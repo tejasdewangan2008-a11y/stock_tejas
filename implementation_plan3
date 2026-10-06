@@ -1,0 +1,61 @@
+# Comprehensive Implementation Plan: Full NSE Cash Universe, Options & Futures Derivative Matrix, Kite-Style 18-Sector Watchlist & Professional Gateway Front Panel
+
+## Overview
+Based on user requests and screenshots from Zerodha Kite:
+1. **Professional Front Panel Gateway**: On launch, prompt user to select between **📈 NSE Cash Equities** and **⚡ Futures & Options (F&O)** with persistence and top-navbar toggle.
+2. **Kite-Style Sector Watchlist in Cash Workspace**:
+   - Watchlist tabs: `STOCK MAIN` (active), `BIG B`, `KHOJ`, `SRISHTY`, `TEJAS`, `+ New group`.
+   - `SECTOR (18)` group header with Collapse/Expand toggle.
+   - 18 Sector cards/rows (Indices, Auto, Banking, IT, Pharma, FMCG, Energy, Metals, Defence, Power, Railways, etc.) with sector index / summary.
+   - **Interactive Sector Stock Drilldown**: Clicking on any sector immediately expands and displays all the cash stocks of that sector (e.g., clicking `NIFTY AUTO` displays `TATAMOTORS`, `MARUTI`, `BAJAJ-AUTO`, `TMPV`, `M&M`, `EICHERMOT`, `TVSMOTOR`, `BHARATFORG`, etc.) with live prices, % change, chart launcher, and Level 5 AI Copilot.
+3. **Comprehensive Full Universe**:
+   - **NSE Cash**: Complete 2,000+ listed equity stocks coverage across all 18 sectors. Specific support for `TMPV` (Tata Motors Passenger Vehicles Ltd), `ADANIENSOL`, `MRF`, `TCS`, `HAL`, `LUPIN`, `WIPRO`, `BAJAJ-AUTO`.
+   - **Options & Futures (F&O)**: Full index & stock derivatives (NIFTY, BANKNIFTY, FINNIFTY, MIDCPNIFTY, SENSEX, and all 185+ F&O stocks with CE/PE strikes and Futures).
+   - **Universal Search**: Seamlessly finds Cash equities and F&O option strikes/futures with distinct visual badges.
+
+---
+
+## User Review Required
+> [!NOTE]
+> All requirements from user's latest Zerodha Kite screenshots (`STOCK MAIN` with 18 sectors and stock drilldown on click, plus `BIG B` watchlist) are integrated directly into the Cash workspace.
+
+---
+
+## Proposed Changes
+
+### 1. Data Universe: Comprehensive NSE Cash & F&O Directory ([`segments.js`](file:///c:/Users/TEJAS%20KUMAR%20DEWANGAN/OneDrive/Desktop/New%20folder/segments.js) & [`market-service.js`](file:///c:/Users/TEJAS%20KUMAR%20DEWANGAN/OneDrive/Desktop/New%20folder/market-service.js))
+- Expand `NSE_MASTER_DIRECTORY` to encompass all 18 sectors, benchmark indices, and comprehensive stock listings.
+- Add full support for `TMPV` (Tata Motors Passenger Vehicles Ltd) with correct sector ("Automobile") and accurate metadata.
+- Pre-generate option strike ladders (Calls & Puts) and futures for Indices and F&O equities.
+- Update `/api/search` and `searchStocks()` to search Cash equities, Option strikes, and Futures simultaneously.
+- Add `/api/sectors` endpoint returning all 18 sectors and their respective stocks.
+
+### 2. Frontend: Professional Gateway Front Panel Modal ([`public/index.html`](file:///c:/Users/TEJAS%20KUMAR%20DEWANGAN/OneDrive/Desktop/New%20folder/public/index.html))
+- Implement `#workspaceGatewayModal`:
+  - Card 1: **📈 NSE Cash Equities** (Delivery & Intraday • 2,000+ Stocks • 18 Sector Watchlist).
+  - Card 2: **⚡ Futures & Options (F&O)** (Live Option Chains • Greek Matrix • PCR & Max Pain • Open Interest).
+  - "Remember my preference" checkbox.
+- Add `#navWorkspaceSwitcher` in top navigation bar (`[ 📈 Cash ]` / `[ ⚡ F&O ]`) for 1-click workspace switching anytime.
+
+### 3. Frontend: Kite-Style 18-Sector Collapsible Watchlist ([`public/index.html`](file:///c:/Users/TEJAS%20KUMAR%20DEWANGAN/OneDrive/Desktop/New%20folder/public/index.html) & [`public/js/app.js`](file:///c:/Users/TEJAS%20KUMAR%20DEWANGAN/OneDrive/Desktop/New%20folder/public/js/app.js))
+- Replace generic watchlist table with authentic Zerodha Kite-style multi-tab watchlist:
+  - Top Tabs: `STOCK MAIN`, `BIG B`, `KHOJ`, `SRISHTY`, `TEJAS`, `+ New group`.
+  - Search & count: `Search & add`, `42/250`, filter icon.
+  - Action bar: `Collapse / Expand All` and `+ New group`.
+  - Section header: `SECTOR (18)` with count and tools.
+  - 18 Sector items: `INDIA VIX`, `NIFTY 50`, `NIFTY BANK`, `NIFTY FIN SERVICE`, `NIFTY AUTO`, `NIFTY FMCG`, `NIFTY IT`, `NIFTY PHARMA`, `NIFTY METAL`, `NIFTY ENERGY`, `NIFTY REALTY`, `DEFENCE & PSU`, `POWER & UTILITIES`, `RAILWAYS & INFRA`, `CHEMICALS`, `CONSUMER DURABLES`, `CAPITAL GOODS`, `FINANCIAL SERVICES`.
+  - **Clicking any Sector**: Expands an accordion stock list showing all constituent stocks of that sector with live prices, % change, chart icon, and AI analysis icon.
+  - Switching to `BIG B` tab loads user's exact stocks from Image 2: `TCS`, `ADANIENSOL`, `HAL`, `LUPIN`, `WIPRO`, `TMPV`, `BAJAJ-AUTO`, `MRF`.
+
+### 4. Styling & Light/Dark Theme Parity ([`public/css/style.css`](file:///c:/Users/TEJAS%20KUMAR%20DEWANGAN/OneDrive/Desktop/New%20folder/public/css/style.css))
+- Style the Front Panel Gateway modal with glassmorphism, glowing badges, and responsive cards.
+- Style Kite-style Watchlist with sector headers, accordion expand/collapse transitions, and search item badges.
+- Ensure 100% crystal-clear contrast in both Light and Dark modes.
+
+---
+
+## Verification Plan
+1. **Node Syntax Verification**: `node -c server.js; node -c market-service.js; node -c segments.js; node -c public/js/app.js`.
+2. **Gateway Modal**: Test app open behavior, localStorage preference persistence, and navbar toggle pill.
+3. **Sector Watchlist**: Click on `NIFTY AUTO` -> verify `TATAMOTORS`, `MARUTI`, `BAJAJ-AUTO`, `TMPV`, etc. expand and render.
+4. **Search Verification**: Test search for `tmpv`, `mrf`, `nifty 24500 ce`, `reliance fut`.

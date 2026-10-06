@@ -1,0 +1,85 @@
+# Chartink Parity Upgrade: Multi-Bar Offsets, Advanced Indicators, Nested Groups & Webhook/Telegram Alerts
+
+This implementation plan brings **TejStockAI** to full parity with and beyond Chartink by implementing the 4 core capabilities that were previously unique to Chartink/Atlas:
+
+1. **Multi-Bar Offset Indexing (`[-1]`, `[-2]`, `[-N]` past candle comparison)**
+2. **Advanced Technical Indicators Catalog (VWAP, ATR, ADX, Pivot Points, Stochastics, Ichimoku Cloud)**
+3. **Custom Nested Sub-Groups (`(Condition 1 AND 2) OR (Condition 3 AND 4)`)**
+4. **Direct External Alerts Engine (Telegram Bot & Webhook Dispatcher for Algo Trading / Tradetron / Broker APIs)**
+
+---
+
+## Proposed Architecture & Changes
+
+### 1. Indicators & Multi-Bar Data Engine
+#### [MODIFY] [market-service.js](file:///c:/Users/TEJAS%20KUMAR%20DEWANGAN/OneDrive/Desktop/New%20folder/market-service.js)
+- Add calculation algorithms for:
+  - **VWAP** (Volume Weighted Average Price)
+  - **ADX(14)** (Average Directional Index with +DI and -DI)
+  - **Pivot Points** (Standard Pivot, S1, S2, S3, R1, R2, R3, and Camarilla H3/H4/L3/L4)
+  - **Stochastic Oscillator** (%K and %D)
+  - **Ichimoku Kinko Hyo** (Tenkan-Sen conversion line, Kijun-Sen baseline)
+  - **ATR(14)** as an accessible numeric indicator
+- Store historical series arrays on the stock object (`stock.series = { close: [...], rsi: [...], ... }`) so offset lookups `[-1]`, `[-2]`, `[-5]` can evaluate historical indicators precisely.
+
+#### [MODIFY] [scans.js](file:///c:/Users/TEJAS%20KUMAR%20DEWANGAN/OneDrive/Desktop/New%20folder/scans.js)
+- Update `evaluateCondition(stock, condition)` to support:
+  - `condition.leftOffset` (e.g. `0`, `-1`, `-2`, `-3`)
+  - `condition.rightOffset` (e.g. `0`, `-1`, `-2`, `-3`)
+  - Resolving indicators from historical candle bars or indicator series when an offset is specified.
+- Support **Nested Filter Groups**:
+  - If `scanDef.filterGroups` exists:
+    - Evaluate each group individually with its own `group.passType` (`all` or `any`).
+    - Combine groups using `scanDef.groupJoin` (`or` / `and`).
+  - Gracefully fallback to flat `scanDef.filters` if no groups are defined.
+
+---
+
+### 2. External Alerts Dispatcher (Telegram & Webhook)
+#### [MODIFY] [server.js](file:///c:/Users/TEJAS%20KUMAR%20DEWANGAN/OneDrive/Desktop/New%20folder/server.js)
+- Add endpoints:
+  - `GET /api/alerts/config`: Retrieve saved alert settings (Telegram bot token, chat ID, webhook URL, secret token).
+  - `POST /api/alerts/config`: Save alert configurations to local state / storage.
+  - `POST /api/alerts/test-telegram`: Send a live formatted test alert message to Telegram via `https://api.telegram.org/bot<TOKEN>/sendMessage`.
+  - `POST /api/alerts/test-webhook`: Send a JSON payload POST test to the user's Webhook URL (Tradetron / Custom Python Bot / Broker API).
+  - `POST /api/alerts/dispatch`: Trigger real-time notifications with stock matches and technical triggers when a scan runs.
+
+---
+
+### 3. Visual Clause Builder UI & Grouping
+#### [MODIFY] [public/js/query-builder.js](file:///c:/Users/TEJAS%20KUMAR%20DEWANGAN/OneDrive/Desktop/New%20folder/public/js/query-builder.js)
+- Update `availableIndicators` with:
+  - `vwap`, `atr14`, `adx14`, `pivot`, `pivot_s1`, `pivot_r1`, `stochK`, `stochD`, `tenkanSen`, `kijunSen`.
+- Add offset selector to each filter clause row:
+  - Pill dropdown for `[0] Latest`, `[-1] 1 bar ago`, `[-2] 2 bars ago`, `[-3] 3 bars ago`, `[-5] 5 bars ago`, `[-10] 10 bars ago`.
+- Add **Filter Groups Support**:
+  - Support `+ Add Filter Group` button.
+  - Render separate group containers with their own `Pass ALL / Pass ANY` pills and group connector (`OR / AND`).
+- Wire up **Alerts Modal**:
+  - Build interactive modal with Telegram configuration, Webhook configuration, test buttons, and trigger frequency settings.
+
+#### [MODIFY] [public/index.html](file:///c:/Users/TEJAS%20KUMAR%20DEWANGAN/OneDrive/Desktop/New%20folder/public/index.html)
+- Add the **Alert Dispatcher Modal** HTML markup (Telegram Bot settings, Webhook URL, frequency, test buttons).
+
+#### [MODIFY] [public/css/style.css](file:///c:/Users/TEJAS%20KUMAR%20DEWANGAN/OneDrive/Desktop/New%20folder/public/css/style.css)
+- Add styling for:
+  - Offset badge pills (`[-1]`, `[-2]`) on clauses.
+  - Nested group containers with connector line and `OR / AND` divider pills.
+  - Alert configuration modal, test response status badges, and webhook payload previews.
+
+---
+
+## Verification Plan
+
+### Automated Tests
+- Run `node -c server.js`, `node -c market-service.js`, `node -c scans.js`, and `node -c public/js/query-builder.js` to ensure zero syntax errors.
+- Test `/api/scans` execution with offset clauses (`[-1] Close > [-2] High`) and nested filter groups via node script.
+- Test `/api/alerts/test-telegram` and `/api/alerts/test-webhook` test endpoint responses.
+
+### Manual Verification
+- Open `http://localhost:3000` in browser.
+- Open Scan Builder -> Open Scanner Detail:
+  - Verify new indicator options (VWAP, ADX, ATR, Pivots, Stochastics, Ichimoku) in dropdowns.
+  - Verify candle offset dropdown `[-1]`, `[-2]`, etc.
+  - Verify adding a second filter group with `OR / AND` logic.
+  - Click `Create Alert` and inspect the Telegram & Webhook configuration modal with live test buttons.

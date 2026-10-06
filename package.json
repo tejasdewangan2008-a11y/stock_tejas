@@ -1,0 +1,29 @@
+{
+  "name": "tejstockai",
+  "version": "2.0.0",
+  "description": "TejStockAI - Real-Time Stock Screener, TradingView Charts & Broker AI Copilot for Windows and Android",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "tejstockai",
+    "stock-screener",
+    "zerodha-kite",
+    "angel-one",
+    "upstox",
+    "dhan",
+    "ai-copilot",
+    "tradingview-charts"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "compression": "^1.8.2",
+    "express": "^4.21.2",
+    "localtunnel": "^2.0.2",
+    "qrcode": "^1.5.4",
+    "ws": "^8.18.0"
+  }
+}

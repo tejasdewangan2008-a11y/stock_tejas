@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0e1726"/>
+      <stop offset="100%" stop-color="#030712"/>
+    </linearGradient>
+    <linearGradient id="greenCandle" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    <linearGradient id="accentGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#6366f1"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background Rounded Rect -->
+  <rect width="512" height="512" rx="120" fill="url(#bg)"/>
+  <rect width="504" height="504" x="4" y="4" rx="116" fill="none" stroke="url(#accentGlow)" stroke-width="6" opacity="0.6"/>
+
+  <!-- Chart Grid Lines -->
+  <line x1="80" y1="160" x2="432" y2="160" stroke="#1f2937" stroke-width="2" stroke-dasharray="6,6"/>
+  <line x1="80" y1="260" x2="432" y2="260" stroke="#1f2937" stroke-width="2" stroke-dasharray="6,6"/>
+  <line x1="80" y1="360" x2="432" y2="360" stroke="#1f2937" stroke-width="2" stroke-dasharray="6,6"/>
+
+  <!-- Candlestick 1 (Red / Dip) -->
+  <line x1="140" y1="190" x2="140" y2="340" stroke="#ef4444" stroke-width="4"/>
+  <rect x="124" y="220" width="32" height="80" rx="4" fill="#ef4444"/>
+
+  <!-- Candlestick 2 (Green / Recovery) -->
+  <line x1="220" y1="180" x2="220" y2="320" stroke="#10b981" stroke-width="4"/>
+  <rect x="204" y="210" width="32" height="70" rx="4" fill="#10b981"/>
+
+  <!-- Candlestick 3 (Green / Breakout) -->
+  <line x1="300" y1="130" x2="300" y2="290" stroke="#10b981" stroke-width="4"/>
+  <rect x="284" y="150" width="32" height="110" rx="4" fill="#10b981"/>
+
+  <!-- Candlestick 4 (Huge Bullish Marubozu) -->
+  <line x1="380" y1="90" x2="380" y2="250" stroke="#10b981" stroke-width="4"/>
+  <rect x="364" y="100" width="32" height="130" rx="4" fill="url(#greenCandle)"/>
+
+  <!-- Dynamic Trend Curve with Glow -->
+  <path d="M 100 320 Q 180 290, 240 240 T 420 110" fill="none" stroke="#3b82f6" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="420" cy="110" r="10" fill="#60a5fa"/>
+  <circle cx="420" cy="110" r="16" fill="none" stroke="#60a5fa" stroke-width="3" opacity="0.6"/>
+
+  <!-- Radar / Screener Scan Wave -->
+  <path d="M 80 430 L 160 430 L 210 390 L 260 450 L 320 410 L 380 440 L 432 400" fill="none" stroke="#8b5cf6" stroke-width="4" stroke-linejoin="round" opacity="0.8"/>
+
+  <!-- Label badge -->
+  <rect x="136" y="420" width="240" height="42" rx="21" fill="#1e293b" stroke="#3b82f6" stroke-width="2"/>
+  <text x="256" y="448" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="18" font-weight="bold" fill="#f8fafc" text-anchor="middle" letter-spacing="2">TEJSTOCKAI</text>
+</svg>
