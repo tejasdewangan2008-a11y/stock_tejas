@@ -446,7 +446,6 @@ class App {
       if (googleSec) googleSec.style.display = 'none'; // STRICT REQUIREMENT: Excluded from Admin Portal
       const mobileInput = document.getElementById('adminMobileInput');
       if (mobileInput) {
-        if (!mobileInput.value) mobileInput.value = '7647814314';
         mobileInput.focus();
       }
     } else if (tab === 'phone') {
@@ -480,7 +479,7 @@ class App {
     const mobileInput = document.getElementById('adminMobileInput');
     const sendBtn = document.getElementById('btnSendAdminOtp');
     const btnText = document.getElementById('btnSendOtpText');
-    const mobile = (mobileInput?.value || '7647814314').trim();
+    const mobile = (mobileInput?.value || '').trim();
 
     if (!mobile) {
       this.showToast('Please enter the Admin Mobile Number', 'warning');
@@ -582,13 +581,13 @@ class App {
     const submitBtn = document.getElementById('btnAdminVerifySubmit');
     const btnText = document.getElementById('adminBtnText');
 
-    const adminName = (nameInput?.value || 'Tejas Dewangan').trim();
-    const mobile = (mobileInput?.value || '7647814314').trim();
-    const password = (pwInput?.value || 'Tejas@7647814314').trim();
+    const adminName = (nameInput?.value || '').trim();
+    const mobile = (mobileInput?.value || '').trim();
+    const password = (pwInput?.value || '').trim();
 
-    if (!adminName) {
-      this.showToast('Please enter Admin Name', 'warning');
-      nameInput?.focus();
+    if (!adminName && !mobile) {
+      this.showToast('Please enter Admin Username or Mobile Number', 'warning');
+      (nameInput || mobileInput)?.focus();
       return;
     }
     if (!password) {
@@ -637,7 +636,7 @@ class App {
     const submitBtn = document.getElementById('btnAdminVerifySubmit');
     const btnText = document.getElementById('adminBtnText');
 
-    const mobile = (mobileInput?.value || '7647814314').trim();
+    const mobile = (mobileInput?.value || '').trim();
     const code = (codeInput?.value || '').trim();
 
     if (!code) {
@@ -687,7 +686,7 @@ class App {
       const portal = document.getElementById('loginPortalView');
       if (portal) portal.classList.remove('hidden');
       this.switchLoginTab('admin');
-      this.showToast('Please verify Admin credentials (7647814314) to access security console', 'info', 4000);
+      this.showToast('Please verify Admin credentials to access security console', 'info', 4000);
       return;
     }
 
