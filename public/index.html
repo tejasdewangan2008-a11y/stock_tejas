@@ -121,8 +121,8 @@
   <link rel="apple-touch-icon" href="./icons/icon-192.png">
 
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="./css/style.css?v=5.1">
-  <link rel="stylesheet" href="./css/mobile.css?v=5.1">
+  <link rel="stylesheet" href="./css/style.css?v=6.0">
+  <link rel="stylesheet" href="./css/mobile.css?v=6.0">
 </head>
 <body>
 
@@ -772,10 +772,16 @@
 
     <!-- Nav Actions -->
     <div class="nav-actions">
+      <!-- Pro Plan Pill (Visible on both Mobile and Desktop) -->
+      <button class="ci-pro-nav-pill" id="btnMobileNavPro" onclick="window.app?.openProSubscriptionModal(); return false;" title="TejStockAI Pro Plan (₹1,000 / 2 Months)">
+        <span class="pro-sparkle">⭐</span>
+        <span class="pro-text">Pro</span>
+      </button>
+
       <!-- Workspace Switcher Pill (Cash vs F&O) -->
       <button class="ci-workspace-toggle-btn" id="navWorkspaceSwitcher" title="Switch Market Workspace (Cash Equities / Derivatives F&O)">
         <span class="ws-pill-icon" id="wsNavIcon">📈</span>
-        <span class="ws-pill-label" id="wsNavLabel">Cash Market</span>
+        <span class="ws-pill-label" id="wsNavLabel">Cash</span>
         <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
       </button>
 
@@ -1848,11 +1854,6 @@
 
   </main>
 
-  <!-- Floating AI Copilot Trigger Button -->
-  <button class="floating-ai-btn" id="btnFloatingAiTerminal" title="Open TejStockAI Intelligence Terminal" onclick="window.app?.switchView('terminal')">
-    <span class="floating-ai-sparkle">🤖</span>
-    <span class="floating-ai-label">TejStockAI Copilot</span>
-  </button>
 
   <!-- ==========================================
        MODAL 1: TRADINGVIEW-STYLE INTERACTIVE CHART
@@ -2818,9 +2819,9 @@
       <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
       <span>Watchlist</span>
     </div>
-    <div class="bottom-nav-item" id="bottomNavConnect">
-      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
-      <span>Phone</span>
+    <div class="bottom-nav-item bottom-nav-pro" id="bottomNavPro" onclick="window.app?.openProSubscriptionModal(); return false;" title="TejStockAI Pro (₹1,000 / 2 Months)">
+      <span style="font-size: 1.15rem; filter: drop-shadow(0 0 6px #c084fc);">⭐</span>
+      <span style="color: #c084fc; font-weight: 700;">Pro</span>
     </div>
   </nav>
 
