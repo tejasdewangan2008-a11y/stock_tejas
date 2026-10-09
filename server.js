@@ -995,24 +995,74 @@ app.post('/api/market/refresh', async (req, res) => {
   }
 });
 
-// Universal Search Endpoint
+// Universal Search Endpoint (All 2,633 Indian equities + Global and Live stocks)
 app.get('/api/search', async (req, res) => {
   const q = req.query.q || '';
   if (!q.trim()) return res.json({ results: [] });
 
-  const results = marketService.searchStocks(q);
+  let results = marketService.searchStocks(q);
+
+  // If few or no results found, query Yahoo Live Search to discover global/recent IPO stocks
+  if (results.length < 5 && q.trim().length >= 2) {
+    try {
+      const yahooUrl = `https://query2.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(q.trim())}&quotesCount=6&newsCount=0`;
+      const resp = await fetch(yahooUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
+        },
+        signal: AbortSignal.timeout(1800)
+      });
+      if (resp.ok) {
+        const data = await resp.json();
+        const existingSyms = new Set(results.map(r => r.symbol.toUpperCase()));
+        if (Array.isArray(data.quotes)) {
+          for (const item of data.quotes) {
+            if (!item.symbol) continue;
+            const cleanSym = item.symbol.replace(/\.NS$/, '').replace(/\.BO$/, '').toUpperCase();
+            if (existingSyms.has(cleanSym) || existingSyms.has(item.symbol.toUpperCase())) continue;
+            existingSyms.add(cleanSym);
+
+            const isUsOrGlobal = !item.symbol.endsWith('.NS') && !item.symbol.endsWith('.BO');
+            const targetSym = isUsOrGlobal ? item.symbol : cleanSym;
+            const stock = marketService.ensureStock(targetSym);
+            results.push({
+              symbol: targetSym,
+              name: item.shortname || item.longname || cleanSym,
+              sector: item.sector || (isUsOrGlobal ? 'Global Asset' : 'NSE / BSE Equity'),
+              ltp: stock ? stock.ltp : null,
+              changePct: stock ? stock.changePct : null,
+              badge: isUsOrGlobal ? 'GLOBAL' : 'CASH',
+              currency: isUsOrGlobal ? 'USD' : 'INR',
+              isCached: !!stock,
+              score: 90
+            });
+          }
+        }
+      }
+    } catch (e) {
+      // Ignore network timeout on external search
+    }
+  }
+
   if (results.length === 0 && q.length >= 2) {
+    const cleanQ = q.trim().toUpperCase();
+    const stock = marketService.ensureStock(cleanQ);
     results.push({
-      symbol: q.toUpperCase(),
-      name: `${q.toUpperCase()} (Search Live)`,
-      sector: 'NSE Equities',
-      ltp: null,
-      changePct: null,
-      isCached: false
+      symbol: cleanQ,
+      name: `${cleanQ} (Live Market Quote)`,
+      sector: 'Equities',
+      ltp: stock ? stock.ltp : null,
+      changePct: stock ? stock.changePct : null,
+      badge: 'CASH',
+      currency: stock?.currency || 'INR',
+      isCached: !!stock,
+      score: 50
     });
   }
 
-  res.json({ results });
+  // Sort by score
+  results.sort((a, b) => (b.score || 0) - (a.score || 0));
+  res.json({ results: results.slice(0, 30) });
 });
 
 app.get('/api/stocks', (req, res) => {
@@ -1045,23 +1095,24 @@ app.get('/api/watchlists', (req, res) => {
   }
 });
 
-// Single Stock Detailed Fetch
-app.get('/api/stock/:symbol', async (req, res) => {
+// Single Stock Detailed Fetch (Supports both singular and plural)
+const getSingleStockHandler = async (req, res) => {
   const symbol = req.params.symbol.toUpperCase();
   let stock = marketService.getStockDetail(symbol);
 
   if (!stock || stock.isFallback || (Date.now() - (stock.lastFetchedAt || 0) > 60000)) {
-    console.log(`[DynamicFetch] Fetching on-demand live data for ${symbol}...`);
     const fetched = await marketService.fetchStockData(symbol, '1d', '3mo');
     if (fetched) stock = fetched;
   }
 
   if (!stock) {
-    return res.status(404).json({ error: `Stock '${symbol}' not found on NSE` });
+    stock = marketService.ensureStock(symbol);
   }
 
   res.json(stock);
-});
+};
+app.get('/api/stock/:symbol', getSingleStockHandler);
+app.get('/api/stocks/:symbol', getSingleStockHandler);
 
 // TradingView-Style Multi-Timeframe Chart Endpoint
 app.get('/api/stock/:symbol/chart', async (req, res) => {
@@ -1081,10 +1132,10 @@ app.get('/api/stock/:symbol/chart', async (req, res) => {
   };
 
   const config = tfMapping[tf] || tfMapping['1D'];
-  const stock = await marketService.fetchStockData(symbol, config.interval, config.range);
+  let stock = await marketService.fetchStockData(symbol, config.interval, config.range);
 
   if (!stock) {
-    return res.status(404).json({ error: `Unable to load timeframe '${tf}' for ${symbol}` });
+    stock = marketService.ensureStock(symbol);
   }
 
   res.json({
@@ -1093,6 +1144,7 @@ app.get('/api/stock/:symbol/chart', async (req, res) => {
     timeframe: tf,
     interval: config.interval,
     range: config.range,
+    currency: stock.currency || 'INR',
     ltp: stock.ltp,
     prevClose: stock.prevClose,
     change: stock.change,
@@ -1110,7 +1162,7 @@ app.get('/api/market/depth/:symbol', async (req, res) => {
   const symbol = req.params.symbol.toUpperCase();
   let stock = marketService.getStockDetail(symbol);
   if (!stock || stock.isFallback) stock = await marketService.fetchStockData(symbol, '1d', '3mo');
-  if (!stock) return res.status(404).json({ error: 'Stock not found' });
+  if (!stock) stock = marketService.ensureStock(symbol);
 
   res.json({
     symbol: stock.symbol,
@@ -1126,7 +1178,7 @@ app.get('/api/market/derivatives/:symbol', async (req, res) => {
   const symbol = req.params.symbol.toUpperCase();
   let stock = marketService.getStockDetail(symbol);
   if (!stock || stock.isFallback) stock = await marketService.fetchStockData(symbol, '1d', '3mo');
-  if (!stock) return res.status(404).json({ error: 'Stock not found' });
+  if (!stock) stock = marketService.ensureStock(symbol);
 
   res.json({
     symbol: stock.symbol,

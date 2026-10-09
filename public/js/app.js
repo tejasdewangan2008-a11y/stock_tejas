@@ -1390,7 +1390,8 @@ class App {
         const isPos = (s.changePct || 0) >= 0;
         const changeClass = isPos ? 'change-positive' : 'change-negative';
         const changeSign = isPos ? '+' : '';
-        const priceText = s.ltp !== null ? `₹${Number(s.ltp).toLocaleString('en-IN')}` : '--';
+        const curSym = s.currency === 'USD' ? '$' : '₹';
+        const priceText = s.ltp !== null ? `${curSym}${Number(s.ltp).toLocaleString('en-IN')}` : '--';
         const changeText = s.changePct !== null ? `${changeSign}${s.changePct}%` : 'NSE';
 
         let badgeHtml = '';
@@ -1537,9 +1538,10 @@ class App {
       const data = await resp.json();
 
       // Populate Header
+      const curSign = data.currency === 'USD' ? '$' : '₹';
       document.getElementById('modalStockSym').textContent = data.symbol || this.activeStockSymbol;
       document.getElementById('modalStockName').textContent = data.name || this.activeStockSymbol;
-      document.getElementById('modalStockPrice').textContent = `₹${(data.ltp || 0).toLocaleString('en-IN')}`;
+      document.getElementById('modalStockPrice').textContent = `${curSign}${(data.ltp || 0).toLocaleString('en-IN')}`;
 
       const isPositive = (data.changePct || 0) >= 0;
       const changeElem = document.getElementById('modalStockChange');
@@ -1556,19 +1558,19 @@ class App {
       if (candles.length > 0) {
         const cLatest = candles[candles.length - 1];
         const dayRangeElem = document.getElementById('statDayRange');
-        if (dayRangeElem) dayRangeElem.textContent = `₹${cLatest.low} - ₹${cLatest.high}`;
+        if (dayRangeElem) dayRangeElem.textContent = `${curSign}${cLatest.low} - ${curSign}${cLatest.high}`;
         const volElem = document.getElementById('statVolume');
         if (volElem) volElem.textContent = (cLatest.volume || 0).toLocaleString('en-IN');
       }
 
       const stat52w = document.getElementById('stat52wRange');
       if (stat52w) {
-        stat52w.textContent = `₹${data.indicators?.sma200 ? (data.indicators.sma200 * 0.8).toFixed(0) : '1,500'} - ₹${data.indicators?.sma200 ? (data.indicators.sma200 * 1.3).toFixed(0) : '3,500'}`;
+        stat52w.textContent = `${curSign}${data.indicators?.sma200 ? (data.indicators.sma200 * 0.8).toFixed(0) : '1,500'} - ${curSign}${data.indicators?.sma200 ? (data.indicators.sma200 * 1.3).toFixed(0) : '3,500'}`;
       }
       const statSma50 = document.getElementById('statSma50');
-      if (statSma50) statSma50.textContent = data.indicators?.sma50 ? `₹${data.indicators.sma50}` : '--';
+      if (statSma50) statSma50.textContent = data.indicators?.sma50 ? `${curSign}${data.indicators.sma50}` : '--';
       const statSma200 = document.getElementById('statSma200');
-      if (statSma200) statSma200.textContent = data.indicators?.sma200 ? `₹${data.indicators.sma200}` : '--';
+      if (statSma200) statSma200.textContent = data.indicators?.sma200 ? `${curSign}${data.indicators.sma200}` : '--';
       const statRsi = document.getElementById('statRsi');
       if (statRsi) statRsi.textContent = data.indicators?.rsi14 ? data.indicators.rsi14.toFixed(1) : '--';
       const statVolMult = document.getElementById('statVolMult');
@@ -1599,20 +1601,21 @@ class App {
       const prev = fallbackCandles[fallbackCandles.length - 2];
       const changePct = (((latest.close - prev.close) / prev.close) * 100).toFixed(2);
       const isPositive = parseFloat(changePct) >= 0;
+      const curSign = (this.activeStockSymbol.includes('-') || ['AAPL', 'TSLA', 'MSFT', 'NVDA', 'AMZN', 'GOOGL', 'META'].includes(this.activeStockSymbol)) ? '$' : '₹';
 
       const symElem = document.getElementById('modalStockSym');
       if (symElem) symElem.textContent = this.activeStockSymbol;
       const nameElem = document.getElementById('modalStockName');
-      if (nameElem) nameElem.textContent = `${this.activeStockSymbol} (NSE Equity)`;
+      if (nameElem) nameElem.textContent = `${this.activeStockSymbol} (${curSign === '$' ? 'Global Asset' : 'NSE Equity'})`;
       const priceElem = document.getElementById('modalStockPrice');
-      if (priceElem) priceElem.textContent = `₹${latest.close.toLocaleString('en-IN')}`;
+      if (priceElem) priceElem.textContent = `${curSign}${latest.close.toLocaleString('en-IN')}`;
       const changeElem = document.getElementById('modalStockChange');
       if (changeElem) {
         changeElem.textContent = `${isPositive ? '+' : ''}${changePct}%`;
         changeElem.className = `stock-change ${isPositive ? 'change-positive' : 'change-negative'}`;
       }
       const dayRangeElem = document.getElementById('statDayRange');
-      if (dayRangeElem) dayRangeElem.textContent = `₹${latest.low} - ₹${latest.high}`;
+      if (dayRangeElem) dayRangeElem.textContent = `${curSign}${latest.low} - ${curSign}${latest.high}`;
       const volElem = document.getElementById('statVolume');
       if (volElem) volElem.textContent = (latest.volume || 0).toLocaleString('en-IN');
 

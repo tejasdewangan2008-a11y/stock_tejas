@@ -1123,6 +1123,7 @@ function generateCalibratedStockFallback(symbol, name = null, meta = null) {
     name: name || (meta && meta.name) || `${cleanSym} (NSE Equity)`,
     sector,
     segment: segments,
+    currency: (meta && meta.currency) ? meta.currency : 'INR',
     isFallback: true,
     lastFetchedAt: 0,
     ltp: latest.close,
@@ -1337,7 +1338,8 @@ class RealMarketService {
         yahoo: INDEX_YAHOO_MAP[q],
         name: `${q} Index`,
         sector: 'Indices',
-        segment: ['all indices', 'broad indices']
+        segment: ['all indices', 'broad indices'],
+        currency: 'INR'
       };
     }
     if (SPECIAL_STOCK_YAHOO_MAP[q]) {
@@ -1346,40 +1348,76 @@ class RealMarketService {
         yahoo: SPECIAL_STOCK_YAHOO_MAP[q],
         name: `${q} (NSE Equity)`,
         sector: 'NSE Equities',
-        segment: ['Cash', 'NSE']
+        segment: ['Cash', 'NSE'],
+        currency: 'INR'
       };
     }
 
-    // 1. Direct exact symbol match
-    let found = this.directory.find(s => s.symbol.toUpperCase() === q || s.yahoo.toUpperCase() === q);
-    if (found) return found;
+    // 1. Direct exact symbol match in NSE Master Directory
+    let found = this.directory.find(s => s.symbol.toUpperCase() === q || (s.yahoo && s.yahoo.toUpperCase() === q));
+    if (found) return { ...found, currency: 'INR' };
 
     // 2. Direct alias match
     found = this.directory.find(s => s.aliases && s.aliases.some(a => a.toUpperCase() === q || a.toUpperCase().replace(/\s+/g, '') === q));
-    if (found) return found;
+    if (found) return { ...found, currency: 'INR' };
 
-    // 3. Substring / Prefix match
-    found = this.directory.find(s => s.symbol.toUpperCase().startsWith(q) || s.name.toUpperCase().includes(q));
-    if (found) return found;
+    // 3. Known Global & US Assets
+    const globalSymbols = {
+      'AAPL': 'Apple Inc.', 'TSLA': 'Tesla, Inc.', 'MSFT': 'Microsoft Corp.', 'NVDA': 'NVIDIA Corp.',
+      'AMZN': 'Amazon.com, Inc.', 'GOOGL': 'Alphabet Inc. (Google)', 'GOOG': 'Alphabet Inc.',
+      'META': 'Meta Platforms, Inc.', 'NFLX': 'Netflix, Inc.', 'AMD': 'Advanced Micro Devices',
+      'INTC': 'Intel Corp.', 'SPY': 'SPDR S&P 500 ETF', 'QQQ': 'Invesco QQQ Trust',
+      'BTC-USD': 'Bitcoin USD', 'ETH-USD': 'Ethereum USD', 'GOLD': 'Gold Futures/ETF', 'SILVER': 'Silver Futures/ETF'
+    };
+    if (globalSymbols[q]) {
+      return {
+        symbol: q,
+        yahoo: q,
+        name: globalSymbols[q],
+        sector: 'Global Markets',
+        segment: ['Cash', 'Global'],
+        isGlobal: true,
+        currency: 'USD'
+      };
+    }
 
-    // 4. Fuzzy Levenshtein or Partial match
-    for (const s of this.directory) {
-      if (this.isFuzzyMatch(q, s.symbol.toUpperCase()) || (s.aliases && s.aliases.some(a => this.isFuzzyMatch(q, a.toUpperCase())))) {
-        return s;
+    // 4. Exact ticker format (clean symbol 2 to 7 chars like AAPL, TSLA, COIN, PLTR, SWIGGY)
+    const isCleanTicker = /^[A-Z0-9\.\-=^]{2,8}$/.test(q);
+    if (!isCleanTicker) {
+      // Substring / Prefix match for full company names
+      found = this.directory.find(s => s.symbol.toUpperCase().startsWith(q) || s.name.toUpperCase().includes(q));
+      if (found) return { ...found, currency: 'INR' };
+
+      // Fuzzy match only for long queries (>= 6 chars) to avoid 4-letter ticker collisions
+      if (q.length >= 6) {
+        for (const s of this.directory) {
+          if (this.isFuzzyMatch(q, s.symbol.toUpperCase()) || (s.aliases && s.aliases.some(a => this.isFuzzyMatch(q, a.toUpperCase())))) {
+            return { ...s, currency: 'INR' };
+          }
+        }
       }
     }
 
     // 5. Construct Yahoo Ticker for unknown/global assets
     let yahoo = `${q}.NS`;
+    let isGlobal = false;
+    let currency = 'INR';
     if (q.startsWith('^') || q.includes('-') || q.includes('=')) {
       yahoo = q;
+      isGlobal = true;
+      currency = 'USD';
+    } else if (q.endsWith('.BO')) {
+      yahoo = q;
     }
+
     return {
       symbol: q,
       yahoo,
-      name: `${q} (NSE Equity)`,
-      sector: 'General Equities',
-      segment: ['Cash', 'NSE']
+      name: `${q} (${isGlobal ? 'Global Asset' : 'Equities'})`,
+      sector: isGlobal ? 'Global Asset' : 'Equities',
+      segment: ['Cash', 'NSE'],
+      isGlobal,
+      currency
     };
   }
 
@@ -1404,11 +1442,16 @@ class RealMarketService {
 
   // Fetch real market quote & multi-timeframe candles
   async fetchStockData(symbol, interval = '1d', range = '3mo') {
-    const meta = this.resolveStockMeta(symbol);
+    const meta = this.resolveStockMeta(symbol) || { symbol: symbol.toUpperCase(), name: symbol.toUpperCase(), yahoo: symbol };
     const candidateYahooSymbols = [];
     if (meta.yahoo) candidateYahooSymbols.push(meta.yahoo);
-    if (!meta.yahoo.endsWith('.NS') && !meta.yahoo.startsWith('^')) candidateYahooSymbols.push(`${meta.yahoo}.NS`);
+    if (!candidateYahooSymbols.includes(meta.symbol)) candidateYahooSymbols.push(meta.symbol);
+    if (!meta.yahoo.endsWith('.NS') && !meta.yahoo.endsWith('.BO') && !meta.yahoo.startsWith('^') && !meta.yahoo.includes('=') && !meta.yahoo.includes('-')) {
+      candidateYahooSymbols.push(`${meta.yahoo}.NS`);
+      candidateYahooSymbols.push(`${meta.yahoo}.BO`);
+    }
     if (!candidateYahooSymbols.includes(`${meta.symbol}.NS`)) candidateYahooSymbols.push(`${meta.symbol}.NS`);
+    if (!candidateYahooSymbols.includes(`${meta.symbol}.BO`)) candidateYahooSymbols.push(`${meta.symbol}.BO`);
     if ((meta.symbol === 'TATAMOTORS' || meta.symbol === 'TMPV') && !candidateYahooSymbols.includes('TMPV.NS')) {
       candidateYahooSymbols.unshift('TMPV.NS');
     }
@@ -1450,8 +1493,9 @@ class RealMarketService {
           if (data.chart?.result?.length > 0) {
             const res = data.chart.result[0];
             const curr = res.meta?.currency;
-            // Guard: If this is an Indian equity, reject USD quotes
-            if (curr === 'USD' && !meta.symbol.startsWith('^') && !meta.symbol.includes('=')) {
+            // Guard: Only reject USD quotes if this is known to be an Indian equity in the NSE directory
+            const isKnownNseEquity = this.directory.some(s => s.symbol.toUpperCase() === meta.symbol);
+            if (isKnownNseEquity && curr === 'USD' && !meta.symbol.startsWith('^') && !meta.symbol.includes('=')) {
               continue;
             }
             validResult = res;
@@ -1466,7 +1510,7 @@ class RealMarketService {
     }
 
     if (!validResult || !quotes || timestamps.length === 0) {
-      const fallback = generateCalibratedStockFallback(meta.symbol, meta.name);
+      const fallback = generateCalibratedStockFallback(meta.symbol, meta.name, meta);
       fallback.isFallback = true;
       fallback.lastFetchedAt = 0;
       this.stocksMap.set(fallback.symbol.toUpperCase(), fallback);
@@ -1567,6 +1611,7 @@ class RealMarketService {
       name: resMeta.shortName || resMeta.longName || meta.name,
       sector: meta.sector || 'Equities',
       segment: meta.segment || ['Cash', 'NSE'],
+      currency: resMeta?.currency || meta.currency || 'INR',
       ltp: parseFloat(ltp.toFixed(2)),
       open: parseFloat((resMeta.regularMarketDayOpen || latestCandle.open).toFixed(2)),
       high: parseFloat((resMeta.regularMarketDayHigh || latestCandle.high).toFixed(2)),
@@ -2003,7 +2048,24 @@ class RealMarketService {
       });
     }
 
-    // 5. Stocks map lookup
+    // 5. Direct exact query ticker if clean symbol format (e.g. AAPL, TSLA, BTC-USD)
+    if (q.length >= 2 && !seen.has(q) && /^[A-Z0-9\.\-=^]+$/.test(q)) {
+      seen.add(q);
+      const stock = this.ensureStock(q);
+      matched.unshift({
+        symbol: q,
+        name: stock ? stock.name : `${q} (Live Quote)`,
+        sector: stock ? stock.sector : 'Equities / Assets',
+        ltp: stock ? stock.ltp : null,
+        changePct: stock ? stock.changePct : null,
+        badge: stock?.currency === 'USD' ? 'GLOBAL' : 'CASH',
+        currency: stock?.currency || 'INR',
+        isCached: !!stock,
+        score: 180
+      });
+    }
+
+    // 6. Stocks map lookup
     for (const [sym, stock] of this.stocksMap.entries()) {
       if (!seen.has(sym) && (sym.includes(q) || stock.name.toUpperCase().includes(q))) {
         seen.add(sym);
@@ -2013,7 +2075,8 @@ class RealMarketService {
           sector: stock.sector,
           ltp: stock.ltp,
           changePct: stock.changePct,
-          badge: stock.sector === 'Indices' ? 'INDEX' : 'CASH',
+          badge: stock.sector === 'Indices' ? 'INDEX' : (stock.currency === 'USD' ? 'GLOBAL' : 'CASH'),
+          currency: stock.currency || 'INR',
           isCached: true,
           score: 45
         });
@@ -2021,7 +2084,19 @@ class RealMarketService {
     }
 
     matched.sort((a, b) => (b.score || 0) - (a.score || 0));
-    return matched.slice(0, 30);
+    const finalResults = matched.slice(0, 30);
+    for (const item of finalResults) {
+      if (item.ltp === null) {
+        const stock = this.ensureStock(item.symbol);
+        if (stock) {
+          item.ltp = stock.ltp;
+          item.changePct = stock.changePct;
+          item.currency = stock.currency || 'INR';
+          item.isCached = true;
+        }
+      }
+    }
+    return finalResults;
   }
 
   // Real-time Live Tick Stream Generator (Generates live micro-fluctuations on active stocks)
