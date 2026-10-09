@@ -438,9 +438,11 @@ let cachedLanQrDataUrl = null;
 app.get('/api/info', async (req, res) => {
   try {
     const isNetlify = Boolean(process.env.NETLIFY || req.headers['x-nf-request-id']);
+    const isVercel = Boolean(process.env.VERCEL || req.headers['x-vercel-id']);
     const host = req.get('host') || 'localhost:3000';
-    const proto = req.protocol || 'http';
+    const proto = req.headers['x-forwarded-proto'] || req.protocol || (host.includes('localhost') ? 'http' : 'https');
     const currentDeployUrl = `${proto}://${host}`;
+    const isCloud = isNetlify || isVercel || (!host.includes('localhost') && !host.includes('127.0.0.1') && !host.startsWith('192.168.'));
 
     if (!cachedLanQrDataUrl) {
       cachedLanQrDataUrl = await QRCode.toDataURL(lanUrl, { margin: 2, width: 250 });
@@ -449,7 +451,7 @@ app.get('/api/info', async (req, res) => {
     let pubQr = publicQrDataUrl;
     let activePublicUrl = publicUrl;
 
-    if (isNetlify && !activePublicUrl) {
+    if (isCloud && !activePublicUrl) {
       activePublicUrl = currentDeployUrl;
     }
 
@@ -466,7 +468,7 @@ app.get('/api/info', async (req, res) => {
       lanUrl,
       localIp,
       publicUrl: activePublicUrl,
-      tunnelType: isNetlify ? 'netlify' : (cloudflaredProc ? 'cloudflare' : 'direct'),
+      tunnelType: isVercel ? 'vercel' : (isNetlify ? 'netlify' : (cloudflaredProc ? 'cloudflare' : (isCloud ? 'cloud' : 'direct'))),
       tunnelPassword: '',
       publicQrDataUrl: pubQr,
       lanQrDataUrl,

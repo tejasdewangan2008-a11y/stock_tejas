@@ -4620,11 +4620,11 @@ class App {
     }
   }
 
-  // WebSocket Live Real-Time Data Streaming (with Netlify / Serverless HTTP Polling Fallback)
+  // WebSocket Live Real-Time Data Streaming (with Vercel / Netlify / Serverless Cloud HTTP Polling Fallback)
   connectWebSocket() {
-    const isNetlify = window.location.hostname.includes('netlify.app');
-    if (isNetlify) {
-      console.log('🌐 Netlify cloud environment detected — starting real-time market stream polling.');
+    const isCloud = window.location.hostname.includes('vercel.app') || window.location.hostname.includes('netlify.app') || (!window.location.hostname.includes('localhost') && !window.location.hostname.includes('127.0.0.1') && !window.location.hostname.startsWith('192.168.'));
+    if (isCloud) {
+      console.log('🌐 Cloud Serverless environment (Vercel / Netlify) detected — starting seamless real-time market stream polling.');
       this.startHttpPollingFallback();
       return;
     }

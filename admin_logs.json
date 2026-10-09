@@ -10,9 +10,9 @@
       "timestamp": "2026-09-30T10:50:29.163Z",
       "lastSeen": "2026-09-30T10:50:38.260Z",
       "visitCount": 2,
-      "identifiedUser": "Tejas Dewangan (tejas.google.trader@gmail.com)",
+      "identifiedUser": "Tejas Dewangan (TEJAS DEWANGAN)",
       "role": "PRO_TRADER",
-      "broker": "Google Workspace",
+      "broker": "Zerodha Kite",
       "viewsHistory": [
         {
           "id": "ev_vis_1790765429163_p2snt_2",
@@ -52,12 +52,40 @@
       "browser": "Chrome / Browser",
       "path": "/",
       "timestamp": "2026-09-30T10:43:46.477Z",
-      "lastSeen": "2026-10-09T13:18:54.510Z",
-      "visitCount": 34,
-      "identifiedUser": "Tejas Dewangan (TEJAS)",
+      "lastSeen": "2026-10-09T13:58:03.804Z",
+      "visitCount": 36,
+      "identifiedUser": "Tejas Dewangan (TEJAS DEWANGAN)",
       "role": "PRO_TRADER",
-      "broker": "Angel One",
+      "broker": "Zerodha Kite",
       "viewsHistory": [
+        {
+          "id": "ev_1791554283805_ydbbc",
+          "visitorId": "vis_1790765026477_loqhs",
+          "visitNumber": 36,
+          "timestamp": "2026-10-09T13:58:03.804Z",
+          "ip": "127.0.0.1",
+          "device": "Windows PC",
+          "browser": "Google Chrome",
+          "path": "/",
+          "viewerName": "Tejas Dewangan (TEJAS)",
+          "role": "PRO_TRADER",
+          "broker": "Angel One",
+          "status": "Authenticated Trader"
+        },
+        {
+          "id": "ev_1791554283706_dm1qh",
+          "visitorId": "vis_1790765026477_loqhs",
+          "visitNumber": 35,
+          "timestamp": "2026-10-09T13:58:03.704Z",
+          "ip": "127.0.0.1",
+          "device": "Windows PC",
+          "browser": "Google Chrome",
+          "path": "/",
+          "viewerName": "Tejas Dewangan (TEJAS)",
+          "role": "PRO_TRADER",
+          "broker": "Angel One",
+          "status": "Authenticated Trader"
+        },
         {
           "id": "ev_1791551934510_0k4ia",
           "visitorId": "vis_1790765026477_loqhs",
@@ -546,9 +574,9 @@
       "timestamp": "2026-09-30T10:42:57.142Z",
       "lastSeen": "2026-10-06T08:37:41.176Z",
       "visitCount": 19,
-      "identifiedUser": "Tejas Dewangan (tejas.google.trader@gmail.com)",
+      "identifiedUser": "Tejas Dewangan (TEJAS DEWANGAN)",
       "role": "PRO_TRADER",
-      "broker": "Google Workspace",
+      "broker": "Zerodha Kite",
       "viewsHistory": [
         {
           "id": "ev_1791275861177_dovrw",
@@ -821,6 +849,19 @@
   ],
   "logins": [
     {
+      "id": "log_1791554287874_48ayd",
+      "username": "Tejas Dewangan",
+      "clientId": "TEJAS DEWANGAN",
+      "broker": "Zerodha Kite",
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+      "device": "Windows PC",
+      "browser": "Google Chrome",
+      "timestamp": "2026-10-09T13:58:07.874Z",
+      "status": "SUCCESS",
+      "type": "BROKER_LOGIN"
+    },
+    {
       "id": "log_1791277623098_l273z",
       "username": "tejas.google.trader@gmail.com",
       "clientId": "TEJAS.GOOGLE.TRADER",
@@ -1082,6 +1123,34 @@
     }
   ],
   "visitEvents": [
+    {
+      "id": "ev_1791554283805_ydbbc",
+      "visitorId": "vis_1790765026477_loqhs",
+      "visitNumber": 36,
+      "timestamp": "2026-10-09T13:58:03.804Z",
+      "ip": "127.0.0.1",
+      "device": "Windows PC",
+      "browser": "Google Chrome",
+      "path": "/",
+      "viewerName": "Tejas Dewangan (TEJAS)",
+      "role": "PRO_TRADER",
+      "broker": "Angel One",
+      "status": "Authenticated Trader"
+    },
+    {
+      "id": "ev_1791554283706_dm1qh",
+      "visitorId": "vis_1790765026477_loqhs",
+      "visitNumber": 35,
+      "timestamp": "2026-10-09T13:58:03.704Z",
+      "ip": "127.0.0.1",
+      "device": "Windows PC",
+      "browser": "Google Chrome",
+      "path": "/",
+      "viewerName": "Tejas Dewangan (TEJAS)",
+      "role": "PRO_TRADER",
+      "broker": "Angel One",
+      "status": "Authenticated Trader"
+    },
     {
       "id": "ev_1791551934510_0k4ia",
       "visitorId": "vis_1790765026477_loqhs",

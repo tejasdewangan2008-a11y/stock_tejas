@@ -1401,30 +1401,38 @@ class RealMarketService {
     let timestamps = [];
 
     for (const yahooSym of candidateYahooSymbols) {
-      const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yahooSym)}?interval=${interval}&range=${range}`;
-      try {
-        const resp = await fetch(url, {
-          signal: AbortSignal.timeout(6500),
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-            'Accept': 'application/json'
+      const mirrors = [
+        `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yahooSym)}?interval=${interval}&range=${range}`,
+        `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yahooSym)}?interval=${interval}&range=${range}`
+      ];
+
+      for (const url of mirrors) {
+        try {
+          const resp = await fetch(url, {
+            signal: AbortSignal.timeout(5000),
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+              'Accept': 'application/json',
+              'Cache-Control': 'no-cache'
+            }
+          });
+          const data = await resp.json();
+          if (data.chart?.result?.length > 0) {
+            const res = data.chart.result[0];
+            const curr = res.meta?.currency;
+            // Guard: If this is an Indian equity, reject USD quotes
+            if (curr === 'USD' && !meta.symbol.startsWith('^') && !meta.symbol.includes('=')) {
+              continue;
+            }
+            validResult = res;
+            resMeta = validResult.meta;
+            quotes = validResult.indicators?.quote?.[0];
+            timestamps = validResult.timestamp || [];
+            if (quotes && timestamps.length > 0) break;
           }
-        });
-        const data = await resp.json();
-        if (data.chart?.result?.length > 0) {
-          const res = data.chart.result[0];
-          const curr = res.meta?.currency;
-          // Guard: If this is an Indian equity, reject USD quotes
-          if (curr === 'USD' && !meta.symbol.startsWith('^') && !meta.symbol.includes('=')) {
-            continue;
-          }
-          validResult = res;
-          resMeta = validResult.meta;
-          quotes = validResult.indicators?.quote?.[0];
-          timestamps = validResult.timestamp || [];
-          if (quotes && timestamps.length > 0) break;
-        }
-      } catch (e) {}
+        } catch (e) {}
+      }
+      if (validResult && quotes && timestamps.length > 0) break;
     }
 
     if (!validResult || !quotes || timestamps.length === 0) {
