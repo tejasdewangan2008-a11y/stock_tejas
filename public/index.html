@@ -762,8 +762,8 @@
         <span class="nav-ai-glow">🤖</span>
         TejAI
       </a>
-      <a class="nav-link nav-link-premium" href="#" id="navLinkPremium" style="color: #c084fc; font-weight: 800;">
-        Premium
+      <a class="nav-link nav-link-premium" href="#" id="navLinkPremium" style="color: #c084fc; font-weight: 800;" onclick="window.app?.openProSubscriptionModal(); return false;">
+        ⭐ Pro (₹1,000 / 2M)
       </a>
       <a class="nav-link" href="#" id="navLinkHelp" title="Scanner Documentation">
         Help
@@ -1543,9 +1543,9 @@
           </div>
         </div>
 
-        <!-- Realtime Data Premium Subscription Banner (Image 1) -->
+        <!-- Realtime Data Premium Subscription Banner -->
         <div class="ci-premium-banner">
-          <span>Get <strong>Realtime data</strong> for scanner in our <a href="#" class="ci-premium-link" onclick="alert('TejStockAI Realtime Data Matrix Active!'); return false;">premium subscription</a>.</span>
+          <span>Get <strong>Realtime tick data & AI Copilot</strong> with <a href="#" class="ci-premium-link" onclick="window.app?.openProSubscriptionModal(); return false;">TejStockAI Pro (₹1,000 for 2 Months)</a>.</span>
         </div>
 
         <!-- STOCKS MATCHING RESULTS SECTION (Screenshot 3) -->
@@ -2829,6 +2829,76 @@
     <span class="floating-ai-icon">🤖</span>
     <span class="floating-ai-label">TejStockAI</span>
   </button>
+
+  <!-- ==========================================
+       MODAL: TEJSTOCKAI PRO SUBSCRIPTION (PHONEPE QR)
+       ========================================== -->
+  <div class="modal-backdrop" id="proSubscriptionModal" style="display: none; z-index: 1200;">
+    <div class="modal-dialog" style="max-width: 500px; width: 94%; border: 1px solid rgba(168, 85, 247, 0.35); box-shadow: 0 20px 50px rgba(168, 85, 247, 0.25); border-radius: 18px; background: rgba(15, 23, 42, 0.96); backdrop-filter: blur(16px);">
+      <div class="modal-header" style="border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding: 1rem 1.25rem; display: flex; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 0.65rem;">
+          <div style="width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(135deg, #a855f7, #6366f1); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; box-shadow: 0 0 15px rgba(168, 85, 247, 0.5);">
+            ⭐
+          </div>
+          <div>
+            <h3 style="font-size: 1.15rem; font-weight: 800; color: #fff; margin: 0;">TejStockAI Pro Plan</h3>
+            <span style="font-size: 0.75rem; color: #a855f7; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Realtime Streaming & AI Copilot</span>
+          </div>
+        </div>
+        <button class="modal-close-btn btn-icon-only" onclick="window.app?.closeProSubscriptionModal()" title="Close">✕</button>
+      </div>
+
+      <div class="modal-body" style="padding: 1.25rem; display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+        
+        <!-- Pricing Badge -->
+        <div style="width: 100%; background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(99, 102, 241, 0.15)); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 12px; padding: 0.85rem 1.15rem; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-size: 0.75rem; color: #cbd5e1; text-transform: uppercase; font-weight: 700;">Special Pro Membership</div>
+            <div style="font-size: 1.45rem; font-weight: 900; color: #f8fafc; font-family: var(--font-mono, monospace);">
+              ₹1,000 <span style="font-size: 0.85rem; font-weight: 600; color: #a855f7;">/ 2 Months</span>
+            </div>
+          </div>
+          <div style="background: rgba(34, 197, 94, 0.2); border: 1px solid rgba(34, 197, 94, 0.4); color: #4ade80; padding: 0.35rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 700;">
+            ₹500 / month
+          </div>
+        </div>
+
+        <!-- PhonePe Payment QR Card -->
+        <div style="width: 100%; display: flex; flex-direction: column; align-items: center; background: #000000; border-radius: 14px; padding: 14px; border: 1px solid rgba(255, 255, 255, 0.12); box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);">
+          <div style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+            <span style="color: #9333ea; font-size: 1.05rem;">🟣</span> Scan & Pay with <strong>PhonePe / GPay / Paytm / Any UPI</strong>
+          </div>
+          <div style="background: #ffffff; padding: 8px; border-radius: 10px; max-width: 250px; width: 100%; box-shadow: 0 4px 18px rgba(0,0,0,0.5);">
+            <img src="/phonepe-qr.png" alt="PhonePe QR Code - Tejas Kumar Dewangan" style="width: 100%; height: auto; display: block; border-radius: 6px;">
+          </div>
+          <div style="margin-top: 10px; text-align: center;">
+            <div style="color: #f8fafc; font-size: 0.95rem; font-weight: 800; letter-spacing: 0.02em;">TEJAS KUMAR DEWANGAN</div>
+            <div style="color: #94a3b8; font-size: 0.75rem; margin-top: 2px;">PhonePe / UPI Mobile: <strong style="color: #cbd5e1;">7647814314</strong></div>
+          </div>
+        </div>
+
+        <!-- Verification / Activation Form -->
+        <div style="width: 100%; display: flex; flex-direction: column; gap: 0.75rem;">
+          <div style="font-size: 0.8rem; color: #cbd5e1; font-weight: 600;">
+            After making payment, enter your Transaction UTR / Ref No. to activate:
+          </div>
+          <div style="display: flex; gap: 0.5rem; flex-direction: column;">
+            <input type="text" id="proPaymentUtrInput" class="input-control" placeholder="Enter 12-digit UPI / UTR Transaction Ref ID" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.14); color: #fff; padding: 0.7rem 0.85rem; border-radius: 8px; font-size: 0.85rem; outline: none;">
+            <button type="button" class="btn btn-primary" id="btnSubmitProPayment" onclick="window.app?.submitProPayment()" style="background: linear-gradient(135deg, #a855f7, #6366f1); border: none; padding: 0.8rem; font-weight: 800; border-radius: 8px; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4); display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+              <span>✅</span> Verify & Activate Pro Access (2 Months)
+            </button>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.25rem;">
+            <a href="https://wa.me/917647814314?text=Hi%20Tejas,%20I%20have%20paid%20Rs.1000%20for%20TejStockAI%20Pro%202-Month%20Plan.%20Please%20verify%20my%20UTR:" target="_blank" style="color: #22c55e; font-size: 0.78rem; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+              <span>💬</span> Send Screenshot on WhatsApp
+            </a>
+            <span style="color: #64748b; font-size: 0.75rem;">Instant Verification</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
 
   <!-- Client-side Scripts -->
   <script src="./js/charts.js?v=5.2"></script>

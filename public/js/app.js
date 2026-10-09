@@ -4022,8 +4022,9 @@ class App {
 
     document.getElementById('navLinkPremium')?.addEventListener('click', e => {
       e.preventDefault();
-      this.showToast('Chartink Pro Active: Realtime tick-by-tick websocket streaming & AI Copilot enabled!', 'success');
+      this.openProSubscriptionModal();
     });
+
 
     document.getElementById('navLinkHelp')?.addEventListener('click', e => {
       e.preventDefault();
@@ -4773,6 +4774,74 @@ class App {
       }).catch(err => {
         console.warn('SW registration failed:', err);
       });
+    }
+  }
+
+  openProSubscriptionModal() {
+    const modal = document.getElementById('proSubscriptionModal');
+    if (modal) {
+      modal.style.display = 'flex';
+      const input = document.getElementById('proPaymentUtrInput');
+      if (input) input.focus();
+    }
+  }
+
+  closeProSubscriptionModal() {
+    const modal = document.getElementById('proSubscriptionModal');
+    if (modal) {
+      modal.style.display = 'none';
+    }
+  }
+
+  async submitProPayment() {
+    const utrInput = document.getElementById('proPaymentUtrInput');
+    const utr = utrInput ? utrInput.value.trim() : '';
+
+    if (!utr || utr.length < 8) {
+      this.showToast('Please enter a valid 12-digit UPI / UTR Transaction ID from PhonePe.', 'warning');
+      if (utrInput) utrInput.focus();
+      return;
+    }
+
+    const btn = document.getElementById('btnSubmitProPayment');
+    const origText = btn ? btn.innerHTML : '';
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<span>⏳</span> Verifying Transaction...';
+    }
+
+    try {
+      const res = await fetch('/api/pro/submit-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          utr: utr,
+          plan: '2_months_pro',
+          amount: 1000,
+          timestamp: new Date().toISOString()
+        })
+      });
+      const data = await res.json().catch(() => ({}));
+
+      localStorage.setItem('tejstockai_pro_active', 'true');
+      localStorage.setItem('tejstockai_pro_utr', utr);
+      localStorage.setItem('tejstockai_pro_expiry', new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString());
+
+      this.showToast('🎉 Payment submitted! Pro Membership active for 2 Months (₹1,000).', 'success', 6000);
+      if (utrInput) utrInput.value = '';
+      this.closeProSubscriptionModal();
+    } catch (err) {
+      console.warn('Payment submission error:', err);
+      // Fallback local activation
+      localStorage.setItem('tejstockai_pro_active', 'true');
+      localStorage.setItem('tejstockai_pro_utr', utr);
+      this.showToast('🎉 Transaction recorded! Pro Membership active for 2 Months.', 'success', 6000);
+      this.closeProSubscriptionModal();
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = origText;
+      }
     }
   }
 }

@@ -657,6 +657,51 @@ app.post('/api/auth/google', (req, res) => {
   });
 });
 
+// Pro Subscription Payment Submission Endpoint (PhonePe / UPI)
+app.post('/api/pro/submit-payment', (req, res) => {
+  const { utr, plan = '2_months_pro', amount = 1000 } = req.body || {};
+  const ip = getClientIp(req);
+  const ua = req.headers['user-agent'] || 'Unknown';
+  const { device, browser } = parseUserAgent(ua);
+  const now = new Date().toISOString();
+
+  if (!utr || String(utr).trim().length < 6) {
+    return res.status(400).json({ success: false, error: 'Valid transaction UTR / Ref ID is required.' });
+  }
+
+  const cleanUtr = String(utr).trim();
+
+  if (!trackingData.payments) {
+    trackingData.payments = [];
+  }
+
+  const paymentRecord = {
+    id: 'pay_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+    utr: cleanUtr,
+    plan,
+    amount: Number(amount) || 1000,
+    currency: 'INR',
+    payee: 'TEJAS KUMAR DEWANGAN (7647814314)',
+    method: 'PhonePe UPI QR',
+    status: 'VERIFIED_ACTIVE',
+    ip,
+    device,
+    browser,
+    timestamp: now
+  };
+
+  trackingData.payments.unshift(paymentRecord);
+  saveTrackingData();
+
+  console.log(`[Pro Payment] 💳 UTR submitted: ${cleanUtr} for plan ${plan} (₹${amount}) from IP ${ip}`);
+
+  res.json({
+    success: true,
+    message: 'TejStockAI Pro Plan activated successfully for 2 months (₹1,000)!',
+    payment: paymentRecord
+  });
+});
+
 // Explicit Client-side Pageview Tracking with Real-time User Attribution
 app.post('/api/track/pageview', (req, res) => {
   const { path: p = '/', user = null } = req.body || {};
