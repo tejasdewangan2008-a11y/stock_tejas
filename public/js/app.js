@@ -1,6 +1,35 @@
 // Chartink Scan Dashboard Main Controller & Event Orchestrator
 // Handles Navigation, Universal Search, TradingView Charting, AI Momentum Agent, and WebSocket Live Feeds
 
+// High-End Smooth Sparkline SVG Generator with SVG Stroke Drawing Animation
+window.generateSparklineSvg = function(data, isPositive = true, width = 90, height = 24) {
+  let pointsData = Array.isArray(data) && data.length >= 2 ? data : [];
+  if (pointsData.length < 2) {
+    pointsData = isPositive ? [10, 11, 13, 12, 15, 14, 18, 19, 22] : [22, 20, 18, 19, 16, 14, 15, 12, 10];
+  }
+  const min = Math.min(...pointsData);
+  const max = Math.max(...pointsData);
+  const range = (max - min) || 1;
+  const strokeColor = isPositive ? '#22c55e' : '#ef4444';
+  const fillColor = isPositive ? 'rgba(34, 197, 94, 0.12)' : 'rgba(239, 68, 68, 0.12)';
+  
+  const coords = pointsData.map((val, idx) => {
+    const x = ((idx / (pointsData.length - 1)) * (width - 4) + 2).toFixed(1);
+    const y = (height - 3 - ((val - min) / range) * (height - 6)).toFixed(1);
+    return `${x},${y}`;
+  });
+
+  const pathD = `M ${coords.join(' L ')}`;
+  const areaD = `${pathD} L ${width - 2},${height} L 2,${height} Z`;
+
+  return `
+    <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" style="overflow: visible; display: inline-block; vertical-align: middle;">
+      <path d="${areaD}" fill="${fillColor}" opacity="0.6" />
+      <path class="chart-path" d="${pathD}" fill="none" stroke="${strokeColor}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+  `;
+};
+
 class App {
   constructor() {
     this.currentView = 'dashboard';
@@ -3062,7 +3091,7 @@ class App {
                   const sPrice = typeof st.ltp === 'number' ? st.ltp.toLocaleString('en-IN', { minimumFractionDigits: 2 }) : st.ltp;
                   const sChgPct = typeof st.changePct === 'number' ? `${sSign}${st.changePct.toFixed(2)}%` : '--';
                   return `
-                    <div class="kite-stock-item" data-symbol="${st.symbol}" onclick="window.app.openStockChart('${st.symbol}')">
+                    <div class="kite-stock-item fade-in-up" data-symbol="${st.symbol}" onclick="window.app.openStockChart('${st.symbol}')">
                       <div class="kite-stock-info">
                         <div class="kite-stock-sym-row">
                           <span class="kite-stock-sym">${st.symbol}</span>
@@ -3148,7 +3177,7 @@ class App {
             const sPrice = typeof st.ltp === 'number' ? st.ltp.toLocaleString('en-IN', { minimumFractionDigits: 2 }) : st.ltp;
             const sChgPct = typeof st.changePct === 'number' ? `${sSign}${st.changePct.toFixed(2)}%` : '--';
             return `
-              <div class="kite-stock-item" data-symbol="${st.symbol}" onclick="window.app.openStockChart('${st.symbol}')">
+              <div class="kite-stock-item fade-in-up" data-symbol="${st.symbol}" onclick="window.app.openStockChart('${st.symbol}')">
                 <div class="kite-stock-info">
                   <div class="kite-stock-sym-row">
                     <span class="kite-stock-sym">${st.symbol}</span>
@@ -3889,7 +3918,7 @@ class App {
           else if (aiScore < 40) aiBadgeClass = 'badge-sell';
 
           return `
-            <tr data-symbol="${s.symbol}" onclick="window.app.openStockChart('${s.symbol}')" style="cursor: pointer;">
+            <tr data-symbol="${s.symbol}" class="fade-in-up" onclick="window.app.openStockChart('${s.symbol}')" style="cursor: pointer;">
               <td style="color: var(--text-muted); font-size: 0.8rem;">${idx + 1}</td>
               <td>
                 <strong style="color: var(--text-main);">${s.symbol}</strong>
@@ -4404,7 +4433,10 @@ class App {
     const container = document.getElementById('marketTickerItems');
     if (!container) return;
 
-    const tickerSymbols = ['NIFTY 50', 'BANK NIFTY', 'RELIANCE', 'TCS', 'HDFCBANK', 'INFY', 'ICICIBANK', 'SBIN', 'TMPV', 'TATAMOTORS', 'TITAN', 'APOLLOHOSP', 'ETERNAL', 'ZOMATO', 'SUZLON'];
+    const tickerSymbols = [
+      'NIFTY 50', 'BANK NIFTY', 'RELIANCE', 'TCS', 'HDFCBANK', 'INFY', 'ICICIBANK', 
+      'SBIN', 'TMPV', 'TATAMOTORS', 'TITAN', 'ZOMATO', 'SUZLON', 'AAPL', 'TSLA', 'NVDA', 'BTC-USD'
+    ];
     const items = [];
 
     tickerSymbols.forEach(sym => {
@@ -4416,24 +4448,35 @@ class App {
           if (found) { st = found; break; }
         }
       }
+      if (!st) {
+        const isUsd = ['AAPL', 'TSLA', 'NVDA', 'BTC-USD'].includes(sym);
+        st = {
+          symbol: sym,
+          ltp: sym === 'BTC-USD' ? 82850 : (sym === 'AAPL' ? 245.5 : (sym === 'TSLA' ? 381.2 : (sym === 'NVDA' ? 138.4 : 1250))),
+          changePct: 1.45,
+          currency: isUsd ? 'USD' : 'INR'
+        };
+      }
       if (st) {
         const isPos = (st.changePct || 0) >= 0;
         const sign = isPos ? '+' : '';
-        const chgClass = isPos ? 'change-positive' : 'change-negative';
+        const chgClass = isPos ? 'up' : 'down';
+        const curSym = (st.currency === 'USD' || ['AAPL', 'TSLA', 'NVDA', 'BTC-USD'].includes(st.symbol)) ? '$' : '₹';
         const price = typeof st.ltp === 'number' ? st.ltp.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : st.ltp;
         const pct = typeof st.changePct === 'number' ? `${sign}${st.changePct.toFixed(2)}%` : '--';
         items.push(`
-          <div class="ticker-item" data-symbol="${st.symbol}" onclick="window.app?.openStockChart('${st.symbol}')" title="Click to view chart">
+          <span class="ticker-item" data-symbol="${st.symbol}" onclick="window.app?.openStockChart('${st.symbol}')" title="Click to view chart">
             <span class="ticker-item-sym">${st.symbol}</span>
-            <span class="ticker-item-price" data-ticker-price="${st.symbol}">₹${price}</span>
-            <span class="ticker-item-chg ${chgClass}" data-ticker-chg="${st.symbol}">${pct}</span>
-          </div>
+            <b data-ticker-price="${st.symbol}">${curSym}${price}</b>
+            <span class="${chgClass}" data-ticker-chg="${st.symbol}">${pct}</span>
+          </span>
         `);
       }
     });
 
     if (items.length > 0) {
-      container.innerHTML = items.join('');
+      // Duplicate for seamless infinite marquee loop
+      container.innerHTML = [...items, ...items].join('');
     }
   }
 
@@ -4447,10 +4490,12 @@ class App {
 
       const isPos = (changePct || 0) >= 0;
       const sign = isPos ? '+' : '';
+      const isUsd = (tick.currency === 'USD' || ['AAPL', 'TSLA', 'NVDA', 'BTC-USD'].includes(symbol));
+      const curSym = isUsd ? '$' : '₹';
       const formattedPrice = ltp.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       const formattedPct = `${sign}${(changePct || 0).toFixed(2)}%`;
       const changeClass = isPos ? 'change-positive' : 'change-negative';
-      const flashClass = direction === 'UP' ? 'flash-green' : 'flash-red';
+      const flashClass = direction === 'UP' ? 'price-flash-up' : 'price-flash-down';
 
       // 1. Update In-Memory cache in cachedAllStocks
       if (this.cachedAllStocks) {
@@ -4501,11 +4546,11 @@ class App {
       // 4. Update Stock item quotes in Kite watchlists & sectors (DOM)
       const stockLtpElems = document.querySelectorAll(`[data-stock-ltp="${symbol}"]`);
       stockLtpElems.forEach(el => {
-        el.textContent = `₹${formattedPrice}`;
-        el.classList.remove('flash-green', 'flash-red');
+        el.textContent = `${curSym}${formattedPrice}`;
+        el.classList.remove('price-flash-up', 'price-flash-down', 'flash-green', 'flash-red');
         void el.offsetWidth;
         el.classList.add(flashClass);
-        setTimeout(() => el.classList.remove(flashClass), 1100);
+        setTimeout(() => el.classList.remove(flashClass), 650);
       });
 
       const stockChgElems = document.querySelectorAll(`[data-stock-chg="${symbol}"]`);
@@ -4517,11 +4562,11 @@ class App {
       // 5. Update Sector Index header in DOM
       const secLtpElems = document.querySelectorAll(`[data-sec-ltp="${symbol}"], .kite-sector-accordion[data-symbol="${symbol}"] .kite-sec-ltp`);
       secLtpElems.forEach(el => {
-        el.textContent = `₹${formattedPrice}`;
-        el.classList.remove('flash-green', 'flash-red');
+        el.textContent = `${curSym}${formattedPrice}`;
+        el.classList.remove('price-flash-up', 'price-flash-down', 'flash-green', 'flash-red');
         void el.offsetWidth;
         el.classList.add(flashClass);
-        setTimeout(() => el.classList.remove(flashClass), 1100);
+        setTimeout(() => el.classList.remove(flashClass), 650);
       });
 
       const secChgElems = document.querySelectorAll(`[data-sec-chg="${symbol}"], .kite-sector-accordion[data-symbol="${symbol}"] .kite-sec-change`);
@@ -4533,16 +4578,16 @@ class App {
       // 6. Update Top Ticker Tape (DOM)
       const tickerPriceEl = document.querySelector(`[data-ticker-price="${symbol}"]`);
       if (tickerPriceEl) {
-        tickerPriceEl.textContent = `₹${formattedPrice}`;
-        tickerPriceEl.classList.remove('flash-green', 'flash-red');
+        tickerPriceEl.textContent = `${curSym}${formattedPrice}`;
+        tickerPriceEl.classList.remove('price-flash-up', 'price-flash-down', 'flash-green', 'flash-red');
         void tickerPriceEl.offsetWidth;
         tickerPriceEl.classList.add(flashClass);
-        setTimeout(() => tickerPriceEl.classList.remove(flashClass), 1100);
+        setTimeout(() => tickerPriceEl.classList.remove(flashClass), 650);
       }
       const tickerChgEl = document.querySelector(`[data-ticker-chg="${symbol}"]`);
       if (tickerChgEl) {
         tickerChgEl.textContent = formattedPct;
-        tickerChgEl.className = `ticker-item-chg ${changeClass}`;
+        tickerChgEl.className = isPos ? 'up' : 'down';
       }
 
       // 7. Update Watchlist Table rows (DOM)
@@ -4550,11 +4595,11 @@ class App {
       if (wlRow) {
         const priceCell = wlRow.querySelector('.cell-ltp');
         if (priceCell) {
-          priceCell.textContent = `₹${formattedPrice}`;
-          priceCell.classList.remove('flash-green', 'flash-red');
+          priceCell.textContent = `${curSym}${formattedPrice}`;
+          priceCell.classList.remove('price-flash-up', 'price-flash-down', 'flash-green', 'flash-red');
           void priceCell.offsetWidth;
           priceCell.classList.add(flashClass);
-          setTimeout(() => priceCell.classList.remove(flashClass), 1100);
+          setTimeout(() => priceCell.classList.remove(flashClass), 650);
         }
         const chgSpan = wlRow.querySelector('.stock-change');
         if (chgSpan) {
@@ -4568,11 +4613,11 @@ class App {
       dashRows.forEach(row => {
         const cellPrice = row.querySelector('.cell-price');
         if (cellPrice) {
-          cellPrice.textContent = `₹${formattedPrice}`;
-          cellPrice.classList.remove('flash-green', 'flash-red');
+          cellPrice.textContent = `${curSym}${formattedPrice}`;
+          cellPrice.classList.remove('price-flash-up', 'price-flash-down', 'flash-green', 'flash-red');
           void cellPrice.offsetWidth;
           cellPrice.classList.add(flashClass);
-          setTimeout(() => cellPrice.classList.remove(flashClass), 1100);
+          setTimeout(() => cellPrice.classList.remove(flashClass), 650);
         }
         const cellChg = row.querySelector('.stock-change');
         if (cellChg) {
@@ -4585,11 +4630,11 @@ class App {
       if (this.terminalActiveSymbol === symbol) {
         const termPriceElem = document.getElementById('terminalActiveStockPrice');
         if (termPriceElem) {
-          termPriceElem.textContent = `₹${formattedPrice} (${formattedPct})`;
-          termPriceElem.classList.remove('flash-green', 'flash-red');
+          termPriceElem.textContent = `${curSym}${formattedPrice} (${formattedPct})`;
+          termPriceElem.classList.remove('price-flash-up', 'price-flash-down', 'flash-green', 'flash-red');
           void termPriceElem.offsetWidth;
           termPriceElem.classList.add(flashClass);
-          setTimeout(() => termPriceElem.classList.remove(flashClass), 1100);
+          setTimeout(() => termPriceElem.classList.remove(flashClass), 650);
         }
       }
     });

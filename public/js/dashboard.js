@@ -265,7 +265,7 @@ class DashboardManager {
 
   renderScanCardSkeleton(scan) {
     return `
-      <div class="scan-card" id="card_${scan.id}">
+      <div class="scan-card fade-in-up" id="card_${scan.id}">
         <div class="scan-card-header">
           <div class="scan-card-title-group">
             <h3 class="scan-card-title">${this.escapeHtml(scan.title)}</h3>
@@ -366,7 +366,7 @@ class DashboardManager {
               const vol = typeof s.volume === 'number' ? s.volume : 0;
               const sparklineSvg = window.generateSparklineSvg ? window.generateSparklineSvg(s.sparkline || [], isPositive, 75, 20) : '';
               return `
-                <tr data-symbol="${s.symbol}" style="cursor: pointer;">
+                <tr data-symbol="${s.symbol}" class="fade-in-up" style="cursor: pointer;">
                   <td>
                     <div class="stock-symbol-cell">
                       <span class="stock-symbol">${s.symbol}</span>

@@ -520,57 +520,205 @@ body {
   box-shadow: 0 0 8px var(--red-glow);
 }
 
-/* Real-time Price Flash Animations (Zerodha Kite & Bloomberg Terminal style) */
-@keyframes flashUptick {
-  0% { background-color: rgba(16, 185, 129, 0.45); color: #34d399; }
-  100% { background-color: transparent; }
+/* ========================================================
+   MODERN HIGH-END ANIMATION SUITE (TradingView / Robinhood / Linear)
+   ======================================================== */
+
+/* 1. Ultra-Smooth Stock Price Flash (Tickers & Cards) */
+@keyframes priceUpPulse {
+  0% { 
+    background-color: rgba(34, 197, 94, 0.35); 
+    color: #22c55e;
+    transform: scale(1.02); 
+  }
+  100% { 
+    background-color: transparent; 
+    transform: scale(1); 
+  }
 }
 
-@keyframes flashDowntick {
-  0% { background-color: rgba(239, 68, 68, 0.45); color: #f87171; }
-  100% { background-color: transparent; }
+@keyframes priceDownPulse {
+  0% { 
+    background-color: rgba(239, 68, 68, 0.35); 
+    color: #ef4444;
+    transform: scale(1.02); 
+  }
+  100% { 
+    background-color: transparent; 
+    transform: scale(1); 
+  }
 }
 
+.price-flash-up,
 .flash-green {
-  animation: flashUptick 1.1s cubic-bezier(0.1, 0.9, 0.2, 1) !important;
+  animation: priceUpPulse 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
   border-radius: 4px;
+  will-change: transform, background-color;
 }
 
+.price-flash-down,
 .flash-red {
-  animation: flashDowntick 1.1s cubic-bezier(0.1, 0.9, 0.2, 1) !important;
+  animation: priceDownPulse 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
   border-radius: 4px;
+  will-change: transform, background-color;
 }
 
-/* Live Market Ticker Tape */
-.ticker-items {
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
-  overflow-x: auto;
-  white-space: nowrap;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+/* 2. 3D Tilt & Glassmorphism Hover for Stock Cards */
+.stock-card,
+.scan-card,
+.backtest-stock-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 16px;
+  transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1),
+              box-shadow 0.25s cubic-bezier(0.2, 0, 0, 1),
+              border-color 0.25s ease;
+  will-change: transform;
 }
-.ticker-items::-webkit-scrollbar {
-  display: none;
+
+.stock-card:hover,
+.scan-card:hover,
+.backtest-stock-card:hover {
+  transform: translateY(-4px) scale(1.01);
+  border-color: rgba(99, 102, 241, 0.4);
+  box-shadow: 0 12px 30px -10px rgba(99, 102, 241, 0.25);
+}
+
+/* 3. Smooth Infinite Marquee / Stock Ticker Strip */
+.ticker-wrap {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  position: relative;
+  white-space: nowrap;
+  padding: 4px 0;
+}
+
+.ticker-wrap::before,
+.ticker-wrap::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 32px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.ticker-wrap::before {
+  left: 0;
+  background: linear-gradient(90deg, var(--bg-secondary), transparent);
+}
+
+.ticker-wrap::after {
+  right: 0;
+  background: linear-gradient(270deg, var(--bg-secondary), transparent);
+}
+
+.ticker-move,
+.ticker-items {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  animation: tickerScroll 28s linear infinite;
+  will-change: transform;
+}
+
+.ticker-move:hover,
+.ticker-items:hover {
+  animation-play-state: paused; /* Pauses when user hovers to inspect */
+}
+
+@keyframes tickerScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
 
 .ticker-item {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  padding: 0.2rem 0.55rem;
-  border-radius: var(--radius-sm);
-  background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
+  gap: 8px;
+  margin-right: 28px;
+  color: #94a3b8;
+  font-family: inherit;
+  font-size: 0.8rem;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease, border-color 0.2s ease;
   flex-shrink: 0;
+  user-select: none;
 }
+
 .ticker-item:hover {
-  background: var(--bg-card-hover);
-  border-color: var(--accent);
+  transform: scale(1.04);
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(99, 102, 241, 0.45);
 }
+
+.ticker-item b {
+  color: var(--text-main, #f8fafc);
+  font-weight: 700;
+  font-family: var(--font-mono, monospace);
+}
+
+.ticker-item .up,
+.ticker-item .change-positive {
+  color: #22c55e !important;
+  font-weight: 600;
+}
+
+.ticker-item .down,
+.ticker-item .change-negative {
+  color: #ef4444 !important;
+  font-weight: 600;
+}
+
+/* 4. Smooth Chart Line Drawing (SVG Stroke Animation) */
+.chart-path {
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: drawChart 1.4s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+
+@keyframes drawChart {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* 5. Smooth Staggered Reveal on Scroll / Mount */
+.fade-in-up {
+  opacity: 0;
+  transform: translateY(18px);
+  animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Stagger delays */
+.fade-in-up:nth-child(1) { animation-delay: 0.04s; }
+.fade-in-up:nth-child(2) { animation-delay: 0.08s; }
+.fade-in-up:nth-child(3) { animation-delay: 0.12s; }
+.fade-in-up:nth-child(4) { animation-delay: 0.16s; }
+.fade-in-up:nth-child(5) { animation-delay: 0.20s; }
+.fade-in-up:nth-child(6) { animation-delay: 0.24s; }
+.fade-in-up:nth-child(7) { animation-delay: 0.28s; }
+.fade-in-up:nth-child(8) { animation-delay: 0.32s; }
+.fade-in-up:nth-child(9) { animation-delay: 0.36s; }
+.fade-in-up:nth-child(10) { animation-delay: 0.40s; }
+.fade-in-up:nth-child(n+11) { animation-delay: 0.44s; }
 
 .ticker-item-sym {
   font-weight: 800;
