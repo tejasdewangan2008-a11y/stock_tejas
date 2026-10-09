@@ -4,11 +4,26 @@
     {
       "source": "/api/(.*)",
       "destination": "/api/index.js"
+    },
+    {
+      "source": "/",
+      "destination": "/public/index.html"
+    },
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/public/$1"
     }
   ],
   "functions": {
     "api/index.js": {
-      "includeFiles": "tradingview-stocks.json,nse-master.json,EQUITY_L.csv"
+      "includeFiles": [
+        "tradingview-stocks.json",
+        "nse-master.json",
+        "EQUITY_L.csv",
+        "admin_logs.json"
+      ],
+      "memory": 1024,
+      "maxDuration": 30
     }
   },
   "headers": [

@@ -1,0 +1,8 @@
+cloudflared.exe
+start-screener.bat
+*.tmp
+*.log
+scratch/
+scratch_*
+%LOCALAPPDATA%/
+.git

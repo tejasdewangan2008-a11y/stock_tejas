@@ -1,0 +1,2911 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>TejStockAI - Pro Stock Screener, TradingView Charts & Broker AI Copilot</title>
+  
+  <!-- SEO and PWA Metadata -->
+  <meta name="description" content="TejStockAI: Real-time NSE Stock Screener, TradingView Charts, Zerodha/AngelOne/Upstox/Dhan Market Depth, Option Chain Matrix, and Broker AI Copilot.">
+  <meta name="theme-color" content="#0f141c">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="TejStockAI">
+  
+  <!-- Critical Eye-Comfort Styling (Guaranteed Smooth Palette) -->
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg-primary: #0f141c;
+      --bg-secondary: #141b26;
+      --bg-card: #18202e;
+      --bg-card-hover: #1e2839;
+      --bg-elevated: #222d40;
+      --border-color: #263347;
+      --border-subtle: #1c2636;
+      --text-main: #e2e8f0;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent: #38bdf8;
+      --accent-hover: #0284c7;
+      --green: #22c55e;
+      --green-bg: rgba(34, 197, 94, 0.12);
+      --red: #f43f5e;
+      --red-bg: rgba(244, 63, 94, 0.12);
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #0f141c !important;
+      color: #e2e8f0 !important;
+    }
+
+    /* Guaranteed Smooth Eye-Comfort Colors for Scan Cards & Tables */
+    .scan-card {
+      background: #18202e !important;
+      border: 1px solid #263347 !important;
+      border-radius: 12px !important;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35) !important;
+      color: #e2e8f0 !important;
+    }
+
+    .scan-card-header {
+      background: #141b26 !important;
+      border-bottom: 1px solid #263347 !important;
+    }
+
+    .scan-card-title {
+      color: #f1f5f9 !important;
+    }
+
+    .scan-card-description {
+      background: #111722 !important;
+      color: #8fa0b5 !important;
+    }
+
+    .stock-table th {
+      background: #141b26 !important;
+      color: #8fa0b5 !important;
+      border-bottom: 1px solid #263347 !important;
+    }
+
+    .stock-table td {
+      color: #e2e8f0 !important;
+      border-bottom: 1px solid #1c2636 !important;
+      background: transparent !important;
+    }
+
+    .stock-symbol {
+      color: #f8fafc !important;
+    }
+
+    .stock-name {
+      color: #7d8ea3 !important;
+    }
+
+    .stock-table tr:hover td {
+      background: #1e2839 !important;
+    }
+
+    .scan-card-footer {
+      background: #141b26 !important;
+      border-top: 1px solid #263347 !important;
+      color: #8fa0b5 !important;
+    }
+
+    .kite-watchlist-card,
+    .kite-sector-accordion,
+    .kite-sector-row {
+      background: #18202e !important;
+      border-color: #263347 !important;
+      color: #e2e8f0 !important;
+    }
+
+    .navbar {
+      background: rgba(15, 20, 28, 0.98) !important;
+      border-bottom: 1px solid #263347 !important;
+    }
+
+    .market-ticker-bar {
+      background: #111722 !important;
+      border-bottom: 1px solid #263347 !important;
+    }
+  </style>
+
+  <!-- Icons and Manifest -->
+  <link rel="icon" type="image/svg+xml" href="./icons/icon.svg">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="./css/style.css?v=6.0">
+  <link rel="stylesheet" href="./css/mobile.css?v=6.0">
+</head>
+<body>
+
+  <!-- ==========================================
+       LOGIN & AUTHENTICATION PORTAL (ENTRY SCREEN)
+       ========================================== -->
+  <div id="loginPortalView" class="login-portal-overlay">
+    <div class="login-portal-glow-orb orb-1"></div>
+    <div class="login-portal-glow-orb orb-2"></div>
+
+    <div class="login-card-container">
+      <!-- Header Branding -->
+      <div class="login-header">
+        <div class="login-logo-badge">
+          <svg width="30" height="30" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24"><path d="M3 3v18h18"></path><path d="m19 9-5 5-4-4-3 3"></path></svg>
+        </div>
+        <h2 class="login-title">TejStock<span class="brand-badge-ai">AI</span></h2>
+        <p class="login-subtitle">Pro Stock Screener & Broker AI Market Terminal</p>
+        
+        <!-- Live Market Status Ribbon -->
+        <div class="login-market-pill" id="loginMarketStatusPill">
+          <span class="pulse-dot pulse-green" id="loginPulseDot"></span>
+          <span id="loginMarketStatusText">🟢 NSE LIVE MARKET CONNECTED</span>
+        </div>
+      </div>
+
+      <!-- Login Card Form -->
+      <div class="login-card">
+        <!-- Tab Navigation (Trader Login vs Quick Demo Access vs Phone Connect vs Admin Portal) -->
+        <div class="login-tabs">
+          <button type="button" class="login-tab active" id="tabTraderLogin" onclick="window.app?.switchLoginTab('trader')">Broker Login</button>
+          <button type="button" class="login-tab" id="tabQuickAccess" onclick="window.app?.switchLoginTab('quick')">Quick Trader</button>
+          <button type="button" class="login-tab" id="tabPhoneLogin" onclick="window.app?.switchLoginTab('phone')" style="color: #38bdf8; font-weight: 700;">📱 Connect Phone</button>
+          <button type="button" class="login-tab login-tab-admin" id="tabAdminLogin" onclick="window.app?.switchLoginTab('admin')" style="color: #fbbf24; font-weight: 800;">🛡️ Admin</button>
+        </div>
+
+        <!-- Admin Security Portal Form (Default Name & Password + OTP Support) -->
+        <form id="adminLoginForm" style="display: none;" onsubmit="event.preventDefault(); window.app?.handleAdminFormSubmit();">
+          <div class="admin-login-notice">
+            <span class="admin-notice-shield">🛡️</span>
+            <div class="admin-notice-text">
+              <strong>Super Admin Security Portal</strong>
+              <p>Pre-configured with Super Admin default credentials</p>
+            </div>
+          </div>
+
+          <!-- Admin Name Input -->
+          <div class="login-form-group">
+            <label for="adminNameInput" class="login-label">
+              <span>Admin Username / Identifier</span>
+            </label>
+            <div class="login-input-wrapper">
+              <span class="login-input-icon">👑</span>
+              <input type="text" id="adminNameInput" class="login-input" placeholder="Enter Admin Username" value="" required autocomplete="username" spellcheck="false">
+            </div>
+          </div>
+
+          <!-- Admin Mobile / ID Input -->
+          <div class="login-form-group">
+            <label for="adminMobileInput" class="login-label">
+              <span>Admin Mobile Number</span>
+            </label>
+            <div class="login-input-wrapper">
+              <span class="login-input-icon">📱</span>
+              <input type="tel" id="adminMobileInput" class="login-input" placeholder="Enter Admin Mobile (e.g. 7647814314)" value="" required autocomplete="tel" spellcheck="false">
+            </div>
+          </div>
+
+          <!-- Admin Password Input -->
+          <div class="login-form-group" id="adminPasswordGroup">
+            <label for="adminPasswordInput" class="login-label">
+              <span>Admin Password</span>
+            </label>
+            <div class="login-input-wrapper">
+              <span class="login-input-icon">🔒</span>
+              <input type="password" id="adminPasswordInput" class="login-input" placeholder="Enter Admin Password" value="" required autocomplete="current-password">
+              <button type="button" class="login-toggle-pw" id="btnToggleAdminPassword" onclick="window.app?.toggleAdminPasswordVisibility()" title="Show/Hide Password">👁️</button>
+            </div>
+          </div>
+
+          <!-- OTP Code Input (Optional Alternative Verification Mode) -->
+          <div class="login-form-group" id="adminOtpGroup" style="display: none;">
+            <label for="adminCodeInput" class="login-label">
+              <span>6-Digit Verification Code</span>
+              <div style="display: flex; gap: 0.65rem;">
+                <a href="#" class="login-forgot-link" id="linkSendAdminOtp" onclick="window.app?.requestAdminOtp(event)">Send Code</a>
+                <a href="#" class="login-forgot-link" id="linkAutoFillAdminOtp" onclick="window.app?.autoFillAdminOtp(event)">Auto Fill</a>
+              </div>
+            </label>
+            <div class="login-input-wrapper">
+              <span class="login-input-icon">🔑</span>
+              <input type="text" id="adminCodeInput" class="login-input" placeholder="Enter 6-digit code received" maxlength="6" autocomplete="one-time-code" style="letter-spacing: 0.25em; font-size: 1.1rem; font-weight: 800;">
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" class="btn-login-submit btn-admin-submit" id="btnAdminVerifySubmit">
+            <span id="adminBtnText">Unlock Admin Terminal</span>
+            <span class="login-btn-icon">➔</span>
+          </button>
+
+          <!-- Toggle between Password and OTP Login Mode -->
+          <div style="text-align: center; margin-top: 0.65rem; margin-bottom: 0.25rem;">
+            <a href="#" id="linkToggleAdminAuthMode" onclick="window.app?.toggleAdminAuthMode(event)" style="font-size: 0.775rem; color: #38bdf8; text-decoration: underline; font-weight: 600;">
+              📱 Switch to 6-Digit Mobile OTP Login
+            </a>
+          </div>
+
+          <!-- Back to Trader Login -->
+          <button type="button" class="btn-login-guest" onclick="window.app?.switchLoginTab('trader')">
+            <span>← Back to Trader Login</span>
+          </button>
+        </form>
+
+        <!-- Google Email ID Authentication Section (Available for Traders/Users, Excluded from Admin) -->
+        <div id="googleAuthSection" style="margin-top: 0.25rem;">
+          <button type="button" class="btn-google-signin" id="btnGoogleSignIn" onclick="window.app?.openGoogleAuthDialog()">
+            <svg class="google-svg-icon" viewBox="0 0 24 24" width="20" height="20">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+            </svg>
+            <span>Continue with Google</span>
+          </button>
+          <div class="google-divider">
+            <span>or sign in with Client ID / Broker</span>
+          </div>
+        </div>
+
+        <!-- Trader / New User Login Form (No Default Values for New Users) -->
+        <form id="loginForm" onsubmit="event.preventDefault(); window.app?.handleLoginSubmit();">
+          <!-- Client ID / Google Email Input (No default value for new users) -->
+          <div class="login-form-group">
+            <label for="loginClientId" class="login-label">
+              <span>Client ID / Google Email / User ID</span>
+              <span class="login-label-hint">Trader User ID</span>
+            </label>
+            <div class="login-input-wrapper">
+              <span class="login-input-icon">👤</span>
+              <input type="text" id="loginClientId" class="login-input" placeholder="e.g. name@gmail.com, CLIENT01, or Mobile" value="" required autocomplete="username" spellcheck="false">
+            </div>
+          </div>
+
+          <!-- Password / PIN Input (No default value for new users) -->
+          <div class="login-form-group">
+            <label for="loginPassword" class="login-label">
+              <span>Password / Broker PIN</span>
+              <a href="#" class="login-forgot-link" onclick="window.app?.fillDemoCredentials(event)">Auto Fill Demo</a>
+            </label>
+            <div class="login-input-wrapper">
+              <span class="login-input-icon">🔒</span>
+              <input type="password" id="loginPassword" class="login-input" placeholder="Enter your password or 6-digit PIN" value="" required autocomplete="current-password">
+              <button type="button" class="login-toggle-pw" id="btnTogglePassword" title="Show/Hide Password">👁️</button>
+            </div>
+          </div>
+
+          <!-- Broker Selection -->
+          <div class="login-form-group">
+            <label class="login-label"><span>Linked Broker Gateway</span></label>
+            <div class="login-broker-grid">
+              <label class="broker-pill active">
+                <input type="radio" name="loginBroker" value="Zerodha Kite" checked>
+                <span>🪁 Zerodha</span>
+              </label>
+              <label class="broker-pill">
+                <input type="radio" name="loginBroker" value="Angel One">
+                <span>👼 Angel One</span>
+              </label>
+              <label class="broker-pill">
+                <input type="radio" name="loginBroker" value="Upstox">
+                <span>⚡ Upstox</span>
+              </label>
+              <label class="broker-pill">
+                <input type="radio" name="loginBroker" value="Dhan Matrix">
+                <span>🎯 Dhan</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Options Row -->
+          <div class="login-options-row">
+            <label class="login-checkbox-label">
+              <input type="checkbox" id="loginRememberMe" checked>
+              <span>Keep me signed in</span>
+            </label>
+            <span class="login-security-tag">🔒 256-Bit SSL</span>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" class="btn-login-submit" id="btnLoginSubmit">
+            <span id="loginBtnText">Sign In to Market Terminal</span>
+            <span class="login-btn-icon">➔</span>
+          </button>
+
+          <!-- 1-Click Instant Guest / Trader Button -->
+          <button type="button" class="btn-login-guest" id="btnQuickGuestLogin" onclick="window.app?.loginAsGuest()">
+            <span>⚡ Instant 1-Click Trader Access</span>
+          </button>
+
+          <!-- Connect Phone / Tablet via QR Scan Button -->
+          <button type="button" class="btn-login-phone-quick" id="btnQuickPhoneConnect" onclick="window.app?.switchLoginTab('phone')">
+            <span>📱 Connect Phone / Tablet (Scan QR Code)</span>
+          </button>
+        </form>
+
+        <!-- ==========================================
+             CONNECT PHONE / TABLET SECTION (IN LOGIN PORTAL)
+             ========================================== -->
+        <div id="loginPhoneSection" style="display: none; animation: loginCardFadeIn 0.3s ease;">
+          <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(56, 189, 248, 0.22); border-radius: 14px; padding: 1.25rem; margin-bottom: 0.75rem; box-shadow: 0 12px 30px rgba(0,0,0,0.45);">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.85rem; padding-bottom: 0.65rem; border-bottom: 1px solid rgba(255,255,255,0.08);">
+              <h3 style="font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem; margin: 0; color: #f8fafc;">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+                Connect Phone / Tablet
+              </h3>
+              <button type="button" onclick="window.app?.switchLoginTab('trader')" title="Close and return to Trader Login" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; width: 28px; height: 28px; cursor: pointer; color: #94a3b8; display: flex; align-items: center; justify-content: center; font-size: 0.95rem; transition: all 0.2s;">✕</button>
+            </div>
+
+            <div class="qr-dialog-content" style="padding: 0; gap: 0.85rem;">
+              <!-- Network Mode Selector -->
+              <div style="display: flex; gap: 6px; width: 100%; max-width: 420px; background: rgba(0,0,0,0.35); padding: 4px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);">
+                <button id="tabLoginQrMobile" type="button" onclick="window.app?.setLoginQrMode('mobile')" style="flex: 1; padding: 8px 12px; font-size: 0.82rem; font-weight: 600; border-radius: 6px; cursor: pointer; border: none; background: #3b82f6; color: #ffffff; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s ease;">
+                  🌐 Mobile Data (Anywhere)
+                </button>
+                <button id="tabLoginQrLan" type="button" onclick="window.app?.setLoginQrMode('lan')" style="flex: 1; padding: 8px 12px; font-size: 0.82rem; font-weight: 600; border-radius: 6px; cursor: pointer; border: none; background: transparent; color: #94a3b8; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s ease;">
+                  📶 Same Wi-Fi
+                </button>
+              </div>
+
+              <p id="loginQrModeSubtitle" style="font-size: 0.825rem; color: #94a3b8; margin: 0; line-height: 1.4; text-align: center;">
+                Open on your phone using your <strong>own 4G / 5G Mobile Data</strong> — No Wi-Fi or Password Needed!
+              </p>
+
+              <div class="qr-image-wrapper" style="background: #ffffff; padding: 12px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;">
+                <img id="loginQrCodeImg" alt="QR Code to connect Phone" style="display: block; width: 210px; height: 210px; object-fit: contain;">
+              </div>
+
+              <div class="lan-url-box" style="width: 100%; max-width: 420px; background: #131923; border: 1px solid #233044; border-radius: 8px; padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; box-sizing: border-box;">
+                <span id="loginLanUrlDisplay" style="font-family: monospace; font-size: 0.84rem; color: #60a5fa; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-right: 8px;">Generating public tunnel...</span>
+                <button class="btn btn-secondary btn-sm" id="btnLoginCopyLanUrl" onclick="window.app?.copyLoginLanUrl()" style="padding: 4px 10px; font-size: 0.775rem; white-space: nowrap; background: #1e293b; border: 1px solid #334155; color: #f8fafc; border-radius: 6px; cursor: pointer;">Copy Link</button>
+              </div>
+
+              <!-- Zero-Password Direct Tunnel Status Badge -->
+              <div id="loginTunnelStatusBadge" style="width: 100%; max-width: 420px; background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 8px; padding: 10px 14px; text-align: left; display: flex; align-items: center; gap: 10px; box-sizing: border-box;">
+                <span style="font-size: 1.2rem; flex-shrink: 0;">⚡</span>
+                <div>
+                  <div style="font-size: 0.825rem; font-weight: 700; color: #4ade80;">Direct Cloudflare Access — No Password Required!</div>
+                  <div style="font-size: 0.735rem; color: #94a3b8; margin-top: 2px;">Ultra-fast global edge network with instant connection on mobile internet.</div>
+                </div>
+              </div>
+
+              <ol id="loginQrStepsList" class="steps-list" style="width: 100%; max-width: 420px; margin: 0; padding-left: 1.25rem; font-size: 0.785rem; color: #94a3b8; text-align: left; line-height: 1.6; box-sizing: border-box;">
+                <li>Scan the QR code with your phone camera using <strong>Mobile Data</strong>.</li>
+                <li>The full <strong>TejStockAI</strong> terminal opens directly — no passwords needed!</li>
+                <li>Tap <strong>⋮ (3 dots)</strong> in Chrome and tap <strong>"Install app"</strong> or <strong>"Add to Home Screen"</strong> for full-screen PWA!</li>
+              </ol>
+
+              <button type="button" class="btn-login-guest" onclick="window.app?.switchLoginTab('trader')" style="margin-top: 0.5rem; width: 100%;">
+                <span>← Back to Broker Login</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Login Card Footer -->
+        <div class="login-footer">
+          <div class="login-security-badges">
+            <span>🛡️ NSE / BSE Direct Feed</span>
+            <span>•</span>
+            <span>⚡ Low-Latency WebSockets</span>
+            <span>•</span>
+            <span>🤖 Level 5 AI Copilot</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       GOOGLE EMAIL ID AUTHENTICATION MODAL
+       (Available for Traders / Users, Excluded from Admin)
+       ========================================== -->
+  <div id="googleAuthModal" class="google-modal-overlay" style="display: none;">
+    <div class="google-modal-container">
+      <div class="google-modal-header">
+        <svg class="google-svg-icon" viewBox="0 0 24 24" width="26" height="26">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+        </svg>
+        <div style="flex: 1;">
+          <h3 class="google-modal-title">Sign in with Google</h3>
+          <p class="google-modal-sub">to connect with <b>TejStockAI Terminal</b></p>
+        </div>
+        <button type="button" class="google-modal-close" onclick="window.app?.closeGoogleAuthDialog()" title="Close">✕</button>
+      </div>
+
+      <div class="google-modal-body">
+        <p class="google-account-prompt">Choose a registered Google account or enter your email:</p>
+        
+        <!-- Detected Google Accounts Quick Click -->
+        <div class="google-account-list">
+          <div class="google-account-item" onclick="window.app?.signInWithGoogleEmail('tejas.dewangan@gmail.com', 'Tejas Dewangan')">
+            <div class="google-account-avatar">T</div>
+            <div class="google-account-details">
+              <span class="google-account-name">Tejas Dewangan</span>
+              <span class="google-account-email">tejas.dewangan@gmail.com</span>
+            </div>
+            <span class="google-select-arrow">➔</span>
+          </div>
+          <div class="google-account-item" onclick="window.app?.signInWithGoogleEmail('pro.trader@gmail.com', 'Pro Trader')">
+            <div class="google-account-avatar" style="background: #0284c7;">P</div>
+            <div class="google-account-details">
+              <span class="google-account-name">Pro Trader Account</span>
+              <span class="google-account-email">pro.trader@gmail.com</span>
+            </div>
+            <span class="google-select-arrow">➔</span>
+          </div>
+        </div>
+
+        <div class="google-or-divider">
+          <span>or use another Google account</span>
+        </div>
+
+        <!-- Custom Google Email Input -->
+        <form onsubmit="event.preventDefault(); window.app?.handleCustomGoogleSubmit();" class="google-custom-email-form">
+          <div class="login-form-group" style="margin-bottom: 0.75rem;">
+            <label for="customGoogleEmailInput" class="login-label"><span>Google Email Address</span></label>
+            <div class="login-input-wrapper">
+              <span class="login-input-icon">✉️</span>
+              <input type="email" id="customGoogleEmailInput" class="login-input" placeholder="e.g. yourname@gmail.com" required autocomplete="email" spellcheck="false">
+            </div>
+          </div>
+          <button type="submit" class="btn-login-submit" id="btnCustomGoogleSubmit" style="background: #1a73e8; border-color: #1a73e8;">
+            <span>Continue with this Google Email</span>
+            <span class="login-btn-icon">➔</span>
+          </button>
+        </form>
+      </div>
+
+      <div class="google-modal-footer">
+        <span>🔒 Secure Google OAuth Authentication</span>
+        <span>•</span>
+        <span>TejStockAI Verified</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       ADMIN SECURITY & VISITOR ANALYTICS TERMINAL
+       ========================================== -->
+  <div id="adminDashboardModal" class="admin-modal-overlay" style="display: none;">
+    <div class="admin-modal-container">
+      <!-- Admin Header -->
+      <div class="admin-header">
+        <div class="admin-brand">
+          <div class="admin-brand-icon">🛡️</div>
+          <div>
+            <h2 class="admin-title">TejStockAI Security & Visitor Analytics Terminal</h2>
+            <div class="admin-subhead">
+              <span class="admin-badge-gold">👑 Super Admin: 7647814314</span>
+              <span class="admin-badge-pulse" id="adminLiveStatusBadge">🟢 Real-Time Tracking Active</span>
+            </div>
+          </div>
+        </div>
+        <div class="admin-header-actions">
+          <button type="button" class="admin-btn-action" id="btnRefreshAdminStats" onclick="window.app?.loadAdminStats()" title="Refresh live analytics">
+            <span>🔄 Refresh</span>
+          </button>
+          <button type="button" class="admin-btn-action admin-btn-danger" id="btnClearAdminLogs" onclick="window.app?.clearAdminLogs()" title="Clear logs">
+            <span>🗑️ Clear Logs</span>
+          </button>
+          <button type="button" class="admin-btn-close" id="btnCloseAdminModal" onclick="window.app?.closeAdminModal()" title="Close Admin Terminal">
+            ✕
+          </button>
+        </div>
+      </div>
+
+      <!-- KPI Summary Cards -->
+      <div class="admin-kpi-grid">
+        <div class="admin-kpi-card">
+          <div class="admin-kpi-icon">👀</div>
+          <div class="admin-kpi-body">
+            <span class="admin-kpi-label">Total Website Views</span>
+            <span class="admin-kpi-value" id="kpiTotalVisitors">0</span>
+            <span class="admin-kpi-sub" id="kpiUniqueVisitors">0 Unique IPs</span>
+          </div>
+        </div>
+        <div class="admin-kpi-card">
+          <div class="admin-kpi-icon" style="color: #22c55e;">🟢</div>
+          <div class="admin-kpi-body">
+            <span class="admin-kpi-label">Active Online Now</span>
+            <span class="admin-kpi-value" id="kpiOnlineNow" style="color: #22c55e;">1</span>
+            <span class="admin-kpi-sub">WebSocket Live Conns</span>
+          </div>
+        </div>
+        <div class="admin-kpi-card">
+          <div class="admin-kpi-icon" style="color: #38bdf8;">🔑</div>
+          <div class="admin-kpi-body">
+            <span class="admin-kpi-label">Total Trader Logins</span>
+            <span class="admin-kpi-value" id="kpiTotalLogins" style="color: #38bdf8;">0</span>
+            <span class="admin-kpi-sub">Successful Sign-Ins</span>
+          </div>
+        </div>
+        <div class="admin-kpi-card">
+          <div class="admin-kpi-icon" style="color: #c084fc;">🪁</div>
+          <div class="admin-kpi-body">
+            <span class="admin-kpi-label">Top Broker Gateway</span>
+            <span class="admin-kpi-value" id="kpiTopBroker" style="font-size: 1.15rem; color: #c084fc;">Zerodha Kite</span>
+            <span class="admin-kpi-sub">Most Popular</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs (Visitors vs Logins) -->
+      <div class="admin-view-tabs">
+        <button type="button" class="admin-view-tab active" id="btnTabVisitors" onclick="window.app?.switchAdminViewTab('visitors')">
+          <span>👀 Website Visitors (Who has seen the website)</span>
+          <span class="admin-tab-count" id="countTabVisitors">0</span>
+        </button>
+        <button type="button" class="admin-view-tab" id="btnTabLogins" onclick="window.app?.switchAdminViewTab('logins')">
+          <span>🔑 User Logins (Who has logged in)</span>
+          <span class="admin-tab-count" id="countTabLogins">0</span>
+        </button>
+      </div>
+
+      <!-- Search & Filter Bar -->
+      <div class="admin-filter-bar">
+        <div class="admin-search-wrapper">
+          <span>🔍</span>
+          <input type="text" id="adminLogSearchInput" placeholder="Filter by IP, device, username, broker..." oninput="window.app?.filterAdminLogs(this.value)">
+        </div>
+        <div class="admin-filter-actions">
+          <span class="admin-auto-refresh-tag">⚡ Live Auto-Sync Active</span>
+        </div>
+      </div>
+
+      <!-- Data Table Container -->
+      <div class="admin-table-container">
+        <!-- Visitors Table -->
+        <div id="adminVisitorsView">
+          <!-- Sub-view mode toggles -->
+          <div class="admin-subview-bar">
+            <div class="admin-subview-toggle">
+              <button type="button" class="admin-sub-btn active" id="btnSubViewUnique" onclick="window.app?.switchVisitorViewMode('unique')">
+                <span>👥 Grouped by Device (Unique Viewers)</span>
+              </button>
+              <button type="button" class="admin-sub-btn" id="btnSubViewStream" onclick="window.app?.switchVisitorViewMode('stream')">
+                <span>📋 All Individual Views Stream (<span id="countSubViewStream">0</span>)</span>
+              </button>
+            </div>
+            <div class="admin-subview-note">
+              <span>💡 Click on any <b>"Views"</b> button below to inspect all 13+ individual visits with exact timestamps</span>
+            </div>
+          </div>
+
+          <!-- Grouped Unique Table -->
+          <div id="adminVisitorsGroupedView">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Viewer / Trader Identity</th>
+                  <th>Time / Last Seen</th>
+                  <th>IP Address</th>
+                  <th>Device / OS</th>
+                  <th>Browser</th>
+                  <th>Page / Route</th>
+                  <th>Views (Click to Inspect)</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="adminVisitorsTableBody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Flat Stream Table (All Individual Views) -->
+          <div id="adminVisitorsStreamView" style="display: none;">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Exact Visit Time</th>
+                  <th>Viewer / Trader Identity</th>
+                  <th>IP Address</th>
+                  <th>Device / OS</th>
+                  <th>Browser</th>
+                  <th>Page / Route</th>
+                  <th>Visit Occasion</th>
+                  <th>Auth State</th>
+                </tr>
+              </thead>
+              <tbody id="adminVisitorsStreamTableBody">
+                <!-- Dynamically populated with all individual views -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Logins Table -->
+        <div id="adminLoginsView" style="display: none;">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Login Time</th>
+                <th>Client ID / Username</th>
+                <th>Broker Gateway</th>
+                <th>IP Address</th>
+                <th>Device / OS</th>
+                <th>Browser</th>
+                <th>Session Type</th>
+                <th>Auth Status</th>
+              </tr>
+            </thead>
+            <tbody id="adminLoginsTableBody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       VISITOR HISTORY & INDIVIDUAL VIEWS AUDIT MODAL
+       ========================================== -->
+  <div id="visitorHistoryModal" class="admin-modal-overlay visitor-history-overlay" style="display: none;">
+    <div class="admin-modal-container history-modal-container">
+      <div class="admin-header">
+        <div class="admin-brand">
+          <div class="admin-brand-icon">🔍</div>
+          <div>
+            <h2 class="admin-title" id="historyModalTitle">Viewer Audit: All Individual Views</h2>
+            <div class="admin-subhead">
+              <span class="admin-badge-gold" id="historyModalUserBadge">👑 Tejas Dewangan (TEJAS)</span>
+              <span class="admin-badge-pulse" id="historyModalCountBadge">13 Individual Views Recorded</span>
+            </div>
+          </div>
+        </div>
+        <div class="admin-header-actions">
+          <button type="button" class="admin-btn-action" onclick="window.app?.loadAdminStats()" title="Refresh views">
+            <span>🔄 Refresh</span>
+          </button>
+          <button type="button" class="admin-btn-close" onclick="window.app?.closeVisitorHistoryModal()" title="Close Viewer Audit">
+            ✕
+          </button>
+        </div>
+      </div>
+
+      <!-- Visitor Meta Summary Bar -->
+      <div class="history-meta-bar" id="historyMetaBar">
+        <!-- Injected dynamically -->
+      </div>
+
+      <!-- Search in Views -->
+      <div class="admin-filter-bar history-search-bar">
+        <div class="admin-search-wrapper">
+          <span>🔍</span>
+          <input type="text" id="historyFilterInput" placeholder="Filter these views by time, route, keyword..." oninput="window.app?.filterHistoryViews(this.value)">
+        </div>
+        <div class="admin-filter-actions">
+          <span class="admin-auto-refresh-tag" id="historyFilterCountTag">Showing all views</span>
+        </div>
+      </div>
+
+      <!-- Table of Individual Views -->
+      <div class="admin-table-container history-table-container">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>View #</th>
+              <th>Exact Timestamp</th>
+              <th>Viewer / Trader Identity</th>
+              <th>Page / Route</th>
+              <th>IP Address</th>
+              <th>Device & Browser</th>
+              <th>Authentication Status</th>
+            </tr>
+          </thead>
+          <tbody id="historyTableBody">
+            <!-- Dynamically populated with individual views -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Navigation Bar with Universal Search -->
+  <header class="navbar">
+    <div class="nav-brand" onclick="window.app?.switchView('dashboard')">
+      <div class="brand-icon">
+        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M3 3v18h18"></path><path d="m19 9-5 5-4-4-3 3"></path></svg>
+      </div>
+      <div class="brand-text">
+        <h1>TejStock<span class="brand-badge-ai">AI</span></h1>
+      </div>
+    </div>
+
+    <!-- Universal Search Bar (Desktop & Tablet) -->
+    <div class="nav-search-container" id="navSearchContainer">
+      <div class="search-input-wrapper">
+        <svg class="search-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" id="globalStockSearch" placeholder="Search any stock, index (e.g. RELIANCE, APOLO, TITAN, SUZLON, TATA)..." autocomplete="off" spellcheck="false">
+        <span class="search-shortcut-badge" title="Press / or Ctrl+K to search">/</span>
+        <button class="search-clear-btn" id="searchClearBtn" style="display: none;">✕</button>
+      </div>
+
+      <!-- Autocomplete Dropdown -->
+      <div class="search-results-dropdown" id="searchResultsDropdown">
+        <!-- Injected dynamically by app.js -->
+      </div>
+    </div>
+
+    <!-- Desktop Navigation Links (Chartink Image 1 Style) -->
+    <nav class="nav-links">
+      <a class="nav-link" data-view="dashboard" id="navLinkAtlas" title="Market Atlas & Overview">
+        Atlas
+      </a>
+      <a class="nav-link" data-view="builder" id="navLinkScreens" title="Chartink Scan Builder & Directory">
+        Screens
+      </a>
+      <a class="nav-link" id="navLinkCharts" title="Interactive Stock Charts">
+        Charts
+      </a>
+      <a class="nav-link" data-view="scans" id="navLinkDashboard" title="Pre-Built Scans Strategy Library">
+        Strategies
+      </a>
+      <a class="nav-link" data-view="watchlist" id="navLinkWatchlist" title="Zerodha Kite 18-Sector Watchlists">
+        Watchlist
+      </a>
+      <a class="nav-link nav-link-ai" data-view="terminal" title="AI Agent Intelligence">
+        <span class="nav-ai-glow">🤖</span>
+        TejAI
+      </a>
+      <a class="nav-link nav-link-premium" href="#" id="navLinkPremium" style="color: #c084fc; font-weight: 800;" onclick="window.app?.openProSubscriptionModal(); return false;">
+        ⭐ Pro (₹1,000 / 2M)
+      </a>
+      <a class="nav-link" href="#" id="navLinkHelp" title="Scanner Documentation">
+        Help
+      </a>
+    </nav>
+
+    <!-- Nav Actions -->
+    <div class="nav-actions">
+      <!-- Pro Plan Pill (Visible on both Mobile and Desktop) -->
+      <button class="ci-pro-nav-pill" id="btnMobileNavPro" onclick="window.app?.openProSubscriptionModal(); return false;" title="TejStockAI Pro Plan (₹1,000 / 2 Months)">
+        <span class="pro-sparkle">⭐</span>
+        <span class="pro-text">Pro</span>
+      </button>
+
+      <!-- Workspace Switcher Pill (Cash vs F&O) -->
+      <button class="ci-workspace-toggle-btn" id="navWorkspaceSwitcher" title="Switch Market Workspace (Cash Equities / Derivatives F&O)">
+        <span class="ws-pill-icon" id="wsNavIcon">📈</span>
+        <span class="ws-pill-label" id="wsNavLabel">Cash</span>
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+
+      <!-- Admin Console Pill Button -->
+      <button class="ci-admin-pill-btn" id="btnOpenAdminModal" onclick="window.app?.openAdminModal()" title="Open Admin Security & Visitor Analytics (7647814314)">
+        <span class="admin-pill-icon">🛡️</span>
+        <span class="admin-pill-label">Admin</span>
+      </button>
+
+      <!-- User Profile Avatar Pill & Dropdown -->
+      <div class="ci-user-avatar-container">
+        <div class="ci-user-avatar" id="btnUserAvatar" title="User Profile (Click to View / Logout)">
+          <span id="userAvatarInitial">T</span>
+        </div>
+        <!-- User Profile Dropdown -->
+        <div class="user-profile-dropdown" id="userProfileDropdown" style="display: none;">
+          <div class="user-dropdown-header">
+            <div class="user-dropdown-avatar" id="userDropdownAvatar">T</div>
+            <div class="user-dropdown-info">
+              <strong id="userDropdownName">Tejas Dewangan</strong>
+              <small id="userDropdownClient">Client ID: TEJAS</small>
+            </div>
+          </div>
+          <div class="user-dropdown-divider"></div>
+          <div class="user-dropdown-item">
+            <span>Broker:</span>
+            <strong id="userDropdownBroker" style="color: #38bdf8;">Zerodha Kite</strong>
+          </div>
+          <div class="user-dropdown-item">
+            <span>Market Feed:</span>
+            <span style="color: #22c55e; font-weight: 700;">🟢 NSE Live</span>
+          </div>
+          <div class="user-dropdown-divider"></div>
+          <button type="button" class="btn-dropdown-admin" onclick="window.app?.openAdminModal()">
+            <span>🛡️ Open Admin Security Portal</span>
+          </button>
+          <button type="button" class="btn-logout" id="btnLogoutUser" onclick="window.app?.logout()">
+            <span>🔒 Logout & Lock Terminal</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- System Mode Toggle (Image 1: System) -->
+      <button class="ci-system-toggle-btn" id="btnThemeToggle" title="Toggle Dark/Light System Theme">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+        <span>System</span>
+      </button>
+
+      <!-- Connect Android / Phone Button -->
+      <button class="btn-connect" id="btnOpenConnectModal" title="Open on Android phone">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+        <span>Phone</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile Search Bar (Visible on phones) -->
+  <div class="mobile-search-bar">
+    <div class="search-input-wrapper">
+      <svg class="search-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      <input type="text" id="mobileStockSearch" placeholder="Search any stock (APOLO, TITAN, RELIANCE, TATA)..." autocomplete="off">
+    </div>
+    <div class="search-results-dropdown" id="mobileSearchResultsDropdown"></div>
+  </div>
+
+  <!-- Live Market Status Bar -->
+  <div class="market-ticker-bar">
+    <div class="market-status-badge" id="marketStatusContainer">
+      <span class="pulse-dot" id="marketPulseDot"></span>
+      <span id="marketStatusText">NSE MARKET STATUS</span>
+      <button class="btn btn-secondary btn-sm" id="btnRefreshMarketData" style="padding: 0.15rem 0.5rem; font-size: 0.7rem; margin-left: 0.5rem;" title="Fetch latest quotes from market provider">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 4v6h-6M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+        Refresh
+      </button>
+      <span id="deviceCountBadge" style="font-size: 0.7rem; color: var(--text-muted); font-weight: normal; margin-left: 0.4rem;">1 connected</span>
+    </div>
+
+    <div class="ticker-wrap" id="marketTickerWrap">
+      <div class="ticker-move" id="marketTickerItems">
+        <!-- Injected real NSE & Global stock tickers marquee -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <main class="app-container">
+
+    <!-- ==========================================
+         VIEW 1: TEJSTOCKAI MULTI-SCAN DASHBOARD
+         ========================================== -->
+    <section class="app-view active" id="view_dashboard">
+      <div class="view-header">
+        <div class="view-title-group">
+          <h2>
+            <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            Scan Dashboard
+          </h2>
+          <p class="view-subtitle">Real-time technical screener & broker intelligence monitoring multiple strategies simultaneously</p>
+        </div>
+
+        <div class="view-controls">
+          <!-- Active Dashboard Select -->
+          <select class="select-control" id="dashboardSelect">
+            <option value="default">TejStockAI Main Screener</option>
+            <option value="intraday">Intraday Broker Momentum</option>
+          </select>
+
+          <!-- Auto-refresh interval -->
+          <div class="refresh-control-box">
+            <span>Refresh:</span>
+            <select class="select-control" id="refreshIntervalSelect" style="padding: 0.2rem 0.4rem; font-size: 0.775rem;">
+              <option value="5">5s (Live)</option>
+              <option value="15" selected>15s</option>
+              <option value="30">30s</option>
+              <option value="60">1 min</option>
+              <option value="0">Paused</option>
+            </select>
+            <span class="refresh-timer" id="refreshCountdown">15s</span>
+          </div>
+
+          <button class="btn btn-secondary btn-sm" id="btnManualRefresh" title="Refresh Now">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 4v6h-6M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+          </button>
+
+          <button class="btn btn-primary btn-sm" id="btnAddScanToDash">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            + Pin Scan
+          </button>
+        </div>
+      </div>
+
+      <!-- Segment Filter Pills -->
+      <div class="segment-pills" style="margin-bottom: 1rem;">
+        <button class="pill-item active" data-segment="Cash">Cash Segment</button>
+        <button class="pill-item" data-segment="Nifty 50">Nifty 50</button>
+        <button class="pill-item" data-segment="Nifty Bank">Nifty Bank</button>
+        <button class="pill-item" data-segment="Nifty IT">Nifty IT</button>
+        <button class="pill-item" data-segment="Nifty Auto">Nifty Auto</button>
+        <button class="pill-item" data-segment="Defence">Defence & PSU</button>
+        <button class="pill-item" data-segment="F&O">F&O Segment</button>
+        <button class="pill-item" data-segment="Nifty 500">Nifty 500</button>
+      </div>
+
+      <!-- Multi-Scan Grid Container -->
+      <div class="dashboard-grid" id="dashboardGrid">
+        <!-- Pinned scan cards rendered dynamically by dashboard.js -->
+      </div>
+    </section>
+
+    <!-- ==========================================
+         VIEW 2: TEJAI MARKET TERMINAL & FULL BROKER COPILOT
+         (Zerodha Kite + Angel One + Dhan + Upstox Matrix)
+         ========================================== -->
+    <section class="app-view" id="view_terminal">
+      <div class="view-header">
+        <div class="view-title-group">
+          <h2>
+            <span style="font-size: 1.4rem;">🤖</span>
+            TejStockAI Market Intelligence Terminal
+          </h2>
+          <p class="view-subtitle">All-in-one Broker AI Copilot (Zerodha Kite Market Depth, Dhan Option Matrix, Angel One Health, and Upstox F&O Analytics)</p>
+        </div>
+
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+          <button class="btn btn-secondary btn-sm" onclick="window.app?.loadFiiDiiData()">🏦 Refresh FII/DII</button>
+          <button class="btn btn-ai-sparkle btn-sm" onclick="window.app?.openStockChart(window.app.activeStockSymbol)">📈 View TradingView Chart</button>
+        </div>
+      </div>
+
+      <!-- 4-Column Broker Overview Ribbon -->
+      <div class="terminal-broker-ribbon" id="terminalBrokerRibbon">
+        <div class="broker-ribbon-card clickable-ribbon-card" id="cardActiveMonitoredAsset" onclick="window.app?.openHighMomentumAssetsModal()" title="Click to view all assets with AI Momentum > 80" style="cursor: pointer; position: relative;">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div class="broker-card-label" style="display: flex; align-items: center; gap: 0.35rem; color: #818cf8; font-weight: 700;">
+              Active Monitored Asset ▾
+            </div>
+            <span class="badge-ai-hot" style="background: linear-gradient(135deg, rgba(99,102,241,0.25), rgba(168,85,247,0.25)); color: #c084fc; font-size: 0.65rem; font-weight: 800; padding: 0.15rem 0.5rem; border-radius: 100px; border: 1px solid rgba(192,132,252,0.4);">⚡ AI &gt; 80</span>
+          </div>
+          <div class="broker-card-value text-accent" id="terminalActiveStockSym">RELIANCE</div>
+          <div class="broker-card-sub" id="terminalActiveStockPrice">₹1,247.40 (+0.45%)</div>
+          <div style="margin-top: 0.4rem; font-size: 0.68rem; color: #a5b4fc; display: flex; align-items: center; gap: 0.25rem;">
+            <span>⚡ Click to select &gt; 80 Momentum stock</span>
+          </div>
+        </div>
+
+        <div class="broker-ribbon-card">
+          <div class="broker-card-label">Kite Level 2 Order Ratio</div>
+          <div class="broker-card-value text-green" id="terminalBuyRatio">58% Buy / 42% Sell</div>
+          <div class="broker-card-sub" id="terminalDeliveryPct">Delivery: 48% • Turnover: ₹1,240 Cr</div>
+        </div>
+
+        <div class="broker-ribbon-card">
+          <div class="broker-card-label">Dhan Option Matrix (PCR)</div>
+          <div class="broker-card-value text-accent" id="terminalPcrVal">1.15 (Bullish)</div>
+          <div class="broker-card-sub" id="terminalMaxPain">Max Pain: ₹1,250 • ATM: ₹1,250</div>
+        </div>
+
+        <div class="broker-ribbon-card">
+          <div class="broker-card-label">Institutional Inflows (FII/DII)</div>
+          <div class="broker-card-value text-green" id="terminalFiiDiiNet">Net Buyer (+₹3,966 Cr)</div>
+          <div class="broker-card-sub" id="terminalFiiLong">Futures Long Ratio: 58.4%</div>
+        </div>
+      </div>
+
+      <!-- Main Terminal Layout: 2 Columns (Left: Chat Terminal / Right: Broker Deep Dive Cards) -->
+      <div class="terminal-layout-grid">
+        
+        <!-- Left: Full AI Interactive Chat Terminal -->
+        <div class="terminal-chat-panel">
+          <div class="terminal-chat-top">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <div class="ai-sparkle-avatar" style="width: 32px; height: 32px; font-size: 1rem;">🤖</div>
+              <div>
+                <strong style="font-size: 0.95rem;">TejStockAI Copilot</strong>
+                <div style="font-size: 0.725rem; color: var(--text-muted);">Trained on NSE live ticks, Level 2 depth & Greeks</div>
+              </div>
+            </div>
+            <span class="ai-live-tag">REAL-TIME COPILOT</span>
+          </div>
+
+          <!-- Suggested Quick Prompts -->
+          <div class="terminal-prompt-chips">
+            <button class="ai-chip" onclick="window.app?.sendTerminalChatMessage('Show me today FII and DII institutional activity')">🏦 FII & DII Inflows Today</button>
+            <button class="ai-chip" onclick="window.app?.sendTerminalChatMessage('Compare RELIANCE vs TCS with market depth and PE')">⚖️ Compare Reliance vs TCS</button>
+            <button class="ai-chip" onclick="window.app?.sendTerminalChatMessage('Show Option Chain PCR, Max Pain and ATM open interest')">📊 Option Chain & Max Pain</button>
+            <button class="ai-chip" onclick="window.app?.sendTerminalChatMessage('Show Zerodha Kite Level 2 Market Depth and circuit limits')">📑 Market Depth & Circuit Limits</button>
+            <button class="ai-chip" onclick="window.app?.sendTerminalChatMessage('Give me high probability intraday strategy and stop loss')">⚡ Intraday Strategy & Stop Loss</button>
+          </div>
+
+          <!-- Chat History Stream -->
+          <div class="terminal-chat-stream" id="terminalChatStream">
+            <div class="ai-chat-msg ai-msg-bot">
+              <div class="chat-avatar">🤖</div>
+              <div class="chat-bubble">
+                Welcome to <strong>TejStockAI Terminal</strong>! I have direct access to all information available across <strong>Zerodha Kite, Angel One, Upstox, and Dhan</strong>:
+                <br>• <strong>Level 2 Market Depth (5-Depth Order Book)</strong> & Circuit Limits
+                <br>• <strong>Option Chain Matrix (PCR, Max Pain, ATM Strikes, Open Interest Buildup)</strong>
+                <br>• <strong>FII / DII Institutional Flows & Index Futures Long-Short Ratio</strong>
+                <br>• <strong>Multi-stock Comparisons & Technical Momentum Strategies</strong>
+                <br><br>Ask me anything or click a suggested prompt above!
+              </div>
+            </div>
+          </div>
+
+          <!-- Chat Input Bar -->
+          <div class="terminal-chat-input-row">
+            <input type="text" id="terminalChatInput" placeholder="Ask TejStockAI: e.g. Compare HDFCBANK vs ICICIBANK, Option chain for NIFTY, Upper circuit for SUZLON..." autocomplete="off">
+            <button class="btn btn-ai-sparkle" id="btnSendTerminalChat">Send Query</button>
+          </div>
+        </div>
+
+        <!-- Right: Broker Deep Dive Tabs & Live Widgets -->
+        <div class="terminal-widgets-panel">
+          
+          <!-- Widget Tab Bar -->
+          <div class="widget-tab-bar">
+            <button class="widget-tab-btn active" data-tab="depth">Level 2 Depth (Kite)</button>
+            <button class="widget-tab-btn" data-tab="options">Option Matrix (Dhan)</button>
+            <button class="widget-tab-btn" data-tab="fiidii">FII / DII Flows</button>
+          </div>
+
+          <!-- Tab Content 1: Level 2 Market Depth -->
+          <div class="widget-tab-pane active" id="tabPane_depth">
+            <div class="depth-card-header">
+              <span id="depthStockHeader">RELIANCE Market Depth (5 Bids / 5 Asks)</span>
+              <span class="depth-circuit-pill" id="depthCircuitPill">Circuits: ₹1,122.6 - ₹1,372.1</span>
+            </div>
+            
+            <div class="depth-table-wrapper">
+              <table class="depth-table">
+                <thead>
+                  <tr>
+                    <th style="color: var(--green);">Bid (Buy Qty)</th>
+                    <th style="color: var(--green);">Orders</th>
+                    <th style="color: var(--green);">Price (₹)</th>
+                    <th style="color: var(--red);">Price (₹)</th>
+                    <th style="color: var(--red);">Orders</th>
+                    <th style="color: var(--red);">Ask (Sell Qty)</th>
+                  </tr>
+                </thead>
+                <tbody id="depthTableBody">
+                  <!-- Rendered dynamically -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Depth Stats Grid -->
+            <div class="depth-stats-grid">
+              <div class="depth-stat-box">
+                <span class="lbl">Upper Circuit (+10%)</span>
+                <span class="val text-green" id="depthUpperCircuit">₹1,372.14</span>
+              </div>
+              <div class="depth-stat-box">
+                <span class="lbl">Lower Circuit (-10%)</span>
+                <span class="val text-red" id="depthLowerCircuit">₹1,122.66</span>
+              </div>
+              <div class="depth-stat-box">
+                <span class="lbl">VWAP / Avg Price</span>
+                <span class="val text-accent" id="depthVwap">₹1,248.50</span>
+              </div>
+              <div class="depth-stat-box">
+                <span class="lbl">Delivery Volume %</span>
+                <span class="val" id="depthDeliveryPct">48%</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab Content 2: Option Chain Matrix -->
+          <div class="widget-tab-pane" id="tabPane_options">
+            <div class="depth-card-header">
+              <span id="optionStockHeader">Option Chain (Dhan Matrix)</span>
+              <span class="depth-circuit-pill text-accent" id="optionPcrPill">PCR: 1.15 • Max Pain: ₹1,250</span>
+            </div>
+
+            <div class="depth-table-wrapper">
+              <table class="depth-table">
+                <thead>
+                  <tr>
+                    <th style="color: var(--green);">Call OI</th>
+                    <th style="color: var(--green);">Call (₹)</th>
+                    <th style="text-align: center; color: var(--accent);">Strike</th>
+                    <th style="color: var(--red);">Put (₹)</th>
+                    <th style="color: var(--red);">Put OI</th>
+                  </tr>
+                </thead>
+                <tbody id="optionTableBody">
+                  <!-- Rendered dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Tab Content 3: FII / DII Flows -->
+          <div class="widget-tab-pane" id="tabPane_fiidii">
+            <div class="fiidii-card">
+              <h4 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 0.75rem; color: var(--text-main);">
+                Institutional Cash & Derivatives Activity
+              </h4>
+              <div class="fiidii-grid">
+                <div class="fiidii-stat-box">
+                  <span class="lbl">FII Net Cash Buy/Sell</span>
+                  <span class="val text-green" id="fiiNetCash">+₹1,845.60 Cr</span>
+                </div>
+                <div class="fiidii-stat-box">
+                  <span class="lbl">DII Net Cash Buy/Sell</span>
+                  <span class="val text-green" id="diiNetCash">+₹2,120.40 Cr</span>
+                </div>
+                <div class="fiidii-stat-box">
+                  <span class="lbl">FII Futures Long Ratio</span>
+                  <span class="val text-accent" id="fiiLongRatio">58.4%</span>
+                </div>
+                <div class="fiidii-stat-box">
+                  <span class="lbl">Market Bias</span>
+                  <span class="val text-green" id="fiiStance">Net Bullish Inflows</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==========================================
+         VIEW 3: TEJSTOCKAI SCAN DASHBOARD & SCANNER BUILDER
+         (Page 1: Directory Table, Page 2/3/4: Detailed Scanner & Backtest)
+         ========================================== -->
+    <section class="app-view" id="view_builder">
+      
+      <!-- SUB-PAGE 1: SCAN DASHBOARD DIRECTORY (Page 1) -->
+      <div id="builderDirectoryPage" class="builder-subpage active">
+        
+        <!-- Top Sub-Nav Pills (Chartink-style) -->
+        <div class="chartink-subnav">
+          <button class="subnav-pill active"><span style="color: var(--accent);">[]</span> Scans</button>
+          <button class="subnav-pill" onclick="window.app?.switchView('watchlist')">Watchlists</button>
+          <button class="subnav-pill" onclick="window.app?.switchView('terminal')">🤖 AI Copilot Alerts</button>
+          <button class="subnav-pill" onclick="window.app?.switchView('dashboard')">Live Dashboard</button>
+          <button class="subnav-pill" onclick="window.app?.switchView('scans')">Strategies</button>
+        </div>
+
+        <!-- Promotional Banner -->
+        <div class="chartink-promo-banner">
+          <span>⚡ Save time tracking 2000+ NSE stocks using <strong>LIVE TEJSTOCKAI ALERTS & WEBSOCKET TICKS</strong></span>
+          <button class="btn-promo-action" onclick="window.app?.switchView('terminal')">ALERTS ↗</button>
+        </div>
+
+        <!-- Section Header -->
+        <div class="scan-dash-header-row">
+          <div>
+            <h2 class="scan-dash-title">Scan dashboard</h2>
+            <p class="scan-dash-subtitle">Review saved scans, tags, sharing, and live previews from one place.</p>
+          </div>
+          <div class="scan-dash-search-box">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="scanSearchInput" placeholder="Search scans by name..." autocomplete="off">
+          </div>
+        </div>
+
+        <!-- Filter & Actions Bar -->
+        <div class="scan-dash-filter-bar">
+          <div class="filter-tab-group">
+            <button class="filter-tab-btn active" data-filter="all">All</button>
+            <button class="filter-tab-btn" data-filter="fav">Favourites</button>
+            <button class="filter-tab-btn" data-filter="tag">Filter by tag <span style="font-size: 0.7rem;">▼</span></button>
+          </div>
+          <div class="filter-action-group">
+            <div class="chart-preview-toggle-wrap">
+              <span>Chart Preview</span>
+              <label class="toggle-switch">
+                <input type="checkbox" id="toggleScanPreview" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <button class="btn btn-secondary btn-sm" id="btnManageTags">🏷️ Manage tags</button>
+            <button class="btn btn-primary btn-sm btn-create-scanner" id="btnCreateNewScanner">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              + Create scanner
+            </button>
+          </div>
+        </div>
+
+        <!-- Scans Table (Page 1 in screenshot) -->
+        <div class="scan-dash-table-card">
+          <div class="scan-table-wrapper">
+            <table class="scans-directory-table">
+              <thead>
+                <tr>
+                  <th style="width: 18%;">NAME</th>
+                  <th style="width: 14%;">DESCRIPTION</th>
+                  <th style="width: 36%;">CLAUSE</th>
+                  <th style="width: 10%;">TAGS</th>
+                  <th style="width: 10%;">CREATED ON</th>
+                  <th style="width: 12%; text-align: right;">ACTIONS</th>
+                </tr>
+              </thead>
+              <tbody id="scansDirectoryTableBody">
+                <!-- Populated dynamically: clicking NAME opens Detail View (Pages 2, 3, 4) -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUB-PAGE 2: SCANNER DETAIL & EXECUTION VIEW (Pages 2, 3, 4 in screenshot) -->
+      <div id="builderDetailPage" class="builder-subpage" style="display: none;">
+        
+        <!-- Back Navigation Bar -->
+        <div class="builder-back-nav">
+          <button class="btn btn-secondary btn-sm" id="btnBackToScanDashboard">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            Back to Scan Dashboard
+          </button>
+          <div class="scanner-status-tag" id="scannerStatusTag">READY TO SCAN</div>
+        </div>
+
+        <!-- Chartink LIVE Alerts Notification Top Bar (Image 1) -->
+        <div class="ci-promo-top-bar">
+          <div class="ci-promo-text">
+            <span>New <strong>LIVE Alerts</strong> now available!</span>
+          </div>
+          <div class="ci-promo-links">
+            <button type="button" class="ci-header-link-btn" id="btnScannerGuide">Scanner Guide</button>
+            <button type="button" class="ci-header-link-btn" id="btnScanExamples">Scan Examples</button>
+            <button type="button" class="ci-header-link-btn" id="btnFeedback">Feedback</button>
+          </div>
+        </div>
+
+        <!-- Scanner Title & Creator Header (Image 1) -->
+        <div class="ci-scanner-header">
+          <div class="ci-title-left">
+            <p class="ci-creator-name" id="activeScannerDesc">Sri</p>
+            <div class="ci-title-row">
+              <span class="ci-star-icon">★</span>
+              <h1 class="ci-active-title" id="activeScannerTitle">KHOJ</h1>
+            </div>
+          </div>
+          <div class="ci-header-actions">
+            <button class="btn btn-secondary btn-sm" id="btnEditScannerMeta">✏️ Edit Details</button>
+            <button class="btn btn-secondary btn-sm" id="btnPinActiveScanner">📌 Pin to Dash</button>
+          </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════
+             MAGIC FILTERS & AI SUITE (Image 1)
+             ═══════════════════════════════════════════════ -->
+        <div class="ci-magic-card">
+          <div class="ci-magic-top-header">
+            <div class="ci-magic-badge">
+              <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2l2.4 7.2L22 10l-6 4.8 2.4 7.2L12 17.5 5.6 22 8 14.8 2 10l7.6-.8L12 2z"></path></svg>
+              <span>MAGIC FILTERS</span>
+            </div>
+            <!-- AI Suite Tabs Switcher -->
+            <div class="ci-ai-switcher">
+              <button class="ci-ai-tab active" data-tab="ai-nlp">Magic AI</button>
+              <button class="ci-ai-tab" data-tab="ai-insight">Scan Insights</button>
+              <button class="ci-ai-tab" data-tab="ai-copilot">AI Copilot Chat</button>
+            </div>
+          </div>
+
+          <!-- Magic Input & Modes Row (Image 1) -->
+          <div class="ci-magic-main-row">
+            <div class="ci-mode-pills">
+              <button type="button" class="ci-mode-pill" data-mode="append">Append</button>
+              <button type="button" class="ci-mode-pill" data-mode="replace">Replace</button>
+              <button type="button" class="ci-mode-pill active" data-mode="draw">
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                Draw
+              </button>
+            </div>
+            <div class="ci-magic-input-wrap">
+              <input type="text" id="magicFilterInput" class="ci-magic-input" placeholder="Scan stocks using simple language like 'stocks up by 4% and rising volume'" autocomplete="off">
+            </div>
+            <button type="button" class="ci-generate-btn" id="btnMagicGenerate">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a4 4 0 0 1 4 4v4a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z"></path><path d="M19 10v1a7 7 0 0 1-14 0v-1"></path></svg>
+              <span>Generate</span>
+            </button>
+          </div>
+
+          <!-- Suggestion Chips matching Image 1 -->
+          <div class="ci-chips-row">
+            <button type="button" class="ci-suggestion-chip" data-prompt="Gravestone doji candlestick pattern on daily">
+              Gravestone doji <span class="ci-chip-arrow">↗</span>
+            </button>
+            <button type="button" class="ci-suggestion-chip" data-prompt="ROCE less than 30 and price rising">
+              ROCE less than 30 <span class="ci-chip-arrow">↗</span>
+            </button>
+            <button type="button" class="ci-suggestion-chip" data-prompt="Green candle on 15-min with volume spike">
+              Green candle on 15-min <span class="ci-chip-arrow">↗</span>
+            </button>
+            <button type="button" class="ci-suggestion-chip" data-prompt="Doji on 15-min chart">
+              Doji on 15-min <span class="ci-chip-arrow">↗</span>
+            </button>
+          </div>
+
+          <!-- Add Tag Row (Image 1) -->
+          <div class="ci-tag-row">
+            <button type="button" class="ci-add-tag-btn" id="btnAddScanTag">
+              <span style="font-size: 1.1rem; line-height: 1;">+</span> Add tag
+            </button>
+            <div class="ci-active-tags" id="activeScanTagsList">
+              <span class="ci-tag-pill">Nifty 500</span>
+              <span class="ci-tag-pill">RSI Breakout</span>
+            </div>
+          </div>
+
+          <!-- AI Streaming Response Preview -->
+          <div class="ai-stream-response" id="aiStreamResponse" style="display: none;">
+            <div class="ai-stream-header">
+              <div class="ai-thinking-dots">
+                <span></span><span></span><span></span>
+              </div>
+              <span class="ai-stream-label">AI is translating to technical filters...</span>
+            </div>
+            <div class="ai-stream-content" id="aiStreamContent"></div>
+          </div>
+
+          <!-- AI Generated Filters Preview -->
+          <div class="ai-filters-preview" id="aiFiltersPreview" style="display: none;">
+            <div class="ai-preview-header">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+              <strong>AI Generated Filters</strong>
+              <span class="ai-preview-count" id="aiPreviewCount"></span>
+            </div>
+            <div class="ai-preview-list" id="aiPreviewList"></div>
+            <div class="ai-preview-actions">
+              <button type="button" class="ai-btn-apply" id="btnApplyAiFilters">Apply Filters</button>
+              <button type="button" class="ai-btn-edit" id="btnEditAiFilters">Edit Before Applying</button>
+              <button type="button" class="ai-btn-discard" id="btnDiscardAiFilters">Discard</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ━━━ TAB 2: AI SCAN INSIGHT ANALYZER ━━━ -->
+        <div class="ai-suite-panel" id="aiPanelInsight" data-tab="ai-insight">
+          <div class="ai-insight-card">
+            <div class="ai-insight-header">
+              <div class="ai-insight-icon-wrap">
+                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 1 1 7.072 0l-.548.547A3.374 3.374 0 0 0 14 18.469V19a2 2 0 1 1-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+              </div>
+              <div>
+                <h3>AI Scan Intelligence</h3>
+                <p>Real-time analysis of your current scan configuration</p>
+              </div>
+              <button class="ai-refresh-insight-btn" id="btnRefreshInsight" title="Re-analyze scan">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+              </button>
+            </div>
+
+            <!-- AI Score Cards Row -->
+            <div class="ai-score-grid" id="aiScoreGrid">
+              <div class="ai-score-card" data-metric="momentum">
+                <div class="ai-score-ring" id="aiScoreMomentum">
+                  <svg viewBox="0 0 80 80">
+                    <circle cx="40" cy="40" r="34" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="6"></circle>
+                    <circle cx="40" cy="40" r="34" fill="none" stroke="var(--green)" stroke-width="6" stroke-dasharray="214" stroke-dashoffset="64" stroke-linecap="round" transform="rotate(-90 40 40)" class="ai-ring-progress"></circle>
+                  </svg>
+                  <span class="ai-score-val">70</span>
+                </div>
+                <div class="ai-score-label">Momentum</div>
+                <div class="ai-score-verdict bullish">Bullish</div>
+              </div>
+              <div class="ai-score-card" data-metric="risk">
+                <div class="ai-score-ring" id="aiScoreRisk">
+                  <svg viewBox="0 0 80 80">
+                    <circle cx="40" cy="40" r="34" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="6"></circle>
+                    <circle cx="40" cy="40" r="34" fill="none" stroke="var(--amber)" stroke-width="6" stroke-dasharray="214" stroke-dashoffset="107" stroke-linecap="round" transform="rotate(-90 40 40)" class="ai-ring-progress"></circle>
+                  </svg>
+                  <span class="ai-score-val">50</span>
+                </div>
+                <div class="ai-score-label">Risk Level</div>
+                <div class="ai-score-verdict moderate">Moderate</div>
+              </div>
+              <div class="ai-score-card" data-metric="quality">
+                <div class="ai-score-ring" id="aiScoreQuality">
+                  <svg viewBox="0 0 80 80">
+                    <circle cx="40" cy="40" r="34" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="6"></circle>
+                    <circle cx="40" cy="40" r="34" fill="none" stroke="var(--accent)" stroke-width="6" stroke-dasharray="214" stroke-dashoffset="43" stroke-linecap="round" transform="rotate(-90 40 40)" class="ai-ring-progress"></circle>
+                  </svg>
+                  <span class="ai-score-val">80</span>
+                </div>
+                <div class="ai-score-label">Filter Quality</div>
+                <div class="ai-score-verdict good">Good</div>
+              </div>
+              <div class="ai-score-card" data-metric="coverage">
+                <div class="ai-score-ring" id="aiScoreCoverage">
+                  <svg viewBox="0 0 80 80">
+                    <circle cx="40" cy="40" r="34" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="6"></circle>
+                    <circle cx="40" cy="40" r="34" fill="none" stroke="var(--purple)" stroke-width="6" stroke-dasharray="214" stroke-dashoffset="86" stroke-linecap="round" transform="rotate(-90 40 40)" class="ai-ring-progress"></circle>
+                  </svg>
+                  <span class="ai-score-val">60</span>
+                </div>
+                <div class="ai-score-label">Coverage</div>
+                <div class="ai-score-verdict fair">~120 stocks</div>
+              </div>
+            </div>
+
+            <!-- AI Recommendations -->
+            <div class="ai-recommendations" id="aiRecommendations">
+              <div class="ai-rec-item ai-rec-suggestion">
+                <div class="ai-rec-icon">💡</div>
+                <div class="ai-rec-content">
+                  <strong>Add volume confirmation</strong>
+                  <p>Your scan uses RSI filters but no volume condition. Adding <code>Volume Multiplier > 1.5</code> can reduce false signals by ~35%.</p>
+                  <button class="ai-rec-apply-btn" data-action="add-volume">+ Apply This</button>
+                </div>
+              </div>
+              <div class="ai-rec-item ai-rec-warning">
+                <div class="ai-rec-icon">⚠️</div>
+                <div class="ai-rec-content">
+                  <strong>High risk: No stop-loss indicator</strong>
+                  <p>Consider adding a SuperTrend or ATR-based filter to define exit levels for risk management.</p>
+                  <button class="ai-rec-apply-btn" data-action="add-supertrend">+ Apply This</button>
+                </div>
+              </div>
+              <div class="ai-rec-item ai-rec-optimize">
+                <div class="ai-rec-icon">🚀</div>
+                <div class="ai-rec-content">
+                  <strong>Optimization: Multi-timeframe confluence</strong>
+                  <p>Your scan uses a single timeframe. Adding Weekly RSI > 50 as a confirming filter increases win-rate in backtests.</p>
+                  <button class="ai-rec-apply-btn" data-action="add-weekly-rsi">+ Apply This</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Auto-Explain Section -->
+            <div class="ai-autoexplain-section">
+              <h4 class="ai-section-subhead">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                Scan Explained (AI Summary)
+              </h4>
+              <div class="ai-explain-box" id="aiExplainBox">
+                <p class="ai-explain-text">This scan looks for stocks in the <strong>Nifty 500</strong> universe where the <strong>Monthly RSI(14)</strong> has crossed above 45 (indicating emerging strength on higher timeframe) <em>and</em> the <strong>Daily RSI(14)</strong> is above 35 (confirming short-term recovery). This is a <span class="ai-tag-bullish">momentum reversal</span> strategy targeting stocks transitioning from weakness to strength.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ━━━ TAB 3: AI COPILOT CHAT ━━━ -->
+        <div class="ai-suite-panel" id="aiPanelCopilot" data-tab="ai-copilot">
+          <div class="ai-copilot-card">
+            <div class="ai-copilot-header">
+              <div class="ai-copilot-avatar">
+                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2a4 4 0 0 1 4 4 4 4 0 0 1-4 4 4 4 0 0 1-4-4 4 4 0 0 1 4-4z"></path><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path></svg>
+              </div>
+              <div>
+                <h3>TejStock AI Copilot</h3>
+                <p>Ask anything about your scan, strategies, or market analysis</p>
+              </div>
+              <button class="ai-copilot-clear-btn" id="btnClearCopilot" title="Clear chat">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              </button>
+            </div>
+
+            <div class="ai-copilot-messages" id="aiCopilotMessages">
+              <!-- Welcome message -->
+              <div class="ai-msg ai-msg-bot">
+                <div class="ai-msg-avatar">🤖</div>
+                <div class="ai-msg-bubble">
+                  <p>Welcome to <strong>TejStock AI Copilot</strong>! I can help you:</p>
+                  <ul class="ai-msg-list">
+                    <li>📊 Build & optimize scan strategies</li>
+                    <li>📈 Explain technical indicators in simple terms</li>
+                    <li>⚡ Suggest filter improvements for better results</li>
+                    <li>🧠 Analyze market conditions for your scan</li>
+                    <li>📋 Compare your scan against professional strategies</li>
+                  </ul>
+                  <p style="margin-top: 0.5rem; color: var(--text-muted); font-size: 0.8rem;">Try: <em>"Why is my scan returning too many stocks?"</em> or <em>"Make my scan more aggressive"</em></p>
+                </div>
+              </div>
+            </div>
+
+            <div class="ai-copilot-input-area">
+              <div class="ai-copilot-quick-actions">
+                <button class="ai-quick-btn" data-q="Explain my current scan filters in simple terms">📖 Explain Scan</button>
+                <button class="ai-quick-btn" data-q="How can I improve this scan to reduce false signals?">🎯 Reduce Noise</button>
+                <button class="ai-quick-btn" data-q="What's the best timeframe combination for this strategy?">⏱️ Best Timeframe</button>
+                <button class="ai-quick-btn" data-q="Add risk management filters to protect against sharp drops">🛡️ Add Risk Mgmt</button>
+                <button class="ai-quick-btn" data-q="Convert this to an intraday scalping strategy">⚡ Make Intraday</button>
+              </div>
+              <div class="ai-copilot-input-row">
+                <input type="text" id="aiCopilotInput" class="ai-copilot-input" placeholder="Ask TejStock AI anything about your scan..." autocomplete="off">
+                <button class="ai-copilot-send-btn" id="btnSendCopilot">
+                  <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- VISUAL CLAUSE BUILDER (Screenshot 2) -->
+        <div class="query-builder-container" id="queryBuilderContainer">
+          <!-- Dynamic Clause & Filter Rows -->
+        </div>
+
+        <!-- ACTION BUTTON BAR (Image 1) -->
+        <div class="ci-actions-toolbar">
+          <div class="ci-actions-left">
+            <button type="button" class="ci-btn ci-btn-run" id="btnRunScanBig">
+              <svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+              Run Scan
+            </button>
+            <button type="button" class="ci-btn ci-btn-save" id="btnSaveScanDetail">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path></svg>
+              Save Scan
+            </button>
+            <button type="button" class="ci-btn ci-btn-backtest" id="btnScrollToBacktest">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+              Backtest Results
+            </button>
+            <button type="button" class="ci-btn ci-btn-alert" id="btnOpenAlertConfigModal">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+              Create Alert
+            </button>
+            <button type="button" class="ci-btn ci-btn-more" id="btnMoreOptions">
+              More ❐ 🖥
+            </button>
+          </div>
+          <div class="ci-actions-right">
+            <button type="button" class="ci-love-btn" id="btnLoveScanner" title="Love this scanner">
+              <span class="heart-icon" id="heartIcon">♡</span>
+              <span id="loveCountText">0</span> people love this
+            </button>
+          </div>
+        </div>
+
+        <!-- Realtime Data Premium Subscription Banner -->
+        <div class="ci-premium-banner">
+          <span>Get <strong>Realtime tick data & AI Copilot</strong> with <a href="#" class="ci-premium-link" onclick="window.app?.openProSubscriptionModal(); return false;">TejStockAI Pro (₹1,000 for 2 Months)</a>.</span>
+        </div>
+
+        <!-- STOCKS MATCHING RESULTS SECTION (Screenshot 3) -->
+        <div class="scanner-section-heading" style="margin-top: 1.5rem;">
+          <h3>STOCKS</h3>
+        </div>
+
+        <div class="scan-card" id="builderResultsContainer" style="box-shadow: var(--shadow-lg); margin-bottom: 1.75rem;">
+          <!-- Stock Results Table rendered here -->
+        </div>
+
+        <!-- BACKTEST HISTORY SECTION (Screenshot 4) -->
+        <div class="backtest-history-card" id="backtestHistorySection">
+          <div class="backtest-header-row">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+              <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--text-main); text-transform: uppercase;">BACKTEST HISTORY</h3>
+              <span class="backtest-badge">9 months</span>
+            </div>
+            <div class="backtest-controls">
+              <div class="backtest-view-toggle">
+                <button class="backtest-toggle-btn active" id="btnBacktestBars">Bars</button>
+                <button class="backtest-toggle-btn" id="btnBacktestStocks">Stocks</button>
+              </div>
+              <button class="btn btn-secondary btn-sm" id="btnExportBacktest">Download 📥</button>
+            </div>
+          </div>
+
+          <p class="backtest-disclaimer">
+            ℹ️ Backtest results display trigger frequencies across 9 months. Click on bars to view stock details filtered at the given date.
+          </p>
+
+          <!-- Color-Coded Sector Legends (Screenshot 4) -->
+          <div class="backtest-sector-legends">
+            <span class="legend-pill" style="--col: #38bdf8;">services</span>
+            <span class="legend-pill" style="--col: #f43f5e;">n/a</span>
+            <span class="legend-pill" style="--col: #84cc16;">consumer discretionary</span>
+            <span class="legend-pill" style="--col: #f59e0b;">fmcg</span>
+            <span class="legend-pill" style="--col: #06b6d4;">healthcare</span>
+            <span class="legend-pill" style="--col: #ec4899;">transportation</span>
+            <span class="legend-pill" style="--col: #10b981;">chemicals</span>
+            <span class="legend-pill" style="--col: #14b8a6;">auto</span>
+            <span class="legend-pill" style="--col: #f97316;">metals & mining</span>
+            <span class="legend-pill" style="--col: #22d3ee;">indices</span>
+            <span class="legend-pill" style="--col: #a855f7;">realty</span>
+            <span class="legend-pill" style="--col: #6366f1;">aerospace & defence</span>
+            <span class="legend-pill" style="--col: #eab308;">industrials</span>
+            <span class="legend-pill" style="--col: #3b82f6;">financials</span>
+            <span class="legend-pill" style="--col: #ef4444;">energy</span>
+            <span class="legend-pill" style="--col: #e11d48;">i.t</span>
+            <span class="legend-pill" style="--col: #2dd4bf;">bank</span>
+            <span class="legend-pill" style="--col: #fb923c;">power & utilities</span>
+            <span class="legend-pill" style="--col: #818cf8;">telecom</span>
+          </div>
+
+          <!-- Canvas for 9-Month Multi-Color Backtest Chart -->
+          <div class="backtest-canvas-wrapper">
+            <canvas id="backtestChartCanvas" height="260"></canvas>
+            <div id="backtestCanvasTooltip" class="backtest-canvas-tooltip" style="display: none;"></div>
+          </div>
+
+          <!-- Dynamic Backtest Triggered Stocks on Clicked Date / Sector -->
+          <div class="backtest-stocks-container" id="backtestStocksContainer" style="display: none;">
+            <!-- Header with Active Date, Sector Filter Tabs, Search, and Close -->
+            <div class="backtest-stocks-header">
+              <div class="backtest-stocks-title-group">
+                <h4 class="backtest-stocks-title">
+                  <span>📅 Triggered Stocks on</span>
+                  <span class="backtest-active-date-badge" id="backtestActiveDateText">Mar 18, 2026</span>
+                  <span class="backtest-count-badge" id="backtestActiveCountText">56 Stocks</span>
+                </h4>
+                <p class="backtest-stocks-subtitle" id="backtestActiveSubText">
+                  Click any stock row or 'Chart' button to open its TradingView interactive chart & AI Momentum Report.
+                </p>
+              </div>
+              <div class="backtest-stocks-actions">
+                <input type="text" id="backtestStockSearchInput" class="input-control" placeholder="Filter stocks..." style="padding: 0.35rem 0.65rem; font-size: 0.8rem; width: 170px;">
+                <button type="button" class="btn btn-secondary btn-sm" id="btnCloseBacktestStocks" title="Close stocks view">✕ Close</button>
+              </div>
+            </div>
+
+            <!-- Sector Filter Pills for that Date -->
+            <div class="backtest-date-sector-tabs" id="backtestDateSectorTabs"></div>
+
+            <!-- Stocks Results Table -->
+            <div class="scan-table-wrapper" style="max-height: 380px; overflow-y: auto;">
+              <table class="stock-table backtest-stock-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Stock Symbol / Company</th>
+                    <th>Sector</th>
+                    <th>Trigger Price (₹)</th>
+                    <th>Day Chg %</th>
+                    <th>Subsequent Return</th>
+                    <th>Strategy Trigger Signal</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="backtestStockTableBody">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==========================================
+         VIEW 4: PRE-BUILT SCANS STRATEGY LIBRARY
+         ========================================== -->
+    <section class="app-view" id="view_scans">
+      <div class="view-header">
+        <div class="view-title-group">
+          <h2>
+            <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+            Pre-Built Strategy Library
+          </h2>
+          <p class="view-subtitle">Battle-tested technical screeners for breakouts, momentum, and reversal setups</p>
+        </div>
+      </div>
+
+      <div class="dashboard-grid" id="scansLibraryGrid" style="grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));">
+        <!-- Rendered by app.js -->
+      </div>
+    </section>
+
+    <!-- ==========================================
+         VIEW 5: ZERODHA KITE-STYLE WATCHLIST & 18 SECTORS
+         ========================================== -->
+    <section class="app-view" id="view_watchlist">
+      <div class="kite-watchlist-card">
+        <!-- Watchlist Top Bar -->
+        <div class="kite-wl-topbar">
+          <div class="kite-wl-title-row">
+            <div class="kite-wl-title-wrap">
+              <h2 class="kite-wl-title">Watchlist</h2>
+              <svg class="kite-title-chevron" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+            </div>
+            <div class="kite-wl-actions-right">
+              <button class="kite-layer-btn" id="btnManageWatchlists" title="Watchlist Settings">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Watchlist Tabs (Image 3: STOCK MAIN, BIG B, KHOJ, SRISHTY, +) -->
+          <div class="kite-tabs-bar" id="kiteTabsBar">
+            <button class="kite-tab-item active" data-tab="STOCK MAIN">STOCK MAIN</button>
+            <button class="kite-tab-item" data-tab="BIG B">BIG B</button>
+            <button class="kite-tab-item" data-tab="KHOJ">KHOJ</button>
+            <button class="kite-tab-item" data-tab="SRISHTY">SRISHTY</button>
+            <button class="kite-tab-item" data-tab="TEJAS">TEJAS</button>
+            <button class="kite-tab-item-add" id="btnAddNewTab" title="Add Watchlist">+ New group</button>
+          </div>
+        </div>
+
+        <!-- Search & Filter Bar (Image 3: Q Search & add 42/250 [filter]) -->
+        <div class="kite-search-row">
+          <div class="kite-search-box">
+            <svg class="kite-search-ico" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="kiteWatchlistSearchInput" placeholder="Search & add" autocomplete="off">
+            <span class="kite-count-badge" id="kiteCountBadge">42/250</span>
+            <button class="kite-filter-btn" id="btnKiteFilterSliders" title="Filter list">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Group Action Subbar (v Collapse / + New sector / + New group) -->
+        <div class="kite-group-action-bar">
+          <button class="kite-action-link" id="btnToggleCollapseAll">
+            <span id="kiteCollapseChevron">⌄</span>
+            <span id="kiteCollapseLabel">Collapse</span>
+          </button>
+          <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <button class="kite-action-link" id="btnKiteNewSector" onclick="window.app?.openNewSectorModal()" style="display: inline-flex; align-items: center; gap: 0.25rem;">
+              <span>+ New Sector</span>
+            </button>
+            <button class="kite-action-link" id="btnKiteNewGroup" style="display: inline-flex; align-items: center; gap: 0.25rem;">
+              <span>+ New Group Tab</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Group Header: SECTOR (18) -->
+        <div class="kite-sector-group-header">
+          <div class="kite-group-title">
+            <strong id="kiteGroupTitleText">SECTOR (18)</strong>
+          </div>
+          <div class="kite-group-tools">
+            <button class="kite-tool-btn" id="btnKiteAddSector" onclick="window.app?.openAddWatchlistItemModal()" title="Add item">+</button>
+            <button class="kite-tool-btn" id="btnKiteGridToggle" title="View options">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- 18 Sectors Accordion List (Visible in STOCK MAIN: click sector to expand all stocks) -->
+        <div class="kite-sectors-list" id="kiteSectorsList">
+          <div class="kite-loading-state">Loading 18 NSE Sectors & Live constituents...</div>
+        </div>
+
+        <!-- Standalone Stocks List (Visible in BIG B, KHOJ, SRISHTY) -->
+        <div class="kite-stocks-list" id="kiteStocksList" style="display: none;">
+          <!-- Injected dynamically for custom watchlists -->
+        </div>
+
+        <!-- Classic Personal Watchlist Table (Hidden by default, available via view toggle) -->
+        <div class="scan-card" id="classicWatchlistCard" style="display: none; margin-top: 1.5rem;">
+          <div class="scan-table-wrapper">
+            <table class="stock-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Symbol / Name</th>
+                  <th>LTP (₹)</th>
+                  <th>Change %</th>
+                  <th>Volume</th>
+                  <th>AI Momentum</th>
+                  <th>52W Range</th>
+                  <th>Trend (15D)</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="watchlistTableBody">
+                <!-- Rendered by app.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Professional Workspace Gateway Front Panel Modal -->
+    <div class="workspace-gateway-backdrop" id="workspaceGatewayModal" style="display: none;">
+      <div class="gateway-modal-card">
+        <div class="gateway-modal-header">
+          <div class="gateway-brand">
+            <div class="brand-icon">
+              <svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M3 3v18h18"></path><path d="m19 9-5 5-4-4-3 3"></path></svg>
+            </div>
+            <div>
+              <h3>Welcome to TejStockAI</h3>
+              <p class="gateway-sub">Professional Multi-Asset Execution Gateway</p>
+            </div>
+          </div>
+          <button class="gateway-close-btn" id="btnCloseGatewayModal" title="Close">✕</button>
+        </div>
+
+        <div class="gateway-modal-body">
+          <p class="gateway-prompt">Which market segment do you want to analyze today?</p>
+
+          <div class="gateway-cards-grid">
+            <!-- Option 1: Cash Equities & 18 Sectors -->
+            <div class="gateway-card" id="btnGatewaySelectCash">
+              <div class="gateway-card-header">
+                <span class="gateway-badge cash-badge">NSE CASH EQUITIES</span>
+                <span class="gateway-icon">📈</span>
+              </div>
+              <h4>Cash Stocks & 18 Sectors</h4>
+              <p class="gateway-desc">Complete NSE Cash Universe (Nifty 500, Large, Mid, Small, Microcap) with Zerodha Kite 18-Sector collapsible watchlist drill-down & delivery volume analytics.</p>
+              <ul class="gateway-features">
+                <li>✓ 18 Sector Watchlists (Auto, Bank, IT, FMCG, Metal, Energy...)</li>
+                <li>✓ Full Cash Universe (including TMPV, MRF, TCS, ADANIENSOL)</li>
+                <li>✓ 1-Click Sector Drilldown to view all constituent stocks</li>
+                <li>✓ Intraday & Swing Momentum Technical Screeners</li>
+              </ul>
+              <button class="btn btn-primary gateway-select-btn">Select Cash Equities →</button>
+            </div>
+
+            <!-- Option 2: Derivatives (Futures & Options) -->
+            <div class="gateway-card" id="btnGatewaySelectFno">
+              <div class="gateway-card-header">
+                <span class="gateway-badge fno-badge">DERIVATIVES (F&O)</span>
+                <span class="gateway-icon">⚡</span>
+              </div>
+              <h4>Options & Futures (F&O)</h4>
+              <p class="gateway-desc">Dedicated derivatives cockpit with NIFTY, BANKNIFTY, FINNIFTY, MIDCPNIFTY option chain matrices, strike ladders, PCR, Max Pain, and multi-broker market depth.</p>
+              <ul class="gateway-features">
+                <li>✓ NIFTY, BANKNIFTY, FINNIFTY, MIDCPNIFTY Options Chain</li>
+                <li>✓ 185+ Single Stock Futures & CE/PE Strike Search</li>
+                <li>✓ Put-Call Ratio (PCR), Max Pain & Open Interest Build-up</li>
+                <li>✓ Level 2 Multi-Broker Order Book & Live Heatmaps</li>
+              </ul>
+              <button class="btn btn-primary gateway-select-btn" style="background: linear-gradient(135deg, #f59e0b, #d97706);">Select F&O Derivatives →</button>
+            </div>
+          </div>
+
+          <div class="gateway-footer">
+            <label class="gateway-remember">
+              <input type="checkbox" id="chkRememberWorkspace" checked>
+              <span>Remember my workspace preference (you can switch anytime from the top navbar pill)</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+
+  <!-- ==========================================
+       MODAL 1: TRADINGVIEW-STYLE INTERACTIVE CHART
+       ========================================== -->
+  <div class="modal-backdrop" id="stockChartModal">
+    <div class="modal-dialog modal-dialog-chart">
+      <div class="modal-header chart-modal-header">
+        <div class="modal-title-box">
+          <span class="modal-stock-sym" id="modalStockSym">RELIANCE</span>
+          <span class="modal-stock-name" id="modalStockName">Reliance Industries Ltd</span>
+          <span style="font-family: var(--font-mono); font-size: 1.25rem; font-weight: 700; margin-left: 0.5rem;" id="modalStockPrice">₹1,247.40</span>
+          <span class="stock-change change-positive" id="modalStockChange">+0.45%</span>
+        </div>
+
+        <!-- Chart Stock Search Bar -->
+        <div class="chart-quick-search" id="chartQuickSearchContainer">
+          <div class="chart-search-input-wrapper">
+            <svg class="chart-search-icon" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="chartStockSearchInput" class="chart-search-input" placeholder="🔍 Search stock to chart (e.g. INFY, TATA, ITC)..." autocomplete="off" spellcheck="false">
+            <button id="chartSearchClearBtn" class="chart-search-clear" style="display: none;" title="Clear">✕</button>
+          </div>
+          <div class="chart-search-dropdown" id="chartSearchDropdown"></div>
+        </div>
+
+        <div class="chart-modal-actions" style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+          <button class="btn btn-ai-sparkle btn-sm" id="btnOpenAiAgentFromChart">
+            🤖 AI Momentum Report
+          </button>
+          <button class="btn btn-secondary btn-sm" id="modalWatchlistToggle">☆ Watchlist</button>
+          <button class="modal-close-btn btn-icon-only">✕</button>
+        </div>
+      </div>
+
+      <div class="modal-body" style="padding: 0.75rem 1.25rem;">
+        
+        <!-- TradingView-Style Toolbar -->
+        <div class="tv-toolbar">
+          <div class="tv-timeframe-group" id="chartTimeframeGroup">
+            <button class="tv-tf-btn" data-tf="1m">1m</button>
+            <button class="tv-tf-btn" data-tf="5m">5m</button>
+            <button class="tv-tf-btn" data-tf="15m">15m</button>
+            <button class="tv-tf-btn" data-tf="30m">30m</button>
+            <button class="tv-tf-btn" data-tf="1h">1h</button>
+            <button class="tv-tf-btn active" data-tf="1D">1D</button>
+            <button class="tv-tf-btn" data-tf="1W">1W</button>
+            <button class="tv-tf-btn" data-tf="1M">1M</button>
+            <button class="tv-tf-btn" data-tf="1Y">1Y</button>
+          </div>
+
+          <div class="tv-chart-type-group" id="chartTypeGroup">
+            <button class="tv-tf-btn active" data-type="candles" title="Candlestick Chart">🕯️ Candles</button>
+            <button class="tv-tf-btn" data-type="line" title="Line Chart">📈 Line</button>
+            <button class="tv-tf-btn" data-type="area" title="Area / Mountain Chart">⛰️ Area</button>
+          </div>
+
+          <div class="tv-indicator-group">
+            <span class="toggle-pill active" data-indicator="sma20">SMA 20</span>
+            <span class="toggle-pill active" data-indicator="sma50">SMA 50</span>
+            <span class="toggle-pill active" data-indicator="ema200">EMA 200</span>
+            <span class="toggle-pill active" data-indicator="bollinger">Bollinger</span>
+            <span class="toggle-pill active" data-indicator="rsi">RSI(14)</span>
+            <span class="toggle-pill active" data-indicator="macd">MACD</span>
+          </div>
+        </div>
+
+        <!-- Chart Canvas Container -->
+        <div class="chart-canvas-container">
+          <canvas id="candlestickCanvas" style="height: 380px; width: 100%; display: block;"></canvas>
+          <canvas id="rsiCanvas" style="height: 90px; width: 100%; border-top: 1px solid var(--border-color); display: block;"></canvas>
+          <canvas id="macdCanvas" style="height: 95px; width: 100%; border-top: 1px solid var(--border-color); display: block;"></canvas>
+        </div>
+
+        <!-- Key Statistics Grid -->
+        <div class="stock-stats-grid">
+          <div class="stat-item">
+            <div class="stat-label">Day Range (L - H)</div>
+            <div class="stat-value" id="statDayRange">₹1,238 - ₹1,254</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">52-Week Range</div>
+            <div class="stat-value" id="stat52wRange">₹1,110 - ₹1,608</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Volume Today</div>
+            <div class="stat-value" id="statVolume">4,520,120</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Volume Multiplier</div>
+            <div class="stat-value" id="statVolMult">1.4x 10D SMA</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Upper Circuit</div>
+            <div class="stat-value text-green" id="statUpperCircuit">₹1,372.10</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Lower Circuit</div>
+            <div class="stat-value text-red" id="statLowerCircuit">₹1,122.60</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">RSI (14)</div>
+            <div class="stat-value" id="statRsi">56.4</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Sector</div>
+            <div class="stat-value" id="statSector" style="font-size: 0.85rem;">Energy</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MODAL 2: AI STOCK MOMENTUM & TECHNICAL AGENT
+       ========================================== -->
+  <div class="modal-backdrop" id="aiAgentModal">
+    <div class="modal-dialog modal-dialog-ai" style="max-width: 780px;">
+      <div class="modal-header ai-modal-header" style="flex-direction: column; align-items: stretch; gap: 0.75rem;">
+        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+          <div class="ai-agent-title-box">
+            <div class="ai-sparkle-avatar">🤖</div>
+            <div>
+              <h3 style="font-size: 1.15rem; font-weight: 800; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                <span>TejStockAI Momentum Agent</span>
+                <span class="ai-live-tag" style="background: linear-gradient(135deg, #4f46e5, #9333ea); color: #fff; font-weight: 800; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.7rem;">⭐ LEVEL 5 AI COPILOT</span>
+              </h3>
+              <p style="font-size: 0.775rem; color: var(--text-secondary);" id="aiAgentStockSub">Analyzing Stock...</p>
+            </div>
+          </div>
+          <button class="modal-close-btn btn-icon-only">✕</button>
+        </div>
+
+        <!-- Mode Switcher Tabs: Intraday vs Long-Term -->
+        <div class="ai-mode-tabs" id="aiMomentumModeTabs">
+          <button type="button" class="ai-mode-tab active" data-mode="intraday" id="tabModeIntraday">
+            <span>⚡</span> Intraday Momentum (VWAP, CPR, Scalp)
+          </button>
+          <button type="button" class="ai-mode-tab" data-mode="longterm" id="tabModeLongterm">
+            <span>📈</span> Long-Term / Swing (50/200 MA, Stages, 1Y Target)
+          </button>
+        </div>
+      </div>
+
+      <div class="modal-body ai-modal-body" style="gap: 1rem;">
+        
+        <!-- Top Score & Momentum State Card -->
+        <div class="ai-score-hero-card">
+          <div class="ai-gauge-wrapper">
+            <div class="ai-gauge-circle" id="aiGaugeCircle">
+              <span class="ai-gauge-number" id="aiGaugeScore">85</span>
+              <span class="ai-gauge-label">/ 100</span>
+            </div>
+          </div>
+
+          <div class="ai-score-details">
+            <div class="ai-status-pill badge-strong-buy" id="aiMomentumState">⚡ Extreme Bullish Acceleration</div>
+            <h4 class="ai-verdict-title" id="aiVerdictText">VERDICT: BUY ON DIPS / MOMENTUM RIDE</h4>
+            <p class="ai-summary-text" id="aiDebriefSummary">
+              Loading real-time market data and indicator alignment...
+            </p>
+          </div>
+        </div>
+
+        <!-- Real-Time Trade Plan & Key Levels Grid -->
+        <div class="ai-levels-grid">
+          <div class="ai-level-card">
+            <div class="ai-card-title" id="aiLevelTitleEntry">🎯 Ideal Entry Zone</div>
+            <div class="ai-card-val text-accent" id="aiLevelEntry">₹1,247.00</div>
+            <div class="ai-card-hint" id="aiLevelHintEntry">Current market price or pullback to VWAP</div>
+          </div>
+
+          <div class="ai-level-card">
+            <div class="ai-card-title" id="aiLevelTitleSL">🛡️ Strict Stop-Loss</div>
+            <div class="ai-card-val text-red" id="aiLevelStopLoss">₹1,215.00</div>
+            <div class="ai-card-hint" id="aiLevelHintSL">Dynamic buffer</div>
+          </div>
+
+          <div class="ai-level-card">
+            <div class="ai-card-title" id="aiLevelTitleT1">🚀 Target 1 (T1)</div>
+            <div class="ai-card-val text-green" id="aiLevelTarget1">₹1,285.00</div>
+            <div class="ai-card-hint" id="aiLevelHintT1">Immediate scalp / swing extension</div>
+          </div>
+
+          <div class="ai-level-card">
+            <div class="ai-card-title" id="aiLevelTitleT2">🔥 Target 2 (T2)</div>
+            <div class="ai-card-val text-green" id="aiLevelTarget2">₹1,320.00</div>
+            <div class="ai-card-hint" id="aiLevelHintT2">Continuation target</div>
+          </div>
+        </div>
+
+        <!-- Dynamic Indicator Dashboard (Switches between Intraday CPR/VWAP and Long-Term Stages/MAs) -->
+        <div class="ai-tech-dashboard" id="aiTechDashboard">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <h4 style="font-size: 0.825rem; font-weight: 800; color: #f8fafc;" id="aiTechTitle">⚡ Intraday Technical Matrix (VWAP & CPR Breakouts)</h4>
+            <span style="font-size: 0.72rem; color: #38bdf8; font-family: var(--font-mono);" id="aiTechSubtitle">Session Real-Time</span>
+          </div>
+          <div class="ai-tech-grid" id="aiTechGrid">
+            <!-- Populated dynamically based on mode -->
+          </div>
+
+          <!-- Chartink Screener: Indeces Intraday Integration Card -->
+          <div class="ai-chartink-banner" id="aiChartinkIndecesBanner" style="display: none; margin-top: 0.9rem; padding: 0.85rem 1.15rem; background: linear-gradient(135deg, rgba(30, 41, 59, 0.75) 0%, rgba(15, 23, 42, 0.9) 100%); border: 1px solid rgba(99, 102, 241, 0.35); border-radius: var(--radius-md); box-shadow: 0 4px 16px rgba(0,0,0,0.25);">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.45rem;">
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span style="font-size: 1.15rem;">📊</span>
+                <div>
+                  <div style="font-weight: 800; font-size: 0.875rem; color: #f8fafc; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                    <span>Chartink Screener: Indeces Intraday</span>
+                    <span class="ai-status-pill badge-strong-buy" id="aiChartinkScanBadge" style="font-size: 0.65rem; padding: 0.15rem 0.55rem; font-weight: 800;">5M RSI > 30</span>
+                  </div>
+                  <div style="font-size: 0.725rem; color: var(--text-muted); margin-top: 0.1rem;">Segment: Nifty & BankNifty • 5-Minute RSI(14) Oversold Reversal Scanner</div>
+                </div>
+              </div>
+              <a href="https://chartink.com/screener/indeces-intraday" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm" style="font-size: 0.725rem; padding: 0.25rem 0.65rem; display: inline-flex; align-items: center; gap: 0.35rem; color: #818cf8; border-color: rgba(99,102,241,0.35); text-decoration: none; font-weight: 700;">
+                <span>🔗 Open on Chartink</span>
+              </a>
+            </div>
+            <div id="aiChartinkScanDetails" style="font-size: 0.785rem; color: var(--text-secondary); line-height: 1.45; background: rgba(15, 23, 42, 0.55); padding: 0.55rem 0.85rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+              Loading Indeces Intraday status...
+            </div>
+          </div>
+        </div>
+
+        <!-- Technical Drivers vs Cautionary Risks -->
+        <div class="ai-drivers-risks-container">
+          <div class="ai-factor-box factor-bullish">
+            <div class="factor-header">
+              <svg width="16" height="16" fill="none" stroke="#10b981" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>Key Strength Drivers</span>
+            </div>
+            <ul class="factor-list" id="aiDriversList"></ul>
+          </div>
+
+          <div class="ai-factor-box factor-bearish">
+            <div class="factor-header">
+              <svg width="16" height="16" fill="none" stroke="#ef4444" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              <span>Risk & Volatility Factors</span>
+            </div>
+            <ul class="factor-list" id="aiRisksList"></ul>
+          </div>
+        </div>
+
+        <!-- Dynamic Floor Pivots Card (Intraday Mode) -->
+        <div class="ai-pivot-table-card" id="aiPivotsCard">
+          <h4 style="font-size: 0.85rem; font-weight: 700; margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: space-between;">
+            <span>Dynamic Floor Pivots (Support & Resistance)</span>
+            <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: normal;">Standard Floor Pivots</span>
+          </h4>
+          <div class="pivot-pills-row">
+            <div class="pivot-pill pill-s">S3: <strong id="pivotS3">--</strong></div>
+            <div class="pivot-pill pill-s">S2: <strong id="pivotS2">--</strong></div>
+            <div class="pivot-pill pill-s">S1: <strong id="pivotS1">--</strong></div>
+            <div class="pivot-pill pill-p">Pivot: <strong id="pivotCentral">--</strong></div>
+            <div class="pivot-pill pill-r">R1: <strong id="pivotR1">--</strong></div>
+            <div class="pivot-pill pill-r">R2: <strong id="pivotR2">--</strong></div>
+            <div class="pivot-pill pill-r">R3: <strong id="pivotR3">--</strong></div>
+          </div>
+        </div>
+
+        <!-- ==========================================
+             ⭐ LEVEL 5 AUTONOMOUS AI COPILOT CHATBOX
+             ========================================== -->
+        <div class="ai-copilot-chat-section" id="aiCopilotChatSection" style="margin-top: 0.5rem;">
+          <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <span style="font-size: 1.1rem;">🤖</span>
+              <span style="font-weight: 800; font-size: 0.9rem; color: #f8fafc;" id="aiCopilotChatTitle">Level 5 AI Copilot (Intraday Engine)</span>
+              <span style="width: 8px; height: 8px; border-radius: 50%; background: #10b981; display: inline-block; box-shadow: 0 0 8px #10b981;" title="Live Autonomy Active"></span>
+            </div>
+            <span style="font-size: 0.72rem; color: #38bdf8; font-weight: 700; background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.3); padding: 0.15rem 0.5rem; border-radius: 4px;">Context-Engineered</span>
+          </div>
+
+          <!-- Dynamic Level 5 Quick Prompt Chips -->
+          <div class="ai-prompt-chips" id="aiPromptChips"></div>
+
+          <!-- Chat Message Stream -->
+          <div class="ai-chat-messages" id="aiChatMessages" style="max-height: 240px; min-height: 140px;"></div>
+
+          <!-- Chat Input & Send -->
+          <div style="display: flex; gap: 0.5rem; margin-top: 0.35rem;">
+            <input type="text" id="aiChatInput" class="input-control" placeholder="Ask Level 5 AI Copilot anything about entry, targets, SL, options..." style="flex: 1; border-radius: 6px; background: #070c18; color: #ffffff; border: 1px solid #334155; padding: 0.55rem 0.75rem;">
+            <button class="btn btn-primary btn-sm" id="btnSendAiChat" style="padding: 0 1.1rem; font-weight: 800; display: flex; align-items: center; gap: 0.3rem;">
+              <span>Send</span> ➔
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MODAL 3: CONNECT PHONE / ANDROID QR MODAL
+       ========================================== -->
+  <div class="modal-backdrop" id="phoneConnectModal">
+    <div class="modal-dialog" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 style="font-size: 1.15rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+          Connect Phone / Tablet
+        </h3>
+        <button class="modal-close-btn btn-icon-only">✕</button>
+      </div>
+
+      <div class="qr-dialog-content">
+        <!-- Network Mode Selector -->
+        <div style="display: flex; gap: 6px; width: 100%; max-width: 420px; background: rgba(0,0,0,0.3); padding: 4px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);">
+          <button id="tabQrMobile" type="button" style="flex: 1; padding: 8px 12px; font-size: 0.82rem; font-weight: 600; border-radius: 6px; cursor: pointer; border: none; background: #3b82f6; color: #ffffff; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s ease;">
+            🌐 Mobile Data (Anywhere)
+          </button>
+          <button id="tabQrLan" type="button" style="flex: 1; padding: 8px 12px; font-size: 0.82rem; font-weight: 600; border-radius: 6px; cursor: pointer; border: none; background: transparent; color: #94a3b8; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s ease;">
+            📶 Same Wi-Fi
+          </button>
+        </div>
+
+        <p id="qrModeSubtitle" style="font-size: 0.85rem; color: var(--text-secondary); margin: 0; line-height: 1.4;">
+          Open on your phone using your <strong>own 4G / 5G Mobile Data</strong> from anywhere — no Wi-Fi needed!
+        </p>
+
+        <div class="qr-image-wrapper" style="background: #ffffff; padding: 12px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.4);">
+          <img id="qrCodeImg" alt="QR Code to connect Phone" style="display: block; width: 210px; height: 210px;">
+        </div>
+
+        <div class="lan-url-box" style="width: 100%; max-width: 420px; background: #131923; border: 1px solid #233044; border-radius: 8px; padding: 8px 12px; display: flex; align-items: center; justify-content: space-between;">
+          <span id="lanUrlDisplay" style="font-family: monospace; font-size: 0.88rem; color: #60a5fa; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-right: 8px;">Generating public tunnel...</span>
+          <button class="btn btn-secondary btn-sm" id="btnCopyLanUrl" style="padding: 4px 10px; font-size: 0.8rem; white-space: nowrap;">Copy Link</button>
+        </div>
+
+        <!-- Zero-Password Direct Tunnel Status Badge -->
+        <div id="tunnelStatusBadge" style="width: 100%; max-width: 420px; background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 8px; padding: 10px 14px; text-align: left; display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 1.2rem;">⚡</span>
+          <div>
+            <div style="font-size: 0.825rem; font-weight: 700; color: #4ade80;">Direct Cloudflare Access — No Password Required!</div>
+            <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 2px;">Ultra-fast global edge network with instant connection on mobile internet.</div>
+          </div>
+        </div>
+
+        <ol id="qrStepsList" class="steps-list" style="width: 100%; max-width: 420px; margin: 0; padding-left: 1.25rem; font-size: 0.8rem; color: var(--text-secondary); text-align: left; line-height: 1.6;">
+          <li>Scan the QR code with your phone camera using your <strong>Mobile Data (4G/5G)</strong>.</li>
+          <li>The full <strong>TejStockAI</strong> terminal opens directly — no passwords or login required!</li>
+          <li>Tap <strong>⋮ (3 dots)</strong> in Chrome and tap <strong>"Install app"</strong> or <strong>"Add to Home Screen"</strong> for full-screen PWA!</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MODAL 4: SAVE SCAN MODAL
+       ========================================== -->
+  <div class="modal-backdrop" id="saveScanModal">
+    <div class="modal-dialog" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3 style="font-size: 1.1rem; font-weight: 700;">Save Custom Scan</h3>
+        <button class="modal-close-btn btn-icon-only">✕</button>
+      </div>
+      <div class="modal-body" style="gap: 0.85rem;">
+        <div>
+          <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary);">Scan Title</label>
+          <input type="text" class="input-control" id="saveScanTitle" placeholder="e.g. My 200 EMA + RSI Breakout" style="width: 100%; margin-top: 0.25rem;">
+        </div>
+        <div>
+          <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary);">Description</label>
+          <textarea class="input-control" id="saveScanDesc" rows="2" placeholder="Brief description of the strategy..." style="width: 100%; margin-top: 0.25rem; font-family: inherit;"></textarea>
+        </div>
+        <div>
+          <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary);">Category</label>
+          <select class="select-control" id="saveScanCategory" style="width: 100%; margin-top: 0.25rem;">
+            <option value="Breakout">Breakout</option>
+            <option value="Momentum">Momentum</option>
+            <option value="Moving Average">Moving Average</option>
+            <option value="Volume">Volume</option>
+            <option value="Intraday">Intraday</option>
+            <option value="Custom">Custom</option>
+          </select>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem;">
+          <input type="checkbox" id="saveScanPinToDash" checked style="width: 16px; height: 16px;">
+          <label for="saveScanPinToDash" style="font-size: 0.85rem; cursor: pointer;">Pin to current TejStockAI Dashboard immediately</label>
+        </div>
+        <button class="btn btn-primary" id="btnConfirmSaveScan" style="margin-top: 0.5rem;">Save & Pin Scan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MODAL 5: PIN EXISTING SCAN TO DASHBOARD
+       ========================================== -->
+  <div class="modal-backdrop" id="addScanToDashModal">
+    <div class="modal-dialog" style="max-width: 540px;">
+      <div class="modal-header">
+        <h3 style="font-size: 1.1rem; font-weight: 700;">Pin Scan to Dashboard</h3>
+        <button class="modal-close-btn btn-icon-only">✕</button>
+      </div>
+      <div class="modal-body" style="max-height: 60vh;">
+        <div style="display: flex; flex-direction: column; gap: 0.65rem;" id="addScanList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MODAL 6: HIGH CONVICTION AI MOMENTUM ASSETS (SCORE > 80)
+       ========================================== -->
+  <div class="modal-backdrop" id="highMomentumAssetsModal">
+    <div class="modal-dialog" style="max-width: 680px; max-height: 85vh;">
+      <div class="modal-header" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.12)); border-bottom: 1px solid var(--border-color); padding: 1rem 1.25rem;">
+        <div>
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <span style="font-size: 1.35rem;">🤖</span>
+            <h3 style="font-size: 1.15rem; font-weight: 800; margin: 0; color: var(--text-main);">AI Momentum Assets (Score &gt; 80)</h3>
+            <span id="highMomentumTotalBadge" style="background: rgba(16, 185, 129, 0.2); color: var(--green); font-size: 0.7rem; font-weight: 800; padding: 0.15rem 0.5rem; border-radius: 100px;">Loading...</span>
+          </div>
+          <p style="font-size: 0.775rem; color: var(--text-muted); margin: 0.25rem 0 0;">
+            Stocks with &gt; 80 AI Conviction in either <strong>⚡ Intraday Breakout</strong> or <strong>🏆 Long-Term Compounder</strong> mode. Click any asset to monitor in Terminal.
+          </p>
+        </div>
+        <button class="modal-close-btn btn-icon-only" onclick="document.getElementById('highMomentumAssetsModal')?.classList.remove('active')">✕</button>
+      </div>
+
+      <!-- Filter Controls & Search -->
+      <div style="padding: 0.75rem 1.25rem; display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); background: rgba(0,0,0,0.15);">
+        <!-- Mode Chips -->
+        <div style="display: flex; gap: 0.4rem;" id="highMomentumModeTabs">
+          <button class="btn btn-sm btn-primary momentum-mode-pill active" data-mode="all" onclick="window.app?.setMomentumFilterMode('all')">All (&gt; 80 Either)</button>
+          <button class="btn btn-sm btn-secondary momentum-mode-pill" data-mode="intraday" onclick="window.app?.setMomentumFilterMode('intraday')">⚡ Intraday (&gt; 80)</button>
+          <button class="btn btn-sm btn-secondary momentum-mode-pill" data-mode="longTerm" onclick="window.app?.setMomentumFilterMode('longTerm')">🏆 Long-Term (&gt; 80)</button>
+        </div>
+
+        <!-- Search Input -->
+        <div style="position: relative; flex: 1; min-width: 180px;">
+          <input type="text" id="highMomentumSearchInput" class="input-control" placeholder="Search high momentum stock..." oninput="window.app?.onMomentumSearchInput(this.value)" style="width: 100%; padding: 0.35rem 0.75rem; font-size: 0.8rem;">
+        </div>
+      </div>
+
+      <div class="modal-body" style="padding: 1rem 1.25rem; max-height: 58vh; overflow-y: auto;">
+        <div id="highMomentumStocksList" style="display: flex; flex-direction: column; gap: 0.65rem;">
+          <div style="padding: 2.5rem; text-align: center; color: var(--text-muted);">
+            <div class="thinking-dot"></div><div class="thinking-dot"></div><div class="thinking-dot"></div>
+            <p style="margin-top: 0.5rem; font-size: 0.85rem;">Scanning 190+ NSE assets for &gt; 80 AI Momentum...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Create New Custom Sector in STOCK MAIN -->
+  <div class="modal-backdrop" id="newSectorModal">
+    <div class="modal-dialog" style="max-width: 440px; padding: 1.5rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem;">
+        <h3 style="font-size: 1.05rem; font-weight: 700; margin: 0; color: var(--text-main);">➕ Create New Sector</h3>
+        <button class="modal-close-btn btn-icon-only" onclick="document.getElementById('newSectorModal')?.classList.remove('active')">✕</button>
+      </div>
+      <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;">
+        Enter a name for your custom sector in STOCK MAIN (e.g. DEFENCE, EV &amp; GREEN, MY PICKS, INTRADAY).
+      </p>
+      <input type="text" id="inputNewSectorName" class="input-control" placeholder="Sector Name (e.g., DEFENCE & AERO)..." style="width: 100%; margin-bottom: 1.25rem; padding: 0.6rem 0.85rem; font-size: 0.9rem;" onkeydown="if(event.key==='Enter') window.app?.submitNewSector()">
+      <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
+        <button class="btn btn-secondary btn-sm" onclick="document.getElementById('newSectorModal')?.classList.remove('active')">Cancel</button>
+        <button class="btn btn-primary btn-sm" onclick="window.app?.submitNewSector()">Create &amp; Add Stocks</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Create New Watchlist Group Tab -->
+  <div class="modal-backdrop" id="newWatchlistGroupModal">
+    <div class="modal-dialog" style="max-width: 440px; padding: 1.5rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem;">
+        <h3 style="font-size: 1.05rem; font-weight: 700; margin: 0; color: var(--text-main);">Create Watchlist Group Tab</h3>
+        <button class="modal-close-btn btn-icon-only" onclick="document.getElementById('newWatchlistGroupModal')?.classList.remove('active')">✕</button>
+      </div>
+      <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;">
+        Enter a name for your custom stock watchlist tab (e.g., INTRADAY, SWING, BREAKOUT).
+      </p>
+      <input type="text" id="inputNewWatchlistGroupName" class="input-control" placeholder="Group Name..." style="width: 100%; margin-bottom: 1.25rem; padding: 0.6rem 0.85rem; font-size: 0.9rem;" onkeydown="if(event.key==='Enter') window.app?.submitNewWatchlistGroup()">
+      <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
+        <button class="btn btn-secondary btn-sm" onclick="document.getElementById('newWatchlistGroupModal')?.classList.remove('active')">Cancel</button>
+        <button class="btn btn-primary btn-sm" onclick="window.app?.submitNewWatchlistGroup()">Create Tab</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MODAL: ADD ITEM (STOCKS & SECTORS) TO WATCHLIST / SECTORS
+       ========================================== -->
+  <div class="modal-backdrop" id="addWatchlistItemModal">
+    <div class="modal-dialog" style="max-width: 760px; max-height: 88vh;">
+      <div class="modal-header" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.16), rgba(16, 185, 129, 0.1)); border-bottom: 1px solid var(--border-color); padding: 1.1rem 1.4rem;">
+        <div style="flex: 1;">
+          <div style="display: flex; align-items: center; gap: 0.6rem;">
+            <span style="font-size: 1.4rem;">➕</span>
+            <h3 style="font-size: 1.2rem; font-weight: 800; margin: 0; color: var(--text-main);">Add Items to Watchlist</h3>
+            <span id="addWatchlistCountBadge" style="background: rgba(99, 102, 241, 0.2); color: #c084fc; font-size: 0.725rem; font-weight: 800; padding: 0.2rem 0.6rem; border-radius: 100px;">190+ Stocks Available</span>
+          </div>
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0.35rem 0 0;" id="addWatchlistModalSubtitle">
+            Search and select any stock to add directly to your sector or watchlist tab.
+          </p>
+        </div>
+        <button class="modal-close-btn btn-icon-only" onclick="document.getElementById('addWatchlistItemModal')?.classList.remove('active')">✕</button>
+      </div>
+
+      <!-- Controls: Target Sector/Tab Selector & Search -->
+      <div style="padding: 0.85rem 1.4rem; background: rgba(0,0,0,0.18); border-bottom: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 0.75rem;">
+        <div style="display: flex; gap: 1rem; align-items: center; justify-content: space-between; flex-wrap: wrap;">
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <label style="font-size: 0.825rem; font-weight: 700; color: var(--text-secondary); white-space: nowrap;">Add To:</label>
+            <select id="selectAddWatchlistTargetTab" class="input-control" style="padding: 0.4rem 0.8rem; font-size: 0.85rem; font-weight: 700; border-radius: var(--radius-sm); background: var(--bg-card); color: var(--text-main); max-width: 250px;" onchange="window.app?.onAddWatchlistTargetTabChanged(this.value)">
+              <!-- Populated dynamically with Sectors and Tabs -->
+            </select>
+          </div>
+          
+          <div style="flex: 1; min-width: 240px; position: relative;">
+            <input type="text" id="inputAddWatchlistSearch" class="input-control" placeholder="Search by ticker, company, or sector (e.g., RELIANCE, TATA, Bank)..." style="width: 100%; padding: 0.45rem 0.9rem; font-size: 0.85rem;" oninput="window.app?.onAddWatchlistSearchInput(this.value)">
+          </div>
+        </div>
+
+        <!-- Filter category pills -->
+        <div style="display: flex; gap: 0.4rem; overflow-x: auto; padding-bottom: 2px;" id="addWatchlistCategoryPills">
+          <button class="btn btn-sm btn-primary add-wl-cat-pill active" data-cat="all" onclick="window.app?.setAddWatchlistCategory('all')">All Stocks</button>
+          <button class="btn btn-sm btn-secondary add-wl-cat-pill" data-cat="ai80" onclick="window.app?.setAddWatchlistCategory('ai80')">⚡ AI &gt; 80</button>
+          <button class="btn btn-sm btn-secondary add-wl-cat-pill" data-cat="nifty50" onclick="window.app?.setAddWatchlistCategory('nifty50')">Nifty 50</button>
+          <button class="btn btn-sm btn-secondary add-wl-cat-pill" data-cat="bank" onclick="window.app?.setAddWatchlistCategory('bank')">Banking</button>
+          <button class="btn btn-sm btn-secondary add-wl-cat-pill" data-cat="it" onclick="window.app?.setAddWatchlistCategory('it')">IT &amp; Tech</button>
+          <button class="btn btn-sm btn-secondary add-wl-cat-pill" data-cat="auto" onclick="window.app?.setAddWatchlistCategory('auto')">Auto</button>
+          <button class="btn btn-sm btn-secondary add-wl-cat-pill" data-cat="pharma" onclick="window.app?.setAddWatchlistCategory('pharma')">Pharma</button>
+          <button class="btn btn-sm btn-secondary add-wl-cat-pill" data-cat="sectors" onclick="window.app?.setAddWatchlistCategory('sectors')">18 NSE Sectors</button>
+        </div>
+      </div>
+
+      <!-- Results Body -->
+      <div class="modal-body" style="padding: 1rem 1.4rem; max-height: 56vh; overflow-y: auto;">
+        <div id="addWatchlistResultsList" style="display: flex; flex-direction: column; gap: 0.65rem;">
+          <!-- Injected dynamically -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="alertConfigModal" style="display: none;">
+    <div class="modal-dialog" style="max-width: 620px; border-radius: var(--radius-lg); border: 1px solid rgba(99, 102, 241, 0.25);">
+      <div class="modal-header" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.08));">
+        <div>
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <span style="font-size: 1.3rem;">⚡</span>
+            <h3 style="font-size: 1.15rem; font-weight: 800; margin: 0; color: var(--text-main);">Live Alert Dispatcher</h3>
+            <span style="background: rgba(16, 185, 129, 0.2); color: var(--green); font-size: 0.65rem; font-weight: 800; padding: 0.15rem 0.5rem; border-radius: 100px;">TELEGRAM + WEBHOOK</span>
+          </div>
+          <p style="font-size: 0.775rem; color: var(--text-muted); margin: 0.25rem 0 0;">
+            Automatically deliver instant alerts to your Telegram chat or execute trades via Webhook in Tradetron / Broker APIs
+          </p>
+        </div>
+        <button class="modal-close-btn btn-icon-only" id="btnCloseAlertModal">✕</button>
+      </div>
+
+      <div class="modal-body" style="padding: 1.25rem; max-height: 70vh; overflow-y: auto;">
+        
+        <!-- Tab Navigation for Alerts Modal -->
+        <div class="alert-modal-tabs">
+          <button class="alert-tab-btn active" data-tab="telegram">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.52 2.77-1.17 3.35-1.37 3.73-1.38.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
+            Telegram Bot
+          </button>
+          <button class="alert-tab-btn" data-tab="webhook">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+            Webhook / Algo
+          </button>
+          <button class="alert-tab-btn" data-tab="settings">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            Preferences
+          </button>
+        </div>
+
+        <!-- 1. Telegram Tab Pane -->
+        <div class="alert-pane active" id="paneTelegram">
+          <div class="alert-toggle-row">
+            <div>
+              <strong style="color: var(--text-main); font-size: 0.9rem;">Enable Telegram Alerts</strong>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">Receive stock alerts directly in your Telegram group or private chat</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="cfgTelegramEnabled">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="alert-form-group">
+            <label class="alert-form-label">Telegram Bot Token</label>
+            <input type="text" class="input-control" id="cfgTelegramToken" placeholder="e.g. 7123456789:AAFlxyz_YourBotTokenHere">
+            <span class="alert-form-hint">Create a bot on Telegram with <strong>@BotFather</strong> to get your API Token</span>
+          </div>
+
+          <div class="alert-form-group">
+            <label class="alert-form-label">Telegram Chat ID / Channel ID</label>
+            <input type="text" class="input-control" id="cfgTelegramChatId" placeholder="e.g. 123456789 or -100123456789">
+            <span class="alert-form-hint">Message <strong>@userinfobot</strong> on Telegram to find your personal Chat ID</span>
+          </div>
+
+          <div style="display: flex; gap: 0.5rem; align-items: center; margin-top: 1rem;">
+            <button class="btn btn-secondary btn-sm" id="btnTestTelegram">
+              🚀 Send Test Message
+            </button>
+            <span id="telegramTestStatus" class="alert-status-badge" style="display: none;"></span>
+          </div>
+        </div>
+
+        <!-- 2. Webhook Tab Pane -->
+        <div class="alert-pane" id="paneWebhook" style="display: none;">
+          <div class="alert-toggle-row">
+            <div>
+              <strong style="color: var(--text-main); font-size: 0.9rem;">Enable Automated Webhook POST</strong>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">Send real-time JSON payloads to Tradetron, Python bots, or broker API endpoints</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="cfgWebhookEnabled">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="alert-form-group">
+            <label class="alert-form-label">Webhook Destination URL</label>
+            <input type="url" class="input-control" id="cfgWebhookUrl" placeholder="https://api.tradetron.tech/webhook/... or https://your-server.com/api/trade">
+          </div>
+
+          <div class="alert-form-group">
+            <label class="alert-form-label">Secret Token / Authorization Header (Optional)</label>
+            <input type="text" class="input-control" id="cfgWebhookSecret" placeholder="Bearer your-secret-auth-key">
+          </div>
+
+          <div style="display: flex; gap: 0.5rem; align-items: center; margin-top: 1rem;">
+            <button class="btn btn-secondary btn-sm" id="btnTestWebhook">
+              ⚡ Send Test Payload
+            </button>
+            <span id="webhookTestStatus" class="alert-status-badge" style="display: none;"></span>
+          </div>
+        </div>
+
+        <!-- 3. Settings Tab Pane -->
+        <div class="alert-pane" id="paneSettings" style="display: none;">
+          <div class="alert-form-group">
+            <label class="alert-form-label">Alert Cooldown</label>
+            <select class="select-control" id="cfgCooldown">
+              <option value="1">1 Minute (Ultra Active)</option>
+              <option value="5" selected>5 Minutes (Recommended)</option>
+              <option value="15">15 Minutes</option>
+              <option value="60">1 Hour</option>
+            </select>
+            <span class="alert-form-hint">Prevents spamming notifications for identical triggers</span>
+          </div>
+
+          <div class="alert-toggle-row" style="margin-top: 1rem;">
+            <div>
+              <strong style="color: var(--text-main); font-size: 0.9rem;">Browser Desktop Notifications</strong>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">Show OS toast notification when a stock matches during active sessions</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="cfgBrowserPush" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer" style="padding: 1rem 1.25rem; border-top: 1px solid var(--border-subtle); display: flex; justify-content: flex-end; gap: 0.5rem;">
+        <button class="btn btn-secondary" id="btnCancelAlertModal">Cancel</button>
+        <button class="btn btn-primary" id="btnSaveAlertConfig">
+          💾 Save Alert Settings
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       CHARTINK 29 SEGMENT SELECTOR MODAL
+       ========================================== -->
+  <div class="modal-backdrop" id="segmentSelectModal" style="display: none; z-index: 1100;">
+    <div class="segment-modal-card">
+      <div class="segment-modal-header">
+        <div class="segment-modal-search-wrapper">
+          <input type="text" id="segmentSearchInput" class="segment-modal-search-input" placeholder="Select a segment" autocomplete="off">
+          <button type="button" class="segment-modal-close" id="btnCloseSegmentModal" title="Close">✕</button>
+        </div>
+        <div class="segment-modal-heading">Select a segement</div>
+      </div>
+      <div class="segment-modal-list" id="segmentModalList">
+        <!-- Rendered dynamically with live stock counts & purple highlight -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       CHARTINK INDICATOR / ATTRIBUTE SELECTION MODAL (Images 3 & 4)
+       ========================================== -->
+  <div class="modal-backdrop" id="indicatorSelectModal" style="display: none; z-index: 1200;">
+    <div class="ci-indicator-modal-card">
+      <div class="ci-indicator-modal-header">
+        <div class="ci-indicator-search-wrapper">
+          <input type="text" id="indicatorModalSearch" class="ci-indicator-search-input" placeholder="Select an indicator/formula" autocomplete="off">
+          <button type="button" class="ci-indicator-modal-close" id="btnCloseIndicatorModal" title="Close">✕</button>
+        </div>
+      </div>
+
+      <!-- Quick Action Shortcuts (Image 3) -->
+      <div class="ci-indicator-shortcuts-bar">
+        <button type="button" class="ci-browse-scans-btn" id="btnBrowseScansShortcut">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          Browse scans
+        </button>
+        <span class="ci-paste-slug-label">Paste scan URL or slug</span>
+      </div>
+
+      <!-- Scrollable Categories & Items List (Images 3 & 4) -->
+      <div class="ci-indicator-modal-list" id="indicatorModalList">
+        <!-- Rendered dynamically: Measures, Stock Attributes, Technical Indicators with purple highlight -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Small Popover for Timeframe Selection -->
+  <div class="ci-popover-menu" id="timeframeSelectPopover" style="display: none; background: #070c18 !important; background-color: #070c18 !important; border: 1px solid #334155 !important; border-radius: 8px !important; padding: 6px !important; box-shadow: 0 16px 36px rgba(0,0,0,0.95) !important; min-width: 150px !important; z-index: 99999 !important;">
+    <div class="ci-popover-item" data-val="Latest" style="color: #f8fafc !important;">Latest</div>
+    <div class="ci-popover-item" data-val="5-min" style="color: #f8fafc !important;">5 minute</div>
+    <div class="ci-popover-item" data-val="15-min" style="color: #f8fafc !important;">15 minute</div>
+    <div class="ci-popover-item" data-val="1-hour" style="color: #f8fafc !important;">1 hour</div>
+    <div class="ci-popover-item" data-val="Daily" style="color: #f8fafc !important;">Daily</div>
+    <div class="ci-popover-item" data-val="Weekly" style="color: #f8fafc !important;">Weekly</div>
+    <div class="ci-popover-item" data-val="Monthly" style="color: #f8fafc !important;">Monthly</div>
+  </div>
+
+  <!-- Small Popover for Operator Selection -->
+  <div class="ci-popover-menu" id="operatorSelectPopover" style="display: none; background: #070c18 !important; background-color: #070c18 !important; border: 1px solid #334155 !important; border-radius: 8px !important; padding: 6px !important; box-shadow: 0 16px 36px rgba(0,0,0,0.95) !important; min-width: 190px !important; z-index: 99999 !important;">
+    <div class="ci-popover-item" data-val="crosses_above" style="color: #f8fafc !important;">Crossed above</div>
+    <div class="ci-popover-item" data-val="crosses_below" style="color: #f8fafc !important;">Crossed below</div>
+    <div class="ci-popover-item" data-val="gt" style="color: #f8fafc !important;">Greater than ( &gt; )</div>
+    <div class="ci-popover-item" data-val="lt" style="color: #f8fafc !important;">Less than ( &lt; )</div>
+    <div class="ci-popover-item" data-val="gte" style="color: #f8fafc !important;">Greater than equal to ( &gt;= )</div>
+    <div class="ci-popover-item" data-val="lte" style="color: #f8fafc !important;">Less than equal to ( &lt;= )</div>
+    <div class="ci-popover-item" data-val="eq" style="color: #f8fafc !important;">Equal to ( = )</div>
+    <div class="ci-popover-item" data-val="contains" style="color: #f8fafc !important;">Contains Pattern</div>
+  </div>
+
+  <!-- Small Popover for Candle Offset Selection -->
+  <div class="ci-popover-menu" id="offsetSelectPopover" style="display: none; background: #070c18 !important; background-color: #070c18 !important; border: 1px solid #334155 !important; border-radius: 8px !important; padding: 6px !important; box-shadow: 0 16px 36px rgba(0,0,0,0.95) !important; min-width: 175px !important; z-index: 99999 !important;">
+    <div class="ci-popover-item" data-val="0" style="color: #f8fafc !important; display: flex; align-items: center; padding: 7px 10px; border-radius: 6px; cursor: pointer;">
+      <span class="ci-badge-offset" style="color: #38bdf8; font-family: monospace; font-weight: 800; background: rgba(56,189,248,0.15); padding: 2px 6px; border-radius: 4px; margin-right: 8px;">[0]</span>
+      <span style="font-weight: 700;">Latest (Current)</span>
+    </div>
+    <div class="ci-popover-item" data-val="-1" style="color: #f8fafc !important; display: flex; align-items: center; padding: 7px 10px; border-radius: 6px; cursor: pointer;">
+      <span class="ci-badge-offset" style="color: #c084fc; font-family: monospace; font-weight: 800; background: rgba(192,132,252,0.15); padding: 2px 6px; border-radius: 4px; margin-right: 8px;">[-1]</span>
+      <span style="font-weight: 700;">1 bar ago</span>
+    </div>
+    <div class="ci-popover-item" data-val="-2" style="color: #f8fafc !important; display: flex; align-items: center; padding: 7px 10px; border-radius: 6px; cursor: pointer;">
+      <span class="ci-badge-offset" style="color: #c084fc; font-family: monospace; font-weight: 800; background: rgba(192,132,252,0.15); padding: 2px 6px; border-radius: 4px; margin-right: 8px;">[-2]</span>
+      <span style="font-weight: 700;">2 bars ago</span>
+    </div>
+    <div class="ci-popover-item" data-val="-3" style="color: #f8fafc !important; display: flex; align-items: center; padding: 7px 10px; border-radius: 6px; cursor: pointer;">
+      <span class="ci-badge-offset" style="color: #c084fc; font-family: monospace; font-weight: 800; background: rgba(192,132,252,0.15); padding: 2px 6px; border-radius: 4px; margin-right: 8px;">[-3]</span>
+      <span style="font-weight: 700;">3 bars ago</span>
+    </div>
+    <div class="ci-popover-item" data-val="-5" style="color: #f8fafc !important; display: flex; align-items: center; padding: 7px 10px; border-radius: 6px; cursor: pointer;">
+      <span class="ci-badge-offset" style="color: #c084fc; font-family: monospace; font-weight: 800; background: rgba(192,132,252,0.15); padding: 2px 6px; border-radius: 4px; margin-right: 8px;">[-5]</span>
+      <span style="font-weight: 700;">5 bars ago</span>
+    </div>
+    <div class="ci-popover-item" data-val="-10" style="color: #f8fafc !important; display: flex; align-items: center; padding: 7px 10px; border-radius: 6px; cursor: pointer;">
+      <span class="ci-badge-offset" style="color: #c084fc; font-family: monospace; font-weight: 800; background: rgba(192,132,252,0.15); padding: 2px 6px; border-radius: 4px; margin-right: 8px;">[-10]</span>
+      <span style="font-weight: 700;">10 bars ago</span>
+    </div>
+  </div>
+
+  <!-- Clause Note / Comment Dialog -->
+  <div class="modal-backdrop" id="clauseCommentModal" style="display: none; z-index: 1300;">
+    <div class="segment-modal-card" style="max-width: 440px;">
+      <div class="segment-modal-header" style="border-bottom: 1px solid var(--border-subtle); padding: 0.75rem 1rem;">
+        <div style="font-weight: 700; color: #f8fafc;">💬 Add Clause Comment / Note</div>
+        <button type="button" class="segment-modal-close" id="btnCloseCommentModal">✕</button>
+      </div>
+      <div style="padding: 1rem;">
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">Document your trading logic or rules for this specific condition:</p>
+        <textarea id="clauseCommentText" class="form-control" rows="3" placeholder="e.g. 'Wait for RSI to cross 45 confirming monthly momentum'" style="width: 100%; border-radius: 6px; background: #070c18; color: #fff; border: 1px solid #334155; padding: 0.5rem;"></textarea>
+      </div>
+      <div style="padding: 0.75rem 1rem; border-top: 1px solid var(--border-subtle); display: flex; justify-content: flex-end; gap: 0.5rem;">
+        <button type="button" class="btn btn-secondary btn-sm" id="btnCancelComment">Cancel</button>
+        <button type="button" class="btn btn-primary btn-sm" id="btnSaveComment">Save Note</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Clause Debug Modal -->
+  <div class="modal-backdrop" id="clauseDebugModal" style="display: none; z-index: 1300;">
+    <div class="segment-modal-card" style="max-width: 600px;">
+      <div class="segment-modal-header" style="border-bottom: 1px solid var(--border-subtle); padding: 0.75rem 1rem;">
+        <div style="font-weight: 700; color: #f8fafc;">🐞 Debug Clause Evaluation</div>
+        <button type="button" class="segment-modal-close" id="btnCloseDebugModal">✕</button>
+      </div>
+      <div style="padding: 1rem; max-height: 400px; overflow-y: auto;" id="clauseDebugContent">
+        <!-- Dynamically populated evaluation output -->
+      </div>
+    </div>
+  </div>
+
+  <!-- More Options Dropdown Menu (Image 1: More ❐ 🖥) -->
+  <div class="ci-popover-menu" id="moreOptionsPopover" style="display: none; min-width: 220px; z-index: 99999; background: #070c18 !important; background-color: #070c18 !important; border: 1px solid #334155 !important; border-radius: 8px !important; padding: 6px !important; box-shadow: 0 16px 36px rgba(0,0,0,0.95) !important;">
+    <div class="ci-popover-item" id="btnMoreCopyLink" style="color: #f8fafc !important;">📋 Copy Scan Link / Formula</div>
+    <div class="ci-popover-item" id="btnMoreDuplicate" style="color: #f8fafc !important;">📑 Duplicate Scanner</div>
+    <div class="ci-popover-item" id="btnMoreFullscreen" style="color: #f8fafc !important;">⛶ Toggle Fullscreen</div>
+    <div class="ci-popover-item" id="btnMorePrint" style="color: #f8fafc !important;">🖨️ Export PDF / Print</div>
+    <div class="ci-popover-item" id="btnMoreEmbed" style="color: #f8fafc !important;">📊 Embed Chart Widget</div>
+    <div class="ci-popover-item" id="btnMoreReset" style="color: #ef4444 !important; font-weight: 700;">🗑️ Reset All Filters</div>
+  </div>
+
+  <!-- Scanner Guide Modal (Image 1: Scanner Guide) -->
+  <div class="modal-backdrop" id="scannerGuideModal" style="display: none; z-index: 1350;">
+    <div class="segment-modal-card" style="max-width: 680px; max-height: 85vh; display: flex; flex-direction: column;">
+      <div class="segment-modal-header" style="border-bottom: 1px solid #1e293b; padding: 0.85rem 1.1rem;">
+        <div style="font-weight: 800; color: #38bdf8; font-size: 1.05rem; display: flex; align-items: center; gap: 0.5rem;">
+          <span>📘</span> Chartink Scanner & Formula Syntax Guide
+        </div>
+        <button type="button" class="segment-modal-close" id="btnCloseScannerGuide">✕</button>
+      </div>
+      <div style="padding: 1.1rem; overflow-y: auto; font-size: 0.88rem; color: #cbd5e1; line-height: 1.6;">
+        <h4 style="color: #ffffff; margin-bottom: 0.4rem;">1. Understanding Clause Sentences</h4>
+        <p>A scan clause defines a criteria that every scanned stock must satisfy. In our Chartink engine, each condition reads like plain English:</p>
+        <div style="background: #090e1a; border: 1px solid #1e293b; padding: 0.6rem 0.85rem; border-radius: 6px; margin: 0.5rem 0; font-family: monospace; color: #38bdf8;">
+          Monthly Rsi( 14 ) Crossed above Number 45
+        </div>
+
+        <h4 style="color: #ffffff; margin-top: 1rem; margin-bottom: 0.4rem;">2. Candle Offsets (Past Bars)</h4>
+        <p>You can reference past historical candles using bar indexing:</p>
+        <ul style="padding-left: 1.2rem; margin-bottom: 0.5rem;">
+          <li><code style="color: #c084fc;">[0]</code> = Current latest candle</li>
+          <li><code style="color: #c084fc;">[-1]</code> = 1 candle ago (previous session)</li>
+          <li><code style="color: #c084fc;">[-2]</code> = 2 candles ago</li>
+        </ul>
+        <p><em>Example:</em> <code>[-1] Daily Close &gt; [-2] Daily High</code> scans for stocks whose yesterday's close exceeded day-before-yesterday's high.</p>
+
+        <h4 style="color: #ffffff; margin-top: 1rem; margin-bottom: 0.4rem;">3. Math Expressions (±=)</h4>
+        <p>Click the <strong>±=</strong> button on any clause line to add mathematical operations like multipliers (e.g. <code>Volume &gt; 2 * 20 SMA(Volume)</code>) or custom percentage formulas.</p>
+
+        <h4 style="color: #ffffff; margin-top: 1rem; margin-bottom: 0.4rem;">4. Segment Selection</h4>
+        <p>Choose from 29 authentic NSE universes including <strong>Nifty 500</strong>, <strong>F&amp;O Futures</strong>, <strong>Bank Nifty</strong>, <strong>Gold/Silver ETFs</strong>, and <strong>My Watchlist</strong>.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scan Examples Modal (Image 1: Scan Examples) -->
+  <div class="modal-backdrop" id="scanExamplesModal" style="display: none; z-index: 1350;">
+    <div class="segment-modal-card" style="max-width: 640px; max-height: 85vh; display: flex; flex-direction: column;">
+      <div class="segment-modal-header" style="border-bottom: 1px solid #1e293b; padding: 0.85rem 1.1rem;">
+        <div style="font-weight: 800; color: #a855f7; font-size: 1.05rem; display: flex; align-items: center; gap: 0.5rem;">
+          <span>⚡</span> Popular Chartink Scan Templates
+        </div>
+        <button type="button" class="segment-modal-close" id="btnCloseScanExamples">✕</button>
+      </div>
+      <div style="padding: 1rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.65rem;" id="scanExamplesList">
+        <!-- Injected dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Feedback Modal (Image 1: Feedback) -->
+  <div class="modal-backdrop" id="feedbackModal" style="display: none; z-index: 1350;">
+    <div class="segment-modal-card" style="max-width: 460px;">
+      <div class="segment-modal-header" style="border-bottom: 1px solid #1e293b; padding: 0.85rem 1.1rem;">
+        <div style="font-weight: 800; color: #f8fafc; font-size: 1rem;">💬 Scanner Feedback &amp; Suggestions</div>
+        <button type="button" class="segment-modal-close" id="btnCloseFeedback">✕</button>
+      </div>
+      <div style="padding: 1rem;">
+        <p style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 0.75rem;">Tell us what indicators, scans, or features you'd like added to the Chartink scanner:</p>
+        <textarea id="feedbackTextInput" class="form-control" rows="4" placeholder="e.g. Add Camarilla Pivots with ATR trailing stop-loss..." style="width: 100%; border-radius: 6px; background: #070c18; color: #fff; border: 1px solid #334155; padding: 0.6rem; font-size: 0.88rem;"></textarea>
+      </div>
+      <div style="padding: 0.75rem 1.1rem; border-top: 1px solid #1e293b; display: flex; justify-content: flex-end; gap: 0.5rem;">
+        <button type="button" class="btn btn-secondary btn-sm" id="btnCancelFeedback">Cancel</button>
+        <button type="button" class="btn btn-primary btn-sm" id="btnSubmitFeedback">Send Feedback 🚀</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Scanner Meta Modal (Image 1: ✏️ Edit Details) -->
+  <div class="modal-backdrop" id="editScannerMetaModal" style="display: none; z-index: 1350;">
+    <div class="segment-modal-card" style="max-width: 460px;">
+      <div class="segment-modal-header" style="border-bottom: 1px solid #1e293b; padding: 0.85rem 1.1rem;">
+        <div style="font-weight: 800; color: #f8fafc; font-size: 1rem;">✏️ Edit Scanner Details</div>
+        <button type="button" class="segment-modal-close" id="btnCloseEditMeta">✕</button>
+      </div>
+      <div style="padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem;">
+        <div>
+          <label style="font-size: 0.78rem; font-weight: 700; color: #94a3b8; margin-bottom: 0.25rem; display: block;">SCANNER TITLE</label>
+          <input type="text" id="editMetaTitle" class="form-control" style="width: 100%; background: #070c18; border: 1px solid #334155; color: #fff; padding: 0.5rem; border-radius: 6px;">
+        </div>
+        <div>
+          <label style="font-size: 0.78rem; font-weight: 700; color: #94a3b8; margin-bottom: 0.25rem; display: block;">CREATOR / AUTHOR</label>
+          <input type="text" id="editMetaDesc" class="form-control" style="width: 100%; background: #070c18; border: 1px solid #334155; color: #fff; padding: 0.5rem; border-radius: 6px;">
+        </div>
+        <div>
+          <label style="font-size: 0.78rem; font-weight: 700; color: #94a3b8; margin-bottom: 0.25rem; display: block;">TAGS (comma separated)</label>
+          <input type="text" id="editMetaTags" class="form-control" placeholder="e.g. Nifty 500, RSI Breakout, Swing" style="width: 100%; background: #070c18; border: 1px solid #334155; color: #fff; padding: 0.5rem; border-radius: 6px;">
+        </div>
+      </div>
+      <div style="padding: 0.75rem 1.1rem; border-top: 1px solid #1e293b; display: flex; justify-content: flex-end; gap: 0.5rem;">
+        <button type="button" class="btn btn-secondary btn-sm" id="btnCancelEditMeta">Cancel</button>
+        <button type="button" class="btn btn-primary btn-sm" id="btnSaveEditMeta">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Clause Math & Arithmetic Expression Modal (Image 1: ±=) -->
+  <div class="modal-backdrop" id="clauseMathModal" style="display: none; z-index: 1350;">
+    <div class="segment-modal-card" style="max-width: 500px;">
+      <div class="segment-modal-header" style="border-bottom: 1px solid #1e293b; padding: 0.85rem 1.1rem;">
+        <div style="font-weight: 800; color: #e879f9; font-size: 1rem; display: flex; align-items: center; gap: 0.4rem;">
+          <span>±=</span> Mathematical Expression Editor
+        </div>
+        <button type="button" class="segment-modal-close" id="btnCloseClauseMath">✕</button>
+      </div>
+      <div style="padding: 1.1rem; display: flex; flex-direction: column; gap: 0.85rem;">
+        <p style="font-size: 0.82rem; color: #94a3b8;">Add arithmetic scaling or multiplier to this condition (e.g. <code>Volume &gt; 2 * 20 SMA(Volume)</code>):</p>
+        
+        <div>
+          <label style="font-size: 0.78rem; font-weight: 700; color: #cbd5e1; margin-bottom: 0.35rem; display: block;">ARITHMETIC OPERATOR</label>
+          <div style="display: flex; gap: 0.5rem;" id="mathOpSelector">
+            <button type="button" class="btn btn-secondary btn-sm math-op-btn active" data-op="*">* (Multiply)</button>
+            <button type="button" class="btn btn-secondary btn-sm math-op-btn" data-op="+">+ (Add)</button>
+            <button type="button" class="btn btn-secondary btn-sm math-op-btn" data-op="-">- (Subtract)</button>
+            <button type="button" class="btn btn-secondary btn-sm math-op-btn" data-op="/">/ (Divide)</button>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size: 0.78rem; font-weight: 700; color: #cbd5e1; margin-bottom: 0.35rem; display: block;">FACTOR / VALUE</label>
+          <input type="number" step="any" id="mathFactorInput" class="form-control" value="1.5" style="width: 100%; background: #070c18; border: 1px solid #334155; color: #fff; padding: 0.5rem; border-radius: 6px; font-weight: 700;">
+        </div>
+
+        <div style="background: #090e1a; border: 1px solid #1e293b; padding: 0.65rem 0.85rem; border-radius: 6px;">
+          <span style="font-size: 0.72rem; color: #94a3b8; font-weight: 700; text-transform: uppercase;">Preview Expression:</span>
+          <div id="mathExpressionPreview" style="color: #38bdf8; font-weight: 800; font-size: 0.95rem; margin-top: 0.2rem;"></div>
+        </div>
+      </div>
+      <div style="padding: 0.75rem 1.1rem; border-top: 1px solid #1e293b; display: flex; justify-content: space-between; align-items: center;">
+        <button type="button" class="btn btn-secondary btn-sm" id="btnRemoveMathExpr" style="color: #ef4444;">Remove Math</button>
+        <div style="display: flex; gap: 0.5rem;">
+          <button type="button" class="btn btn-secondary btn-sm" id="btnCancelClauseMath">Cancel</button>
+          <button type="button" class="btn btn-primary btn-sm" id="btnApplyClauseMath">Apply Expression</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MOBILE BOTTOM NAVIGATION BAR (ANDROID)
+       ========================================== -->
+  <nav class="mobile-bottom-nav">
+    <div class="bottom-nav-item active" data-view="dashboard">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+      <span>Dashboard</span>
+    </div>
+    <div class="bottom-nav-item" data-view="terminal">
+      <span style="font-size: 1.1rem;">🤖</span>
+      <span>TejAI</span>
+    </div>
+    <div class="bottom-nav-item" data-view="builder">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+      <span>Builder</span>
+    </div>
+    <div class="bottom-nav-item" data-view="watchlist">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+      <span>Watchlist</span>
+    </div>
+    <div class="bottom-nav-item bottom-nav-pro" id="bottomNavPro" onclick="window.app?.openProSubscriptionModal(); return false;" title="TejStockAI Pro (₹1,000 / 2 Months)">
+      <span style="font-size: 1.15rem; filter: drop-shadow(0 0 6px #c084fc);">⭐</span>
+      <span style="color: #c084fc; font-weight: 700;">Pro</span>
+    </div>
+  </nav>
+
+  <!-- Floating Quick TejStockAI Copilot Action Button -->
+  <button class="floating-ai-btn" id="btnFloatingAi" title="Open TejStockAI Terminal & Copilot" onclick="window.app?.switchView('terminal')">
+    <span class="floating-ai-icon">🤖</span>
+    <span class="floating-ai-label">TejStockAI</span>
+  </button>
+
+  <!-- ==========================================
+       MODAL: TEJSTOCKAI PRO SUBSCRIPTION (PHONEPE QR)
+       ========================================== -->
+  <div class="modal-backdrop" id="proSubscriptionModal" style="display: none; z-index: 1200;">
+    <div class="modal-dialog" style="max-width: 500px; width: 94%; border: 1px solid rgba(168, 85, 247, 0.35); box-shadow: 0 20px 50px rgba(168, 85, 247, 0.25); border-radius: 18px; background: rgba(15, 23, 42, 0.96); backdrop-filter: blur(16px);">
+      <div class="modal-header" style="border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding: 1rem 1.25rem; display: flex; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 0.65rem;">
+          <div style="width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(135deg, #a855f7, #6366f1); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; box-shadow: 0 0 15px rgba(168, 85, 247, 0.5);">
+            ⭐
+          </div>
+          <div>
+            <h3 style="font-size: 1.15rem; font-weight: 800; color: #fff; margin: 0;">TejStockAI Pro Plan</h3>
+            <span style="font-size: 0.75rem; color: #a855f7; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Realtime Streaming & AI Copilot</span>
+          </div>
+        </div>
+        <button class="modal-close-btn btn-icon-only" onclick="window.app?.closeProSubscriptionModal()" title="Close">✕</button>
+      </div>
+
+      <div class="modal-body" style="padding: 1.25rem; display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+        
+        <!-- Pricing Badge -->
+        <div style="width: 100%; background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(99, 102, 241, 0.15)); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 12px; padding: 0.85rem 1.15rem; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-size: 0.75rem; color: #cbd5e1; text-transform: uppercase; font-weight: 700;">Special Pro Membership</div>
+            <div style="font-size: 1.45rem; font-weight: 900; color: #f8fafc; font-family: var(--font-mono, monospace);">
+              ₹1,000 <span style="font-size: 0.85rem; font-weight: 600; color: #a855f7;">/ 2 Months</span>
+            </div>
+          </div>
+          <div style="background: rgba(34, 197, 94, 0.2); border: 1px solid rgba(34, 197, 94, 0.4); color: #4ade80; padding: 0.35rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 700;">
+            ₹500 / month
+          </div>
+        </div>
+
+        <!-- PhonePe Payment QR Card -->
+        <div style="width: 100%; display: flex; flex-direction: column; align-items: center; background: #000000; border-radius: 14px; padding: 14px; border: 1px solid rgba(255, 255, 255, 0.12); box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);">
+          <div style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+            <span style="color: #9333ea; font-size: 1.05rem;">🟣</span> Scan & Pay with <strong>PhonePe / GPay / Paytm / Any UPI</strong>
+          </div>
+          <div style="background: #ffffff; padding: 8px; border-radius: 10px; max-width: 250px; width: 100%; box-shadow: 0 4px 18px rgba(0,0,0,0.5);">
+            <img src="/phonepe-qr.png" alt="PhonePe QR Code - Tejas Kumar Dewangan" style="width: 100%; height: auto; display: block; border-radius: 6px;">
+          </div>
+          <div style="margin-top: 10px; text-align: center;">
+            <div style="color: #f8fafc; font-size: 0.95rem; font-weight: 800; letter-spacing: 0.02em;">TEJAS KUMAR DEWANGAN</div>
+            <div style="color: #94a3b8; font-size: 0.75rem; margin-top: 2px;">PhonePe / UPI Mobile: <strong style="color: #cbd5e1;">7647814314</strong></div>
+          </div>
+        </div>
+
+        <!-- Verification / Activation Form -->
+        <div style="width: 100%; display: flex; flex-direction: column; gap: 0.75rem;">
+          <div style="font-size: 0.8rem; color: #cbd5e1; font-weight: 600;">
+            After making payment, enter your Transaction UTR / Ref No. to activate:
+          </div>
+          <div style="display: flex; gap: 0.5rem; flex-direction: column;">
+            <input type="text" id="proPaymentUtrInput" class="input-control" placeholder="Enter 12-digit UPI / UTR Transaction Ref ID" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.14); color: #fff; padding: 0.7rem 0.85rem; border-radius: 8px; font-size: 0.85rem; outline: none;">
+            <button type="button" class="btn btn-primary" id="btnSubmitProPayment" onclick="window.app?.submitProPayment()" style="background: linear-gradient(135deg, #a855f7, #6366f1); border: none; padding: 0.8rem; font-weight: 800; border-radius: 8px; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4); display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+              <span>✅</span> Verify & Activate Pro Access (2 Months)
+            </button>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.25rem;">
+            <a href="https://wa.me/917647814314?text=Hi%20Tejas,%20I%20have%20paid%20Rs.1000%20for%20TejStockAI%20Pro%202-Month%20Plan.%20Please%20verify%20my%20UTR:" target="_blank" style="color: #22c55e; font-size: 0.78rem; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+              <span>💬</span> Send Screenshot on WhatsApp
+            </a>
+            <span style="color: #64748b; font-size: 0.75rem;">Instant Verification</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Client-side Scripts -->
+  <script src="./js/charts.js?v=5.2"></script>
+  <script src="./js/query-builder.js?v=5.2"></script>
+  <script src="./js/dashboard.js?v=5.2"></script>
+  <script src="./js/app.js?v=5.2"></script>
+
+</body>
+</html>

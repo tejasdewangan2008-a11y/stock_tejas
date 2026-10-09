@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "build": "node -e \"console.log('TejStockAI Cloud Build Complete')\""
+    "build": "node -e \"const fs = require('fs'); try { fs.copyFileSync('public/index.html', 'index.html'); console.log('[Build] Root index.html prepared for Vercel CDN'); } catch (e) { console.warn(e.message); }\""
   },
   "keywords": [
     "tejstockai",

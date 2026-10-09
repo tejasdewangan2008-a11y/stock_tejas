@@ -432,6 +432,26 @@ app.use('/api', (req, res, next) => {
   next();
 });
 
+// Root Fallback Handlers
+app.get('/', (req, res) => {
+  const candidates = [
+    path.join(__dirname, 'public', 'index.html'),
+    path.join(process.cwd(), 'public', 'index.html'),
+    path.join(__dirname, 'index.html'),
+    path.join(process.cwd(), 'index.html')
+  ];
+  for (const c of candidates) {
+    if (fs.existsSync(c)) {
+      return res.sendFile(c);
+    }
+  }
+  res.send('TejStockAI Terminal Ready');
+});
+
+app.get('/api', (req, res) => {
+  res.json({ status: 'ok', service: 'TejStockAI Cloud API', time: new Date().toISOString() });
+});
+
 let cachedLanQrDataUrl = null;
 
 // REST Endpoints
@@ -445,9 +465,13 @@ app.get('/api/info', async (req, res) => {
     const isCloud = isNetlify || isVercel || (!host.includes('localhost') && !host.includes('127.0.0.1') && !host.startsWith('192.168.'));
 
     if (!cachedLanQrDataUrl) {
-      cachedLanQrDataUrl = await QRCode.toDataURL(lanUrl, { margin: 2, width: 250 });
+      try {
+        cachedLanQrDataUrl = await QRCode.toDataURL(lanUrl, { margin: 2, width: 250 });
+      } catch (e) {
+        cachedLanQrDataUrl = '';
+      }
     }
-    const lanQrDataUrl = cachedLanQrDataUrl;
+    const lanQrDataUrl = cachedLanQrDataUrl || '';
     let pubQr = publicQrDataUrl;
     let activePublicUrl = publicUrl;
 
@@ -456,8 +480,12 @@ app.get('/api/info', async (req, res) => {
     }
 
     if (activePublicUrl && !pubQr) {
-      pubQr = await QRCode.toDataURL(activePublicUrl, { margin: 2, width: 250 });
-      publicQrDataUrl = pubQr;
+      try {
+        pubQr = await QRCode.toDataURL(activePublicUrl, { margin: 2, width: 250 });
+        publicQrDataUrl = pubQr;
+      } catch (e) {
+        pubQr = '';
+      }
     }
     const marketStatus = getNseMarketStatus();
     res.json({
@@ -477,7 +505,12 @@ app.get('/api/info', async (req, res) => {
       marketStatus
     });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to generate QR' });
+    console.error('Info endpoint error:', err);
+    res.json({
+      appName: 'TejStockAI',
+      version: '3.0.0',
+      marketStatus: getNseMarketStatus()
+    });
   }
 });
 
