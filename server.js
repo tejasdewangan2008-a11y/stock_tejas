@@ -1002,45 +1002,49 @@ app.get('/api/search', async (req, res) => {
 
   let results = marketService.searchStocks(q);
 
-  // If few or no results found, query Yahoo Live Search to discover global/recent IPO stocks
-  if (results.length < 5 && q.trim().length >= 2) {
+  // If few or no results found, query TradingView Live Symbol Search to discover ANY stock in the world
+  if (results.length < 8 && q.trim().length >= 2) {
     try {
-      const yahooUrl = `https://query2.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(q.trim())}&quotesCount=6&newsCount=0`;
-      const resp = await fetch(yahooUrl, {
+      const tvUrl = `https://symbol-search.tradingview.com/symbol_search/v3/?text=${encodeURIComponent(q.trim())}&hl=0&lang=en`;
+      const resp = await fetch(tvUrl, {
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+          'Origin': 'https://www.tradingview.com',
+          'Referer': 'https://www.tradingview.com/'
         },
-        signal: AbortSignal.timeout(1800)
+        signal: AbortSignal.timeout(2000)
       });
       if (resp.ok) {
         const data = await resp.json();
         const existingSyms = new Set(results.map(r => r.symbol.toUpperCase()));
-        if (Array.isArray(data.quotes)) {
-          for (const item of data.quotes) {
+        if (Array.isArray(data.symbols)) {
+          for (const item of data.symbols.slice(0, 10)) {
             if (!item.symbol) continue;
-            const cleanSym = item.symbol.replace(/\.NS$/, '').replace(/\.BO$/, '').toUpperCase();
-            if (existingSyms.has(cleanSym) || existingSyms.has(item.symbol.toUpperCase())) continue;
+            const cleanSym = item.symbol.replace(/<[^>]*>/g, '').toUpperCase().trim();
+            if (existingSyms.has(cleanSym)) continue;
             existingSyms.add(cleanSym);
 
-            const isUsOrGlobal = !item.symbol.endsWith('.NS') && !item.symbol.endsWith('.BO');
-            const targetSym = isUsOrGlobal ? item.symbol : cleanSym;
-            const stock = marketService.ensureStock(targetSym);
+            const isIndian = item.exchange === 'NSE' || item.exchange === 'BSE' || item.country === 'IN' || item.currency_code === 'INR';
+            const curSym = isIndian ? 'INR' : (item.currency_code || 'USD');
+            const cleanDesc = (item.description || cleanSym).replace(/<[^>]*>/g, '').trim();
+
+            const stock = marketService.ensureStock(cleanSym);
             results.push({
-              symbol: targetSym,
-              name: item.shortname || item.longname || cleanSym,
-              sector: item.sector || (isUsOrGlobal ? 'Global Asset' : 'NSE / BSE Equity'),
+              symbol: cleanSym,
+              name: cleanDesc,
+              sector: `TradingView (${item.exchange || (isIndian ? 'NSE' : 'Global')})`,
               ltp: stock ? stock.ltp : null,
               changePct: stock ? stock.changePct : null,
-              badge: isUsOrGlobal ? 'GLOBAL' : 'CASH',
-              currency: isUsOrGlobal ? 'USD' : 'INR',
+              badge: isIndian ? 'CASH' : (item.type === 'crypto' ? 'CRYPTO' : 'GLOBAL'),
+              currency: curSym,
               isCached: !!stock,
-              score: 90
+              score: 95
             });
           }
         }
       }
     } catch (e) {
-      // Ignore network timeout on external search
+      // Ignore network timeout on TradingView live search
     }
   }
 

@@ -1353,13 +1353,13 @@ class RealMarketService {
       };
     }
 
-    // 1. Direct exact symbol match in NSE Master Directory
+    // 1. Direct exact symbol match in Master Directory
     let found = this.directory.find(s => s.symbol.toUpperCase() === q || (s.yahoo && s.yahoo.toUpperCase() === q));
-    if (found) return { ...found, currency: 'INR' };
+    if (found) return { ...found, currency: found.currency || 'INR' };
 
     // 2. Direct alias match
     found = this.directory.find(s => s.aliases && s.aliases.some(a => a.toUpperCase() === q || a.toUpperCase().replace(/\s+/g, '') === q));
-    if (found) return { ...found, currency: 'INR' };
+    if (found) return { ...found, currency: found.currency || 'INR' };
 
     // 3. Known Global & US Assets
     const globalSymbols = {
@@ -2014,13 +2014,15 @@ class RealMarketService {
       if (!seen.has(sym) && (name.includes(q) || sym.includes(q) || aliases.some(a => a.includes(q)))) {
         seen.add(sym);
         const cached = this.stocksMap.get(sym);
+        const isGlobal = s.currency === 'USD' || s.exchange === 'NASDAQ' || s.exchange === 'NYSE';
         matched.push({
           symbol: s.symbol,
           name: s.name,
           sector: s.sector,
-          ltp: cached ? cached.ltp : null,
-          changePct: cached ? cached.changePct : null,
-          badge: s.sector === 'Indices' ? 'INDEX' : 'CASH',
+          ltp: cached ? cached.ltp : (typeof s.ltp === 'number' ? s.ltp : null),
+          changePct: cached ? cached.changePct : (typeof s.changePct === 'number' ? s.changePct : null),
+          badge: isGlobal ? 'GLOBAL' : (s.sector === 'Indices' ? 'INDEX' : (s.exchange === 'BSE' ? 'BSE' : 'CASH')),
+          currency: s.currency || (cached ? cached.currency : 'INR'),
           isCached: !!cached,
           score: sym.includes(q) ? 85 : 75
         });
@@ -2034,13 +2036,15 @@ class RealMarketService {
         if (!seen.has(sym) && (this.isFuzzyMatch(q, sym) || (s.aliases && s.aliases.some(a => this.isFuzzyMatch(q, a.toUpperCase()))))) {
           seen.add(sym);
           const cached = this.stocksMap.get(sym);
+          const isGlobal = s.currency === 'USD' || s.exchange === 'NASDAQ' || s.exchange === 'NYSE';
           matched.push({
             symbol: s.symbol,
             name: s.name,
             sector: s.sector,
-            ltp: cached ? cached.ltp : null,
-            changePct: cached ? cached.changePct : null,
-            badge: s.sector === 'Indices' ? 'INDEX' : 'CASH',
+            ltp: cached ? cached.ltp : (typeof s.ltp === 'number' ? s.ltp : null),
+            changePct: cached ? cached.changePct : (typeof s.changePct === 'number' ? s.changePct : null),
+            badge: isGlobal ? 'GLOBAL' : (s.sector === 'Indices' ? 'INDEX' : (s.exchange === 'BSE' ? 'BSE' : 'CASH')),
+            currency: s.currency || (cached ? cached.currency : 'INR'),
             isCached: !!cached,
             score: 50
           });

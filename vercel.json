@@ -6,6 +6,11 @@
       "destination": "/api/index.js"
     }
   ],
+  "functions": {
+    "api/index.js": {
+      "includeFiles": "tradingview-stocks.json,nse-master.json,EQUITY_L.csv"
+    }
+  },
   "headers": [
     {
       "source": "/api/(.*)",

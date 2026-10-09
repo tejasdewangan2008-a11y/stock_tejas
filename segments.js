@@ -514,7 +514,41 @@ try {
       }
     }
   }
-  console.log(`[TejStockAI] Master NSE Directory loaded with ${NSE_MASTER_DIRECTORY.length} equities and indices.`);
+
+  // Supplement from tradingview-stocks.json for comprehensive 8,000+ TradingView stock universe
+  const tvStocksPath = resolveAssetPath('tradingview-stocks.json');
+  if (fs.existsSync(tvStocksPath)) {
+    const tvStocks = JSON.parse(fs.readFileSync(tvStocksPath, 'utf8'));
+    for (const item of tvStocks) {
+      if (!item || !item.symbol) continue;
+      const sym = item.symbol.toUpperCase().trim();
+      if (!existingSymbols.has(sym)) {
+        existingSymbols.add(sym);
+        NSE_MASTER_DIRECTORY.push({
+          symbol: sym,
+          name: item.name || sym,
+          sector: item.sector || (item.exchange === 'BSE' ? 'BSE Equities' : (item.currency === 'USD' ? 'Global Markets' : 'NSE Equities')),
+          segment: ['cash', item.exchange || 'NSE'],
+          exchange: item.exchange,
+          currency: item.currency || 'INR',
+          ltp: item.ltp,
+          changePct: item.changePct,
+          volume: item.volume,
+          yahoo: item.yahoo || (item.exchange === 'BSE' ? sym + '.BO' : (item.currency === 'USD' ? sym : sym + '.NS'))
+        });
+      } else {
+        const existing = NSE_MASTER_DIRECTORY.find(s => s.symbol === sym);
+        if (existing) {
+          if (item.ltp && !existing.ltp) existing.ltp = item.ltp;
+          if (item.changePct !== undefined && existing.changePct === undefined) existing.changePct = item.changePct;
+          if (item.volume && !existing.volume) existing.volume = item.volume;
+          if (item.currency) existing.currency = item.currency;
+          if (item.exchange) existing.exchange = item.exchange;
+        }
+      }
+    }
+  }
+  console.log(`[TejStockAI] Master Directory loaded with ${NSE_MASTER_DIRECTORY.length} equities and indices (TradingView + NSE).`);
 } catch (e) {
   console.error('Error loading master NSE directory:', e);
 }
