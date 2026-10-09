@@ -259,13 +259,24 @@ function runScan(scanDef, stockList) {
   let candidates = stockList;
   if (scanDef.segment) {
     const segNorm = scanDef.segment.trim().toLowerCase();
-    if (segNorm !== 'all' && segNorm !== 'cash') {
-      if (segNorm === 'watchlist' && Array.isArray(scanDef.watchlistSymbols)) {
+    const cleanSegNorm = segNorm.replace(/[\s\-_&]/g, '');
+    if (cleanSegNorm !== 'all' && cleanSegNorm !== 'cash' && cleanSegNorm !== 'cashsegment') {
+      if (cleanSegNorm === 'watchlist' && Array.isArray(scanDef.watchlistSymbols)) {
         candidates = candidates.filter(s => scanDef.watchlistSymbols.includes(s.symbol));
-      } else if (segNorm !== 'watchlist') {
+      } else if (cleanSegNorm !== 'watchlist') {
         candidates = candidates.filter(s => {
           if (!Array.isArray(s.segment)) return false;
-          return s.segment.some(seg => seg.trim().toLowerCase() === segNorm);
+          const secNorm = (s.sector || '').toLowerCase().replace(/[\s\-_&]/g, '');
+          return s.segment.some(sg => {
+            const c = String(sg).toLowerCase().replace(/[\s\-_&]/g, '');
+            if (c === cleanSegNorm) return true;
+            if (cleanSegNorm === 'niftybank' && (c.includes('bank') || secNorm.includes('banking'))) return true;
+            if (cleanSegNorm === 'niftyit' && (c.includes('it') || secNorm.includes('informationtech'))) return true;
+            if (cleanSegNorm === 'niftyauto' && (c.includes('auto') || secNorm.includes('automobile'))) return true;
+            if (cleanSegNorm === 'defence' && (c.includes('pse') || c.includes('psu') || c.includes('defence') || secNorm.includes('defence'))) return true;
+            if ((cleanSegNorm === 'fo' || cleanSegNorm === 'f&o') && (c.includes('futures') || c.includes('fo'))) return true;
+            return c.includes(cleanSegNorm) || cleanSegNorm.includes(c);
+          });
         });
       }
     }
