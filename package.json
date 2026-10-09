@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "build": "node -e \"console.log('TejStockAI Netlify Build Complete')\""
   },
   "keywords": [
     "tejstockai",
@@ -24,6 +25,7 @@
     "express": "^4.21.2",
     "localtunnel": "^2.0.2",
     "qrcode": "^1.5.4",
+    "serverless-http": "^4.0.0",
     "ws": "^8.18.0"
   }
 }

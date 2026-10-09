@@ -75,12 +75,40 @@ A next-generation financial intelligence platform, multi-stage Chartink-style sc
    - **Windows (Local)**: [http://localhost:3000](http://localhost:3000)
    - **Phone over Mobile Data**: Scan the **🌐 Mobile Data** QR code directly from your phone camera!
    - **Phone over Same Wi-Fi**: Scan the **📶 Same Wi-Fi** QR code or visit `http://<YOUR_LOCAL_IP>:3000`
+## ☁️ Deploying to Netlify (`netlify.app`)
+
+TejStockAI is configured for **Netlify** with zero extra setup needed. The static frontend is served through Netlify's CDN, and the Express backend runs via Netlify Serverless Functions (AWS Lambda).
+
+### Option 1: Deploy via GitHub (Recommended)
+1. Push this project to your GitHub repository:
+   ```bash
+   git add .
+   git commit -m "Configure Netlify deployment"
+   git push origin main
+   ```
+2. Log in to [Netlify Dashboard](https://app.netlify.com).
+3. Click **"Add new site"** → **"Import an existing project"** → select **GitHub** and your repository.
+4. Netlify will auto-detect `netlify.toml`:
+   - **Publish directory**: `public`
+   - **Functions directory**: `netlify/functions`
+   - **Build command**: `npm run build`
+5. Click **"Deploy site"**. Your app will be live at `https://<your-site-name>.netlify.app`!
+
+### Option 2: Deploy directly via Netlify CLI
+Run from this folder:
+```bash
+npx -y netlify-cli deploy --prod
+```
+Follow the quick prompts to log in and select or create your Netlify site.
+
+---
+
 ## 🔄 Cache Refresh After Updates
 
 When you deploy a new version of the app, the service worker caches old assets. To ensure you get the latest UI and scripts:
 
 1. Open the app in Chrome (or your mobile browser).
-2. Press **Ctrl + Shift + Delete** → Clear **Cached images and files**.
+2. Press **Ctrl + Shift + Delete** → Clear **Cached images and files**.
 3. Reload the page (F5) or close and reopen the PWA.
 4. Alternatively, run this script in the browser console:
 

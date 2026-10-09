@@ -18,8 +18,13 @@ const {
 const { PREBUILT_SCANS, runScan } = require('./scans');
 
 const app = express();
-const server = http.createServer(app);
-const wss = new WebSocketServer({ server });
+const isDirectRun = require.main === module;
+let server = null;
+let wss = null;
+if (isDirectRun) {
+  server = http.createServer(app);
+  wss = new WebSocketServer({ server });
+}
 
 const PORT = process.env.PORT || 3000;
 
@@ -138,6 +143,16 @@ const localIp = getLocalIpAddress();
 const localUrl = `http://localhost:${PORT}`;
 const lanUrl = `http://${localIp}:${PORT}`;
 
+// Netlify Serverless Path Normalizer
+app.use((req, res, next) => {
+  if (req.url.startsWith('/.netlify/functions/api')) {
+    req.url = req.url.replace('/.netlify/functions/api', '/api') || '/api';
+  } else if (req.url.startsWith('/.netlify/functions')) {
+    req.url = req.url.replace('/.netlify/functions', '') || '/';
+  }
+  next();
+});
+
 // Compression Middleware (Gzip & Deflate for all text, html, css, js, json)
 app.use(compression({
   threshold: 1024
@@ -151,7 +166,20 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // ADMIN SECURITY & VISITOR/LOGIN TRACKING
 // ==========================================
 const ADMIN_PHONE = '7647814314';
-const LOGS_FILE = path.join(__dirname, 'admin_logs.json');
+
+function resolveLogsPath() {
+  const candidates = [
+    path.join(__dirname, 'admin_logs.json'),
+    path.join(process.cwd(), 'admin_logs.json'),
+    path.join(os.tmpdir(), 'admin_logs.json')
+  ];
+  for (const c of candidates) {
+    if (fs.existsSync(c)) return c;
+  }
+  return path.join(__dirname, 'admin_logs.json');
+}
+
+let LOGS_FILE = resolveLogsPath();
 
 let adminOtpStore = {
   phone: null,
@@ -261,7 +289,12 @@ function saveTrackingData() {
     if (trackingData.visitors.length > 500) trackingData.visitors = trackingData.visitors.slice(0, 500);
     if (trackingData.logins.length > 500) trackingData.logins = trackingData.logins.slice(0, 500);
     if (trackingData.visitEvents.length > 500) trackingData.visitEvents = trackingData.visitEvents.slice(0, 500);
-    fs.writeFileSync(LOGS_FILE, JSON.stringify(trackingData, null, 2), 'utf8');
+    try {
+      fs.writeFileSync(LOGS_FILE, JSON.stringify(trackingData, null, 2), 'utf8');
+    } catch (writeErr) {
+      const tmpFile = path.join(os.tmpdir(), 'admin_logs.json');
+      fs.writeFileSync(tmpFile, JSON.stringify(trackingData, null, 2), 'utf8');
+    }
   } catch (e) {
     console.error('[Admin] Error saving logs:', e.message);
   }
@@ -404,13 +437,24 @@ let cachedLanQrDataUrl = null;
 // REST Endpoints
 app.get('/api/info', async (req, res) => {
   try {
+    const isNetlify = Boolean(process.env.NETLIFY || req.headers['x-nf-request-id']);
+    const host = req.get('host') || 'localhost:3000';
+    const proto = req.protocol || 'http';
+    const currentDeployUrl = `${proto}://${host}`;
+
     if (!cachedLanQrDataUrl) {
       cachedLanQrDataUrl = await QRCode.toDataURL(lanUrl, { margin: 2, width: 250 });
     }
     const lanQrDataUrl = cachedLanQrDataUrl;
     let pubQr = publicQrDataUrl;
-    if (publicUrl && !pubQr) {
-      pubQr = await QRCode.toDataURL(publicUrl, { margin: 2, width: 250 });
+    let activePublicUrl = publicUrl;
+
+    if (isNetlify && !activePublicUrl) {
+      activePublicUrl = currentDeployUrl;
+    }
+
+    if (activePublicUrl && !pubQr) {
+      pubQr = await QRCode.toDataURL(activePublicUrl, { margin: 2, width: 250 });
       publicQrDataUrl = pubQr;
     }
     const marketStatus = getNseMarketStatus();
@@ -421,13 +465,13 @@ app.get('/api/info', async (req, res) => {
       localUrl,
       lanUrl,
       localIp,
-      publicUrl,
-      tunnelType: cloudflaredProc ? 'cloudflare' : 'direct',
+      publicUrl: activePublicUrl,
+      tunnelType: isNetlify ? 'netlify' : (cloudflaredProc ? 'cloudflare' : 'direct'),
       tunnelPassword: '',
       publicQrDataUrl: pubQr,
       lanQrDataUrl,
       qrDataUrl: pubQr || lanQrDataUrl,
-      deviceCounts: wss.clients.size,
+      deviceCounts: wss ? wss.clients.size : 1,
       marketStatus
     });
   } catch (err) {
@@ -876,7 +920,7 @@ app.get('/api/admin/stats', (req, res) => {
       totalIndividualEvents: (trackingData.visitEvents || []).length,
       uniqueVisitors: new Set(trackingData.visitors.map(v => v.ip)).size,
       totalLogins: trackingData.logins.length,
-      onlineNow: wss.clients.size,
+      onlineNow: wss ? wss.clients.size : 1,
       brokerCounts,
       adminPhone: ADMIN_PHONE,
       lastUpdated: new Date().toISOString()
@@ -906,6 +950,21 @@ app.post('/api/admin/clear-logs', (req, res) => {
 
 app.get(['/api/market-status', '/api/market/status'], (req, res) => {
   res.json(getNseMarketStatus());
+});
+
+app.get('/api/market/ticks', async (req, res) => {
+  try {
+    const count = parseInt(req.query.count, 10) || 20;
+    const ticks = await marketService.fetchLiveMarketTicks(count);
+    res.json({
+      success: true,
+      timestamp: Date.now(),
+      marketStatus: getNseMarketStatus(),
+      ticks
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 app.post('/api/market/refresh', async (req, res) => {
@@ -1700,6 +1759,7 @@ app.post('/api/alerts/dispatch', async (req, res) => {
 });
 
 function broadcast(data) {
+  if (!wss || !wss.clients) return;
   const msg = JSON.stringify(data);
   wss.clients.forEach(client => {
     if (client.readyState === 1) {
@@ -1708,122 +1768,132 @@ function broadcast(data) {
   });
 }
 
-wss.on('connection', (ws, req) => {
-  const marketStatus = getNseMarketStatus();
-  ws.send(JSON.stringify({
-    type: 'CONNECTED',
-    clientsCount: wss.clients.size,
-    localIp,
-    lanUrl,
-    marketStatus,
-    initialTicks: marketService.generateLiveTicks(10)
-  }));
+if (isDirectRun && server && wss) {
+  wss.on('connection', (ws, req) => {
+    const marketStatus = getNseMarketStatus();
+    ws.send(JSON.stringify({
+      type: 'CONNECTED',
+      clientsCount: wss.clients.size,
+      localIp,
+      lanUrl,
+      marketStatus,
+      initialTicks: marketService.generateLiveTicks(10)
+    }));
 
-  ws.on('message', message => {
-    try {
-      const parsed = JSON.parse(message);
-      if (parsed.type === 'PING') {
-        ws.send(JSON.stringify({ type: 'PONG', timestamp: Date.now() }));
-      }
-    } catch (e) {}
-  });
-});
-
-// Continuous Real-Time Tick Stream (Polls 100% REAL LIVE exchange quotes every 3.5s)
-let isPollingRealTicks = false;
-setInterval(async () => {
-  if (isPollingRealTicks) return;
-  isPollingRealTicks = true;
-  try {
-    const ticks = await marketService.fetchLiveMarketTicks(20);
-    if (ticks && ticks.length > 0) {
-      broadcast({
-        type: 'PRICE_TICK',
-        timestamp: Date.now(),
-        marketStatus: getNseMarketStatus(),
-        ticks
-      });
-    }
-  } catch (err) {
-    console.error('[LiveStream] Tick error:', err.message);
-  } finally {
-    isPollingRealTicks = false;
-  }
-}, 3500);
-
-// Comprehensive Market Data Sync (Polls Yahoo quotes during market hours or if stale)
-setInterval(async () => {
-  try {
-    const status = getNseMarketStatus();
-    if (status.isOpen || !marketService.lastRefreshAll || Date.now() - marketService.lastRefreshAll > 300000) {
-      console.log('[LiveStream] Polling active quotes...');
-      await marketService.refreshAllStocks();
-    }
-    broadcast({
-      type: 'MARKET_DATA_UPDATE',
-      timestamp: Date.now(),
-      marketStatus: status,
-      total: marketService.stocksMap.size,
-      sectors: marketService.getSectorsWithStocks(),
-      watchlists: marketService.getKiteWatchlistTabs(),
-      stocks: marketService.getAllStocks()
+    ws.on('message', message => {
+      try {
+        const parsed = JSON.parse(message);
+        if (parsed.type === 'PING') {
+          ws.send(JSON.stringify({ type: 'PONG', timestamp: Date.now() }));
+        }
+      } catch (e) {}
     });
-  } catch (err) {
-    console.error('[LiveStream] Sync error:', err.message);
-  }
-}, 15000);
-
-// Start HTTP & WebSocket server immediately for instantaneous 0ms port binding
-server.listen(PORT, '0.0.0.0', async () => {
-  const marketStatus = getNseMarketStatus();
-  console.log('====================================================');
-  console.log('  TEJSTOCKAI - Pro Broker Screener & Market Terminal ');
-  console.log('  (Zerodha Kite + Angel One + Upstox + Dhan Matrix)  ');
-  console.log('====================================================');
-  console.log(`> Market Status:          ${marketStatus.statusText}`);
-  console.log(`> Current IST:            ${marketStatus.istTime}`);
-  console.log(`> Windows / Local:        ${localUrl}`);
-  console.log(`> Android / LAN:          ${lanUrl}`);
-  console.log('----------------------------------------------------');
-  console.log('Scan this QR code with your Android phone to open (Local Wi-Fi):');
-  try {
-    const qrString = await QRCode.toString(lanUrl, { type: 'terminal', small: true });
-    console.log(qrString);
-  } catch (e) {}
-  console.log('====================================================');
-  
-  // Launch public HTTPS tunnel for remote Mobile Internet / 4G / 5G phone access
-  startTunnel();
-
-  // Broadcast initial cached / calibrated market data immediately
-  broadcast({
-    type: 'MARKET_REFRESHED',
-    timestamp: Date.now(),
-    marketStatus: getNseMarketStatus(),
-    total: marketService.stocksMap.size,
-    sectors: marketService.getSectorsWithStocks(),
-    watchlists: marketService.getKiteWatchlistTabs(),
-    stocks: marketService.getAllStocks()
   });
 
-  // Background quotes sync: fetch fresh live quotes from NSE without blocking server startup
-  (async () => {
+  // Continuous Real-Time Tick Stream (Polls 100% REAL LIVE exchange quotes every 3.5s)
+  let isPollingRealTicks = false;
+  setInterval(async () => {
+    if (isPollingRealTicks) return;
+    isPollingRealTicks = true;
     try {
-      console.log('[TejStockAI] Pre-syncing live market quotes from NSE in background...');
-      await marketService.refreshAllStocks();
-      console.log(`[TejStockAI] Initial quotes sync completed successfully with ${marketService.stocksMap.size} symbols ready.`);
+      const ticks = await marketService.fetchLiveMarketTicks(20);
+      if (ticks && ticks.length > 0) {
+        broadcast({
+          type: 'PRICE_TICK',
+          timestamp: Date.now(),
+          marketStatus: getNseMarketStatus(),
+          ticks
+        });
+      }
+    } catch (err) {
+      console.error('[LiveStream] Tick error:', err.message);
+    } finally {
+      isPollingRealTicks = false;
+    }
+  }, 3500);
+
+  // Comprehensive Market Data Sync (Polls Yahoo quotes during market hours or if stale)
+  setInterval(async () => {
+    try {
+      const status = getNseMarketStatus();
+      if (status.isOpen || !marketService.lastRefreshAll || Date.now() - marketService.lastRefreshAll > 300000) {
+        console.log('[LiveStream] Polling active quotes...');
+        await marketService.refreshAllStocks();
+      }
       broadcast({
-        type: 'MARKET_REFRESHED',
+        type: 'MARKET_DATA_UPDATE',
         timestamp: Date.now(),
-        marketStatus: getNseMarketStatus(),
+        marketStatus: status,
         total: marketService.stocksMap.size,
         sectors: marketService.getSectorsWithStocks(),
         watchlists: marketService.getKiteWatchlistTabs(),
         stocks: marketService.getAllStocks()
       });
     } catch (err) {
-      console.error('[TejStockAI] Background quotes sync warning:', err.message);
+      console.error('[LiveStream] Sync error:', err.message);
     }
-  })();
-});
+  }, 15000);
+
+  // Start HTTP & WebSocket server immediately for instantaneous 0ms port binding
+  server.listen(PORT, '0.0.0.0', async () => {
+    const marketStatus = getNseMarketStatus();
+    console.log('====================================================');
+    console.log('  TEJSTOCKAI - Pro Broker Screener & Market Terminal ');
+    console.log('  (Zerodha Kite + Angel One + Upstox + Dhan Matrix)  ');
+    console.log('====================================================');
+    console.log(`> Market Status:          ${marketStatus.statusText}`);
+    console.log(`> Current IST:            ${marketStatus.istTime}`);
+    console.log(`> Windows / Local:        ${localUrl}`);
+    console.log(`> Android / LAN:          ${lanUrl}`);
+    console.log('----------------------------------------------------');
+    console.log('Scan this QR code with your Android phone to open (Local Wi-Fi):');
+    try {
+      const qrString = await QRCode.toString(lanUrl, { type: 'terminal', small: true });
+      console.log(qrString);
+    } catch (e) {}
+    console.log('====================================================');
+    
+    // Launch public HTTPS tunnel for remote Mobile Internet / 4G / 5G phone access
+    startTunnel();
+
+    // Broadcast initial cached / calibrated market data immediately
+    broadcast({
+      type: 'MARKET_REFRESHED',
+      timestamp: Date.now(),
+      marketStatus: getNseMarketStatus(),
+      total: marketService.stocksMap.size,
+      sectors: marketService.getSectorsWithStocks(),
+      watchlists: marketService.getKiteWatchlistTabs(),
+      stocks: marketService.getAllStocks()
+    });
+
+    // Background quotes sync: fetch fresh live quotes from NSE without blocking server startup
+    (async () => {
+      try {
+        console.log('[TejStockAI] Pre-syncing live market quotes from NSE in background...');
+        await marketService.refreshAllStocks();
+        console.log(`[TejStockAI] Initial quotes sync completed successfully with ${marketService.stocksMap.size} symbols ready.`);
+        broadcast({
+          type: 'MARKET_REFRESHED',
+          timestamp: Date.now(),
+          marketStatus: getNseMarketStatus(),
+          total: marketService.stocksMap.size,
+          sectors: marketService.getSectorsWithStocks(),
+          watchlists: marketService.getKiteWatchlistTabs(),
+          stocks: marketService.getAllStocks()
+        });
+      } catch (err) {
+        console.error('[TejStockAI] Background quotes sync warning:', err.message);
+      }
+    })();
+  });
+}
+
+module.exports = {
+  app,
+  marketService,
+  getNseMarketStatus,
+  PREBUILT_SCANS,
+  broadcast
+};
 

@@ -455,9 +455,23 @@ const KITE_WATCHLIST_TABS = {
 const fs = require('fs');
 const path = require('path');
 
+function resolveAssetPath(filename) {
+  const candidates = [
+    path.join(__dirname, filename),
+    path.join(process.cwd(), filename),
+    path.join(__dirname, '..', filename),
+    path.join(__dirname, '..', '..', filename),
+    path.join('/var/task', filename)
+  ];
+  for (const p of candidates) {
+    if (fs.existsSync(p)) return p;
+  }
+  return path.join(__dirname, filename);
+}
+
 try {
   const existingSymbols = new Set(NSE_MASTER_DIRECTORY.map(s => s.symbol.toUpperCase()));
-  const masterDataPath = path.join(__dirname, 'nse-master.json');
+  const masterDataPath = resolveAssetPath('nse-master.json');
   if (fs.existsSync(masterDataPath)) {
     const raw = fs.readFileSync(masterDataPath, 'utf8').replace(/^\uFEFF/, '');
     const masterData = JSON.parse(raw);
@@ -477,7 +491,7 @@ try {
   }
 
   // Also supplement from EQUITY_L.csv for complete 2,500+ NSE market coverage
-  const equityCsvPath = path.join(__dirname, 'EQUITY_L.csv');
+  const equityCsvPath = resolveAssetPath('EQUITY_L.csv');
   if (fs.existsSync(equityCsvPath)) {
     const lines = fs.readFileSync(equityCsvPath, 'utf8').split('\n');
     for (let i = 1; i < lines.length; i++) {

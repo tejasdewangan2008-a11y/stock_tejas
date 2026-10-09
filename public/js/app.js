@@ -4568,42 +4568,82 @@ class App {
     }
   }
 
-  // WebSocket Live Real-Time Data Streaming
+  // WebSocket Live Real-Time Data Streaming (with Netlify / Serverless HTTP Polling Fallback)
   connectWebSocket() {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}`;
-    this.ws = new WebSocket(wsUrl);
+    const isNetlify = window.location.hostname.includes('netlify.app');
+    if (isNetlify) {
+      console.log('🌐 Netlify cloud environment detected — starting real-time market stream polling.');
+      this.startHttpPollingFallback();
+      return;
+    }
 
-    this.ws.onopen = () => {
-      this.reconnectAttempts = 0;
-      console.log('⚡ Connected to Chartink Real-Time Market Feed.');
-    };
+    try {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${protocol}//${window.location.host}`;
+      this.ws = new WebSocket(wsUrl);
 
-    this.ws.onmessage = e => {
-      try {
-        const msg = JSON.parse(e.data);
-        if (msg.type === 'PRICE_TICK') {
-          if (msg.marketStatus) this.updateMarketStatusBadge(msg.marketStatus);
-          if (msg.ticks) this.applyLiveTicks(msg.ticks);
-        } else if (msg.type === 'CONNECTED') {
-          if (msg.marketStatus) this.updateMarketStatusBadge(msg.marketStatus);
-          if (msg.initialTicks) this.applyLiveTicks(msg.initialTicks);
-        } else if (msg.type === 'MARKET_DATA_UPDATE' || msg.type === 'MARKET_REFRESHED') {
-          if (msg.marketStatus) this.updateMarketStatusBadge(msg.marketStatus);
-          this.applyMarketDataUpdate(msg);
-        } else if (msg.type === 'SCANS_UPDATED') {
-          if (window.dashboard) window.dashboard.loadScans();
-          this.renderStrategiesLibrary();
-        } else if (msg.type === 'WATCHLIST_UPDATED') {
-          this.loadWatchlist();
+      this.ws.onopen = () => {
+        this.reconnectAttempts = 0;
+        if (this.fallbackPollingTimer) {
+          clearInterval(this.fallbackPollingTimer);
+          this.fallbackPollingTimer = null;
         }
-      } catch (err) {}
+        console.log('⚡ Connected to Chartink Real-Time Market Feed.');
+      };
+
+      this.ws.onmessage = e => {
+        try {
+          const msg = JSON.parse(e.data);
+          if (msg.type === 'PRICE_TICK') {
+            if (msg.marketStatus) this.updateMarketStatusBadge(msg.marketStatus);
+            if (msg.ticks) this.applyLiveTicks(msg.ticks);
+          } else if (msg.type === 'CONNECTED') {
+            if (msg.marketStatus) this.updateMarketStatusBadge(msg.marketStatus);
+            if (msg.initialTicks) this.applyLiveTicks(msg.initialTicks);
+          } else if (msg.type === 'MARKET_DATA_UPDATE' || msg.type === 'MARKET_REFRESHED') {
+            if (msg.marketStatus) this.updateMarketStatusBadge(msg.marketStatus);
+            this.applyMarketDataUpdate(msg);
+          } else if (msg.type === 'SCANS_UPDATED') {
+            if (window.dashboard) window.dashboard.loadScans();
+            this.renderStrategiesLibrary();
+          } else if (msg.type === 'WATCHLIST_UPDATED') {
+            this.loadWatchlist();
+          }
+        } catch (err) {}
+      };
+
+      this.ws.onerror = () => {
+        this.startHttpPollingFallback();
+      };
+
+      this.ws.onclose = () => {
+        this.startHttpPollingFallback();
+        const delay = Math.min(10000, 1000 * Math.pow(2, this.reconnectAttempts++));
+        if (this.reconnectAttempts < 6) {
+          setTimeout(() => this.connectWebSocket(), delay);
+        }
+      };
+    } catch (err) {
+      this.startHttpPollingFallback();
+    }
+  }
+
+  // Real-Time High Frequency HTTP Fallback for Cloud / Netlify Serverless Environments
+  startHttpPollingFallback() {
+    if (this.fallbackPollingTimer) return;
+    const pollTicks = async () => {
+      try {
+        const resp = await fetch('/api/market/ticks');
+        if (resp.ok) {
+          const data = await resp.json();
+          if (data.marketStatus) this.updateMarketStatusBadge(data.marketStatus);
+          if (data.ticks && Array.isArray(data.ticks)) this.applyLiveTicks(data.ticks);
+        }
+      } catch (e) {}
     };
 
-    this.ws.onclose = () => {
-      const delay = Math.min(10000, 1000 * Math.pow(2, this.reconnectAttempts++));
-      setTimeout(() => this.connectWebSocket(), delay);
-    };
+    pollTicks();
+    this.fallbackPollingTimer = setInterval(pollTicks, 3500);
   }
 
   // PWA Installation Flow
