@@ -17,9 +17,7 @@
         "nse-master.json",
         "EQUITY_L.csv",
         "admin_logs.json"
-      ],
-      "memory": 1024,
-      "maxDuration": 30
+      ]
     }
   },
   "headers": [
