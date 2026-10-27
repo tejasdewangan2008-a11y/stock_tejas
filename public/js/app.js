@@ -265,6 +265,7 @@ class App {
       }
 
       this.showToast(`Welcome back, ${user.displayName}! Connected to ${user.broker}.`, 'success', 3500);
+      this.openWorkspaceGateway();
     } catch (err) {
       console.warn('[Auth] Server login fallback to offline trader mode:', err);
       const fallbackUser = {
@@ -284,6 +285,7 @@ class App {
       this.applyUserSession(fallbackUser);
       document.getElementById('loginPortalView')?.classList.add('hidden');
       this.showToast(`Welcome ${fallbackUser.displayName}! Terminal unlocked.`, 'success', 3500);
+      this.openWorkspaceGateway();
     } finally {
       if (btnText) btnText.textContent = 'Sign In to Market Terminal';
       if (submitBtn) submitBtn.disabled = false;
@@ -310,6 +312,7 @@ class App {
     }
 
     this.showToast('Instant Trader Access Granted! Welcome to TejStockAI.', 'success', 3500);
+    this.openWorkspaceGateway();
   }
 
   logout() {
@@ -399,6 +402,7 @@ class App {
         if (portal) portal.classList.add('hidden');
 
         this.showToast(`Welcome ${user.displayName}! Signed in with Google.`, 'success', 4000);
+        this.openWorkspaceGateway();
       } else {
         throw new Error(data.error || 'Google authentication rejected by server');
       }
@@ -420,6 +424,7 @@ class App {
       this.closeGoogleAuthDialog();
       document.getElementById('loginPortalView')?.classList.add('hidden');
       this.showToast(`Signed in with Google as ${fallbackUser.displayName}!`, 'success', 4000);
+      this.openWorkspaceGateway();
     }
   }
 
@@ -693,17 +698,31 @@ class App {
     const modal = document.getElementById('adminDashboardModal');
     if (modal) {
       modal.style.display = 'flex';
+      const container = modal.querySelector('.admin-modal-container');
+      if (container) container.scrollTop = 0;
       this.loadAdminStats();
       this.startAdminAutoRefresh();
     }
   }
 
-  closeAdminModal() {
+  closeAdminModal(openGateway = false) {
     const modal = document.getElementById('adminDashboardModal');
     if (modal) modal.style.display = 'none';
     if (this.adminRefreshInterval) {
       clearInterval(this.adminRefreshInterval);
       this.adminRefreshInterval = null;
+    }
+    if (openGateway) {
+      this.openWorkspaceGateway();
+    }
+  }
+
+  launchFromAdmin(mode = 'cash') {
+    this.closeAdminModal(false);
+    if (mode === 'gateway') {
+      this.openWorkspaceGateway();
+    } else {
+      this.selectWorkspace(mode, true);
     }
   }
 
@@ -1220,6 +1239,8 @@ class App {
       if (window.dashboard) {
         window.dashboard.renderCurrentDashboard();
       }
+    } else if (viewName === 'fno_derivatives') {
+      this.loadFnoOptionChain(this.activeFnoSymbol || 'NIFTY');
     }
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1322,10 +1343,7 @@ class App {
       const changeText = s.changePct !== null ? `${changeSign}${s.changePct}%` : 'NSE';
 
       let badgeHtml = '';
-      if (s.badge === 'CALL CE') badgeHtml = '<span class="search-res-badge badge-ce">CALL CE</span>';
-      else if (s.badge === 'PUT PE') badgeHtml = '<span class="search-res-badge badge-pe">PUT PE</span>';
-      else if (s.badge === 'FUTURES') badgeHtml = '<span class="search-res-badge badge-fut">FUT</span>';
-      else if (s.badge === 'INDEX') badgeHtml = '<span class="search-res-badge" style="background:rgba(192,132,252,0.15);color:#c084fc;border:1px solid rgba(192,132,252,0.3);">INDEX</span>';
+      if (s.badge === 'INDEX') badgeHtml = '<span class="search-res-badge" style="background:rgba(192,132,252,0.15);color:#c084fc;border:1px solid rgba(192,132,252,0.3);">INDEX</span>';
       else badgeHtml = '<span class="search-res-badge badge-cash">CASH</span>';
 
       html += `
@@ -1423,10 +1441,7 @@ class App {
         const changeText = s.changePct !== null ? `${changeSign}${s.changePct}%` : 'NSE';
 
         let badgeHtml = '';
-        if (s.badge === 'CALL CE') badgeHtml = '<span class="search-res-badge badge-ce">CE</span>';
-        else if (s.badge === 'PUT PE') badgeHtml = '<span class="search-res-badge badge-pe">PE</span>';
-        else if (s.badge === 'FUTURES') badgeHtml = '<span class="search-res-badge badge-fut">FUT</span>';
-        else if (s.badge === 'INDEX') badgeHtml = '<span class="search-res-badge" style="background:rgba(192,132,252,0.15);color:#c084fc;border:1px solid rgba(192,132,252,0.3);font-size:0.65rem;padding:1px 4px;border-radius:3px;">INDEX</span>';
+        if (s.badge === 'INDEX') badgeHtml = '<span class="search-res-badge" style="background:rgba(192,132,252,0.15);color:#c084fc;border:1px solid rgba(192,132,252,0.3);font-size:0.65rem;padding:1px 4px;border-radius:3px;">INDEX</span>';
         else badgeHtml = '<span class="search-res-badge badge-cash">CASH</span>';
 
         html += `
@@ -1761,8 +1776,8 @@ class App {
     if (isIntraday) {
       document.getElementById('aiLevelTitleEntry').textContent = '🎯 Intraday Entry Zone';
       document.getElementById('aiLevelHintEntry').textContent = 'Current CMP or retest of VWAP';
-      document.getElementById('aiLevelTitleSL').textContent = '🛡️ 15m ATR Stop-Loss';
-      document.getElementById('aiLevelHintSL').textContent = 'Tight intraday buffer below VWAP';
+      document.getElementById('aiLevelTitleSL').textContent = '🛡️ Wide ATR Stop-Loss';
+      document.getElementById('aiLevelHintSL').textContent = '2.5x ATR buffer below VWAP to absorb false wicks';
       document.getElementById('aiLevelTitleT1').textContent = '🚀 Target 1 (Scalp)';
       document.getElementById('aiLevelHintT1').textContent = 'R1 / Camarilla H4 scalp';
       document.getElementById('aiLevelTitleT2').textContent = '🔥 Target 2 (Expansion)';
@@ -1770,18 +1785,27 @@ class App {
     } else {
       document.getElementById('aiLevelTitleEntry').textContent = '🎯 Accumulation Range';
       document.getElementById('aiLevelHintEntry').textContent = 'Value range near 50-day SMA';
-      document.getElementById('aiLevelTitleSL').textContent = '🛡️ Weekly Positional SL';
-      document.getElementById('aiLevelHintSL').textContent = 'Weekly close basis below 200 SMA';
+      document.getElementById('aiLevelTitleSL').textContent = '🛡️ Positional Cushion SL';
+      document.getElementById('aiLevelHintSL').textContent = '15% cushion / weekly close below 200 SMA';
       document.getElementById('aiLevelTitleT1').textContent = '🚀 Target 1 (3-Month Swing)';
       document.getElementById('aiLevelHintT1').textContent = 'Projected 8-15% swing extension';
       document.getElementById('aiLevelTitleT2').textContent = '🌟 Target 2 (1-Year Valuation)';
       document.getElementById('aiLevelHintT2').textContent = `${ai.tradeSetup?.projectedReturn || '+25%'} expected return`;
     }
 
+    const entryVal = ai.tradeSetup.entry || 0;
+    const slVal = ai.tradeSetup.stopLoss || 0;
+    const t1Val = ai.tradeSetup.target1 || 0;
+    const t2Val = ai.tradeSetup.target2 || 0;
+
+    const slDistPct = entryVal > 0 ? ((Math.abs(entryVal - slVal) / entryVal) * 100).toFixed(1) : '5.0';
+    const t1DistPct = entryVal > 0 ? ((Math.abs(t1Val - entryVal) / entryVal) * 100).toFixed(1) : '7.5';
+    const t2DistPct = entryVal > 0 ? ((Math.abs(t2Val - entryVal) / entryVal) * 100).toFixed(1) : '12.5';
+
     document.getElementById('aiLevelEntry').textContent = `₹${ai.tradeSetup.entry}`;
-    document.getElementById('aiLevelStopLoss').textContent = `₹${ai.tradeSetup.stopLoss}`;
-    document.getElementById('aiLevelTarget1').textContent = `₹${ai.tradeSetup.target1}`;
-    document.getElementById('aiLevelTarget2').textContent = `₹${ai.tradeSetup.target2}`;
+    document.getElementById('aiLevelStopLoss').innerHTML = `₹${ai.tradeSetup.stopLoss} <small style="font-size: 0.72rem; color: #ef4444; font-weight: 600;">(-${slDistPct}%)</small>`;
+    document.getElementById('aiLevelTarget1').innerHTML = `₹${ai.tradeSetup.target1} <small style="font-size: 0.72rem; color: #10b981; font-weight: 600;">(+${t1DistPct}%)</small>`;
+    document.getElementById('aiLevelTarget2').innerHTML = `₹${ai.tradeSetup.target2} <small style="font-size: 0.72rem; color: #10b981; font-weight: 600;">(+${t2DistPct}%)</small>`;
 
     // Render Mode-Specific Technical Matrix Dashboard
     const techTitle = document.getElementById('aiTechTitle');
@@ -1810,8 +1834,8 @@ class App {
             <div class="ai-tech-value text-accent">₹${ai.camarilla?.l3 || '--'}</div>
           </div>
           <div class="ai-tech-item" style="grid-column: span 2;">
-            <div class="ai-tech-label"><span>📈</span> Suggested Option Strike</div>
-            <div class="ai-tech-value" style="color: #c084fc;">${ai.suggestedOption || 'ATM Strike'}</div>
+            <div class="ai-tech-label"><span>📊</span> Cash Volume Velocity</div>
+            <div class="ai-tech-value text-accent">${ai.volumeSurge || 'Active Cash Volume'}</div>
           </div>
           <div class="ai-tech-item" style="grid-column: span 2;">
             <div class="ai-tech-label"><span>⚖️</span> Risk-to-Reward Ratio</div>
@@ -2377,52 +2401,12 @@ class App {
   }
 
   renderDerivativesMatrix(data) {
-    const deriv = data.derivatives || data;
-    const pcr = deriv.pcr || 1.0;
-    const pcrSentiment = pcr >= 1.2 ? 'Strong Bullish' : (pcr >= 0.9 ? 'Neutral / Bullish' : 'Bearish');
-
-    const pcrElem = document.getElementById('terminalPcrVal');
-    if (pcrElem) {
-      pcrElem.textContent = `${pcr} (${pcrSentiment})`;
-      pcrElem.className = `broker-card-value ${pcr >= 1.0 ? 'text-green' : 'text-red'}`;
-    }
-
-    const maxPainElem = document.getElementById('terminalMaxPain');
-    if (maxPainElem) {
-      maxPainElem.textContent = `Max Pain: ${deriv.maxPain} • ATM: ${deriv.atmStrike}`;
-    }
-
-    const optHeader = document.getElementById('optionStockHeader');
-    if (optHeader) {
-      optHeader.textContent = `${data.symbol} Option Chain (Dhan Matrix - Monthly Expiry)`;
-    }
-
-    const optPill = document.getElementById('optionPcrPill');
-    if (optPill) {
-      optPill.textContent = `PCR: ${pcr} • Max Pain: ${deriv.maxPain} • VIX: ${deriv.indiaVix || '13.5'}`;
-    }
-
-    // Render Option Chain Rows
-    const tbody = document.getElementById('optionTableBody');
-    if (tbody) {
-      const strikes = deriv.strikes || [];
-      tbody.innerHTML = strikes.map(s => {
-        const isAtm = s.isATM || s.isAtm;
-        const atmStyle = isAtm ? 'background: rgba(99, 102, 241, 0.15); font-weight: 800; border: 1px solid var(--accent);' : '';
-        const atmBadge = isAtm ? '<span style="background: var(--accent); color: #fff; font-size: 0.65rem; padding: 0.1rem 0.3rem; border-radius: 4px; margin-left: 4px;">ATM</span>' : '';
-
-        return `
-          <tr style="${atmStyle}">
-            <td style="color: var(--green);">${s.callOI || s.callOi || '--'}</td>
-            <td style="color: var(--green); font-family: var(--font-mono); font-weight: 700;">₹${s.callPremium || s.callLtp || '--'}</td>
-            <td style="text-align: center; font-family: var(--font-mono); font-weight: 800; color: var(--accent);">
-              ₹${s.strike}${atmBadge}
-            </td>
-            <td style="color: var(--red); font-family: var(--font-mono); font-weight: 700;">₹${s.putPremium || s.putLtp || '--'}</td>
-            <td style="color: var(--red);">${s.putOI || s.putOi || '--'}</td>
-          </tr>
-        `;
-      }).join('');
+    // F&O / Derivatives removed: populate Cash VWAP & turnover metrics
+    const vwapElem = document.getElementById('terminalPcrVal');
+    if (vwapElem && data) {
+      const vwap = data.marketDepth?.vwap || data.vwap || (data.ltp ? `₹${data.ltp}` : '₹1,248.50');
+      vwapElem.textContent = typeof vwap === 'number' ? `₹${vwap.toFixed(2)}` : vwap;
+      vwapElem.className = 'broker-card-value text-accent';
     }
   }
 
@@ -2440,7 +2424,7 @@ class App {
 
       const ribbonLong = document.getElementById('terminalFiiLong');
       if (ribbonLong) {
-        ribbonLong.textContent = `Futures Long: ${data.fiiFuturesLongRatio || '58.4%'} • Calls: ${data.fiiIndexCallsNet || '+42K'}`;
+        ribbonLong.textContent = `DII Net Support: ${data.diiNetCashCr || '+₹2,120 Cr'}`;
       }
 
       const fiiCash = document.getElementById('fiiNetCash');
@@ -2457,7 +2441,7 @@ class App {
 
       const longRatio = document.getElementById('fiiLongRatio');
       if (longRatio) {
-        longRatio.textContent = data.fiiFuturesLongRatio || '58.4%';
+        longRatio.textContent = data.diiNetCashCr || '+₹2,120.40 Cr';
       }
 
       const stance = document.getElementById('fiiStance');
@@ -2697,84 +2681,279 @@ class App {
   // =========================================================================
 
   initWorkspaceGateway() {
-    const gatewayModal = document.getElementById('workspaceGatewayModal');
-    const navWsBtn = document.getElementById('navWorkspaceSwitcher');
-    const closeBtn = document.getElementById('btnCloseGatewayModal');
-    const selectCashBtn = document.getElementById('btnGatewaySelectCash');
-    const selectFnoBtn = document.getElementById('btnGatewaySelectFno');
-    const chkRemember = document.getElementById('chkRememberWorkspace');
+    this.currentWorkspace = localStorage.getItem('tej_workspace') || 'cash';
+    this.activeFnoSymbol = 'NIFTY';
 
-    const isRemembered = localStorage.getItem('tej_workspace_remember') === 'true';
-    const savedWs = localStorage.getItem('tej_workspace');
-
-    if (savedWs) {
-      this.currentWorkspace = savedWs;
+    if (this.currentWorkspace === 'fno') {
+      document.body.classList.add('workspace-mode-fno');
+      document.body.classList.remove('workspace-mode-cash');
+    } else {
+      document.body.classList.add('workspace-mode-cash');
+      document.body.classList.remove('workspace-mode-fno');
     }
+
     this.updateWorkspaceNavPill();
 
-    // Keep gateway modal hidden by default on app launch
+    // Bind Gateway Modal interactive buttons
+    const btnCash = document.getElementById('btnGatewaySelectCash');
+    const btnFno = document.getElementById('btnGatewaySelectFno');
+    const btnClose = document.getElementById('btnCloseGatewayModal');
+    const chkRemember = document.getElementById('chkRememberWorkspace');
+    const switcher = document.getElementById('navWorkspaceSwitcher');
+
+    if (btnCash) {
+      btnCash.addEventListener('click', () => {
+        const rem = chkRemember ? chkRemember.checked : true;
+        this.selectWorkspace('cash', rem);
+      });
+    }
+
+    if (btnFno) {
+      btnFno.addEventListener('click', () => {
+        const rem = chkRemember ? chkRemember.checked : true;
+        this.selectWorkspace('fno', rem);
+      });
+    }
+
+    if (btnClose) {
+      btnClose.addEventListener('click', () => this.closeWorkspaceGateway());
+    }
+
+    if (switcher) {
+      switcher.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.openWorkspaceGateway();
+      });
+    }
+
+    // Dismiss gateway modal when clicking backdrop
+    const gatewayModal = document.getElementById('workspaceGatewayModal');
     if (gatewayModal) {
-      gatewayModal.style.display = 'none';
       gatewayModal.addEventListener('click', (e) => {
-        if (e.target === gatewayModal) gatewayModal.style.display = 'none';
+        if (e.target === gatewayModal) this.closeWorkspaceGateway();
       });
     }
 
-    if (navWsBtn && gatewayModal) {
-      navWsBtn.addEventListener('click', () => {
-        gatewayModal.style.display = 'flex';
-      });
-    }
+    this.bindFnoEvents();
+  }
 
-    if (closeBtn && gatewayModal) {
-      closeBtn.addEventListener('click', () => {
-        gatewayModal.style.display = 'none';
-      });
+  openWorkspaceGateway() {
+    const modal = document.getElementById('workspaceGatewayModal');
+    if (modal) {
+      modal.style.display = 'flex';
     }
+  }
 
-    if (selectCashBtn) {
-      selectCashBtn.addEventListener('click', () => {
-        this.selectWorkspace('cash', chkRemember ? chkRemember.checked : true);
-      });
+  closeWorkspaceGateway() {
+    const modal = document.getElementById('workspaceGatewayModal');
+    if (modal) {
+      modal.style.display = 'none';
     }
+  }
 
-    if (selectFnoBtn) {
-      selectFnoBtn.addEventListener('click', () => {
-        this.selectWorkspace('fno', chkRemember ? chkRemember.checked : true);
-      });
-    }
+  openInfographicModal() {
+    const modal = document.getElementById('infographicPhotoModal');
+    if (modal) modal.style.display = 'flex';
+  }
+
+  togglePortalMode() {
+    const nextMode = this.currentWorkspace === 'fno' ? 'cash' : 'fno';
+    this.selectWorkspace(nextMode, true);
   }
 
   updateWorkspaceNavPill() {
     const iconElem = document.getElementById('wsNavIcon');
     const labelElem = document.getElementById('wsNavLabel');
-    if (this.currentWorkspace === 'fno') {
-      if (iconElem) iconElem.textContent = '⚡';
-      if (labelElem) labelElem.textContent = 'F&O Derivatives';
-    } else {
-      if (iconElem) iconElem.textContent = '📈';
-      if (labelElem) labelElem.textContent = 'Cash Market';
+    const pill = document.getElementById('navWorkspaceSwitcher');
+    const isFno = this.currentWorkspace === 'fno';
+
+    if (iconElem) iconElem.textContent = isFno ? '⚡' : '📈';
+    if (labelElem) labelElem.textContent = isFno ? 'F&O Cockpit' : 'Cash Portal';
+    if (pill) {
+      pill.classList.toggle('fno-active', isFno);
+      pill.title = isFno
+        ? 'Active: Pure F&O Derivatives Cockpit (Click to switch to Cash Portal)'
+        : 'Active: Pure NSE Cash Equities Portal (Click to switch to F&O Cockpit)';
+    }
+
+    // Update Top Portal Mode Indicator Banner ("other should not be seen that part")
+    const banner = document.getElementById('portalActiveModeBanner');
+    const badge = document.getElementById('portalModeBadge');
+    const text = document.getElementById('portalModeText');
+    const btnToggle = document.getElementById('btnTogglePortalMode');
+
+    if (banner && badge && text && btnToggle) {
+      if (isFno) {
+        banner.className = 'portal-active-mode-banner banner-fno';
+        badge.textContent = '⚡ 100% Futures & Options Cockpit';
+        text.textContent = 'Cash equity screens are strictly hidden. Only derivatives cockpit, strike matrix & OI are active.';
+        btnToggle.innerHTML = '<span>📈 Switch to Cash Portal</span>';
+        btnToggle.className = 'portal-mode-btn btn-switch-cash';
+      } else {
+        banner.className = 'portal-active-mode-banner banner-cash';
+        badge.textContent = '📈 100% Cash Equities Mode';
+        text.textContent = 'F&O derivatives clutter is strictly hidden. Only pure cash equity screens & watchlists are active.';
+        btnToggle.innerHTML = '<span>⚡ Switch to F&O Cockpit</span>';
+        btnToggle.className = 'portal-mode-btn btn-switch-fno';
+      }
     }
   }
 
-  selectWorkspace(mode, remember = true) {
+  selectWorkspace(mode = 'cash', remember = true) {
     this.currentWorkspace = mode;
-    localStorage.setItem('tej_workspace', mode);
     if (remember) {
-      localStorage.setItem('tej_workspace_remember', 'true');
-    } else {
-      localStorage.removeItem('tej_workspace_remember');
+      localStorage.setItem('tej_workspace', mode);
     }
-    this.updateWorkspaceNavPill();
+    this.closeWorkspaceGateway();
 
-    const gatewayModal = document.getElementById('workspaceGatewayModal');
-    if (gatewayModal) gatewayModal.style.display = 'none';
-
-    if (mode === 'cash') {
-      this.switchView('watchlist');
-      this.switchWatchlistTab('STOCK MAIN');
+    // Apply strict isolation classes to document.body ("other should not be seen that part")
+    if (mode === 'fno') {
+      document.body.classList.add('workspace-mode-fno');
+      document.body.classList.remove('workspace-mode-cash');
+      this.updateWorkspaceNavPill();
+      this.showToast('⚡ Switched to Futures & Options Cockpit (Cash clutter strictly hidden)', 'success', 3500);
+      this.switchView('fno_derivatives');
+      this.loadFnoOptionChain(this.activeFnoSymbol || 'NIFTY');
     } else {
-      this.switchView('terminal');
+      document.body.classList.add('workspace-mode-cash');
+      document.body.classList.remove('workspace-mode-fno');
+      this.updateWorkspaceNavPill();
+      this.showToast('📈 Switched to NSE Cash Equities Portal (F&O clutter strictly hidden)', 'success', 3500);
+      this.switchView('dashboard');
+    }
+  }
+
+  bindFnoEvents() {
+    // Underlying chips in F&O Cockpit
+    const chipsContainer = document.getElementById('fnoUnderlyingChips');
+    if (chipsContainer) {
+      chipsContainer.addEventListener('click', (e) => {
+        const chip = e.target.closest('.fno-chip');
+        if (chip && chip.dataset.symbol) {
+          chipsContainer.querySelectorAll('.fno-chip').forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          this.activeFnoSymbol = chip.dataset.symbol;
+          this.loadFnoOptionChain(this.activeFnoSymbol);
+        }
+      });
+    }
+
+    // Refresh Option Chain button
+    const refreshBtn = document.getElementById('btnRefreshFnoChain');
+    if (refreshBtn) {
+      refreshBtn.addEventListener('click', () => {
+        this.loadFnoOptionChain(this.activeFnoSymbol || 'NIFTY');
+      });
+    }
+
+    // Expiry selector dropdown
+    const expirySelect = document.getElementById('fnoExpirySelect');
+    if (expirySelect) {
+      expirySelect.addEventListener('change', () => {
+        this.loadFnoOptionChain(this.activeFnoSymbol || 'NIFTY');
+      });
+    }
+
+    // Buildup cards filter
+    document.querySelectorAll('.fno-buildup-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const filter = card.dataset.filter || '';
+        this.showToast(`Active Buildup Filter: ${filter.replace('_', ' ').toUpperCase()}`, 'info', 2000);
+      });
+    });
+  }
+
+  async loadFnoOptionChain(symbol = 'NIFTY') {
+    this.activeFnoSymbol = symbol;
+    const tbody = document.getElementById('fnoOptionTableBody');
+    if (tbody) {
+      tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 2.5rem; color: #94a3b8;"><div class="thinking-dot"></div><div class="thinking-dot"></div><div class="thinking-dot"></div><p style="margin-top: 0.5rem;">Fetching live ${symbol} Option Chain & Derivatives Matrix from NSE Feed...</p></td></tr>`;
+    }
+
+    try {
+      const resp = await fetch(`/api/market/derivatives/${encodeURIComponent(symbol)}`);
+      const data = await resp.json();
+      const deriv = data.derivatives || {};
+
+      // Update Hero Metrics
+      const spotEl = document.getElementById('fnoSpotPrice');
+      const pcrHero = document.getElementById('fnoPcrHero');
+      const painHero = document.getElementById('fnoMaxPainHero');
+      const vixHero = document.getElementById('fnoVixHero');
+      const activeTitle = document.getElementById('fnoActiveTitle');
+      const spotBadge = document.getElementById('fnoSpotBadge');
+      const pcrVal = document.getElementById('fnoPcrVal');
+      const maxPainVal = document.getElementById('fnoMaxPainVal');
+
+      const spotPrice = data.ltp || (symbol === 'NIFTY' ? 22753.20 : 54366.70);
+      const atmStr = deriv.atmStrike || `₹${Math.round(spotPrice / 50) * 50}`;
+      const pcrNum = typeof deriv.pcr === 'number' ? deriv.pcr : 1.18;
+
+      if (spotEl) spotEl.textContent = `₹${Number(spotPrice).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      if (pcrHero) pcrHero.textContent = `${pcrNum} (${pcrNum >= 1 ? 'Bullish' : 'Bearish'})`;
+      if (painHero) painHero.textContent = deriv.maxPain || atmStr;
+      if (vixHero) vixHero.textContent = deriv.indiaVix || '13.45 (-1.2%)';
+      if (activeTitle) activeTitle.textContent = `${symbol} Option Chain (Dhan & Sensibull Matrix)`;
+      if (spotBadge) spotBadge.textContent = `SPOT: ₹${Number(spotPrice).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} • ATM: ${atmStr}`;
+      if (pcrVal) pcrVal.textContent = pcrNum;
+      if (maxPainVal) maxPainVal.textContent = deriv.maxPain || atmStr;
+
+      // Populate Option Chain Table
+      const strikes = deriv.strikes || [];
+      if (!tbody) return;
+
+      if (strikes.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 2rem; color: #94a3b8;">No option contracts available for ${symbol}</td></tr>`;
+        return;
+      }
+
+      // Find max OI for visual depth bars
+      let maxOi = 1;
+      strikes.forEach(s => {
+        const cOi = parseInt(String(s.callOI || '').replace(/,/g, ''), 10) || 0;
+        const pOi = parseInt(String(s.putOI || '').replace(/,/g, ''), 10) || 0;
+        if (cOi > maxOi) maxOi = cOi;
+        if (pOi > maxOi) maxOi = pOi;
+      });
+
+      tbody.innerHTML = strikes.map(s => {
+        const isAtm = s.isATM || s.isAtm;
+        const cOi = parseInt(String(s.callOI || '').replace(/,/g, ''), 10) || 0;
+        const pOi = parseInt(String(s.putOI || '').replace(/,/g, ''), 10) || 0;
+        const cPct = Math.min(100, Math.round((cOi / maxOi) * 100));
+        const pPct = Math.min(100, Math.round((pOi / maxOi) * 100));
+
+        const atmClass = isAtm ? 'fno-strike-atm' : '';
+        const atmBadge = isAtm ? '<span class="fno-atm-badge">ATM</span>' : '';
+
+        return `
+          <tr class="${atmClass}">
+            <td style="color: #22c55e; font-weight: 700; position: relative;">
+              <div style="position: absolute; right: 0; top: 0; bottom: 0; width: ${cPct}%; background: rgba(34, 197, 94, 0.12); pointer-events: none;"></div>
+              <span style="position: relative; z-index: 1;">${s.callOI}</span>
+            </td>
+            <td style="color: #94a3b8; font-size: 0.85rem;">${(cOi / 50).toLocaleString('en-IN')}</td>
+            <td style="color: #c084fc; font-size: 0.82rem;">${s.iv || '14.5%'}</td>
+            <td style="color: #22c55e; font-family: var(--font-mono); font-weight: 800; border-right: 2px solid #334155;">₹${Number(s.callPremium).toFixed(2)}</td>
+            <td class="fno-strike-cell" style="text-align: center; font-weight: 900; font-size: 1.02rem; color: #f8fafc; background: ${isAtm ? 'rgba(56, 189, 248, 0.22)' : 'rgba(56, 189, 248, 0.05)'};">
+              <span>₹${Number(s.strike).toLocaleString('en-IN')}</span>
+              ${atmBadge}
+            </td>
+            <td style="color: #ef4444; font-family: var(--font-mono); font-weight: 800; border-left: 2px solid #334155;">₹${Number(s.putPremium).toFixed(2)}</td>
+            <td style="color: #c084fc; font-size: 0.82rem;">${s.iv || '14.5%'}</td>
+            <td style="color: #94a3b8; font-size: 0.85rem;">${(pOi / 50).toLocaleString('en-IN')}</td>
+            <td style="color: #ef4444; font-weight: 700; position: relative;">
+              <div style="position: absolute; left: 0; top: 0; bottom: 0; width: ${pPct}%; background: rgba(239, 68, 68, 0.12); pointer-events: none;"></div>
+              <span style="position: relative; z-index: 1;">${s.putOI}</span>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    } catch (err) {
+      console.error('[F&O] Failed to load option chain:', err);
+      if (tbody) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 2rem; color: #ef4444;">Failed to load live derivatives for ${symbol}. Please try again.</td></tr>`;
+      }
     }
   }
 
@@ -3975,6 +4154,17 @@ class App {
       });
     });
 
+    // Horizontal mouse-wheel scrolling for .nav-links
+    const navLinksContainer = document.querySelector('.nav-links');
+    if (navLinksContainer) {
+      navLinksContainer.addEventListener('wheel', (e) => {
+        if (e.deltaY !== 0) {
+          e.preventDefault();
+          navLinksContainer.scrollLeft += (e.deltaY * 0.85);
+        }
+      }, { passive: false });
+    }
+
     // Theme Toggle
     const themeBtn = document.getElementById('btnThemeToggle');
     const updateThemeBtnUI = (theme) => {
@@ -4004,14 +4194,10 @@ class App {
           window.queryBuilder.renderBacktestChart();
         }
       });
-      // Reset any previous light setting to the eye-comfort dark mode
-      let savedTheme = localStorage.getItem('chartink_theme');
-      if (!savedTheme || savedTheme === 'light') {
-        savedTheme = 'dark';
-        localStorage.setItem('chartink_theme', 'dark');
-      }
-      document.documentElement.setAttribute('data-theme', 'dark');
-      updateThemeBtnUI('dark');
+      // Initialize theme preference (default to 'light' to match reference screenshot)
+      let savedTheme = localStorage.getItem('chartink_theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      updateThemeBtnUI(savedTheme);
     }
 
     // Chartink Top Nav Links

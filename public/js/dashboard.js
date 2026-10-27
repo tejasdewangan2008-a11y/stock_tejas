@@ -208,6 +208,23 @@ class DashboardManager {
       this.dashboards = data.dashboards || [];
       this.activeDashboardId = data.activeDashboardId || 'default';
       
+      // Auto-migrate if dashboard contains old default cards that user wanted replaced
+      const defaultDash = this.dashboards.find(d => d.id === 'default');
+      if (defaultDash && Array.isArray(defaultDash.pinnedScanIds)) {
+        const oldScans = ['bullish-breakout', 'rsi-oversold-bounce', 'golden-cross'];
+        const hasOld = defaultDash.pinnedScanIds.some(id => oldScans.includes(id));
+        if (hasOld) {
+          defaultDash.pinnedScanIds = ['indeces-20', 'indeces-intraday', '50-downmw-williams'];
+          try {
+            fetch('/api/dashboards/save', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ dashboards: this.dashboards, activeDashboardId: this.activeDashboardId })
+            });
+          } catch (e) {}
+        }
+      }
+
       if (this.dashboardSelect) {
         this.dashboardSelect.innerHTML = this.dashboards.map(d => `
           <option value="${d.id}" ${d.id === this.activeDashboardId ? 'selected' : ''}>${d.name}</option>
@@ -264,6 +281,12 @@ class DashboardManager {
   }
 
   renderScanCardSkeleton(scan) {
+    const chartinkBtn = scan.chartinkUrl ? `
+      <a href="${scan.chartinkUrl}" target="_blank" rel="noopener noreferrer" class="scan-action-btn" title="Open Original Screener on Chartink.com" style="color: #818cf8; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+      </a>
+    ` : '';
+
     return `
       <div class="scan-card fade-in-up" id="card_${scan.id}">
         <div class="scan-card-header">
@@ -272,6 +295,7 @@ class DashboardManager {
             <span class="scan-count-badge" id="badge_${scan.id}">Scanning...</span>
           </div>
           <div class="scan-card-actions">
+            ${chartinkBtn}
             <button class="scan-action-btn btn-refresh-card" data-id="${scan.id}" title="Refresh Scan">
               <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 4v6h-6M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
             </button>
@@ -294,7 +318,10 @@ class DashboardManager {
           </div>
         </div>
         <div class="scan-card-footer" id="footer_${scan.id}">
-          <span id="footer_meta_${scan.id}">Segment: ${this.currentSegment}</span>
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <span id="footer_meta_${scan.id}">Segment: ${this.currentSegment}</span>
+            ${scan.chartinkUrl ? `<a href="${scan.chartinkUrl}" target="_blank" rel="noopener noreferrer" style="color: #818cf8; font-size: 0.72rem; text-decoration: none; font-weight: 700;">Chartink ↗</a>` : ''}
+          </div>
           <div class="footer-actions">
             <span class="footer-action-link copy-sym-btn" data-id="${scan.id}" style="cursor: pointer;">Copy Symbols</span>
             <span class="footer-action-link export-csv-btn" data-id="${scan.id}" style="cursor: pointer;">CSV</span>

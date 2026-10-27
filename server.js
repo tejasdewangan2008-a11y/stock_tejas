@@ -38,13 +38,13 @@ let dashboardConfig = {
     {
       id: 'default',
       name: 'TejStockAI Main Screener',
-      pinnedScanIds: ['bullish-breakout', 'rsi-oversold-bounce', 'golden-cross', 'volume-shockers', 'bollinger-breakout', 'candlestick-reversal'],
+      pinnedScanIds: ['indeces-20', 'indeces-intraday', '50-downmw-williams'],
       autoRefreshSec: 15
     },
     {
       id: 'intraday',
       name: 'Intraday Broker Momentum',
-      pinnedScanIds: ['volume-shockers', 'top-gainers-momentum', 'macd-bullish-cross'],
+      pinnedScanIds: ['indeces-intraday', 'indeces-20', '50-downmw-williams'],
       autoRefreshSec: 5
     }
   ]
@@ -1470,14 +1470,13 @@ app.post('/api/ai/terminal-chat', async (req, res) => {
   if (qLower.includes('fii') || qLower.includes('dii') || qLower.includes('institution') || qLower.includes('flow')) {
     const fiiDii = getFiiDiiData();
     return res.json({
-      answer: `🏦 **Institutional Flow & FII / DII Pulse (Kite & Dhan Analytics):**\n\n` +
+      answer: `🏦 **Institutional Flow & FII / DII Pulse (Cash Analytics):**\n\n` +
         `- **Date:** ${fiiDii.date}\n` +
         `- **FII Net Cash Activity:** **${fiiDii.fiiNetCashCr}**\n` +
         `- **DII Net Cash Activity:** **${fiiDii.diiNetCashCr}**\n` +
-        `- **FII Index Futures Long Ratio:** **${fiiDii.fiiFuturesLongRatio}** (Above 55% signals sustained bull control)\n` +
-        `- **Index Options Bias:** Calls ${fiiDii.fiiIndexCallsNet} vs Puts ${fiiDii.fiiIndexPutsNet}\n` +
+        `- **DII Net Institutional Support:** **${fiiDii.diiSupportCr || fiiDii.diiNetCashCr}**\n` +
         `- **Market Stance:** ${fiiDii.institutionalStance}\n\n` +
-        `*💡 Pro Tip: When both FII and DII are net buyers, buy-on-dips strategies in Nifty 50 leaders yield highest probability.*`
+        `*💡 Pro Tip: When both FII and DII are net buyers, buy-on-dips strategies in high-delivery cash market leaders yield highest probability.*`
     });
   }
 
@@ -1521,26 +1520,17 @@ app.post('/api/ai/terminal-chat', async (req, res) => {
 
   if (!stock) {
     return res.json({
-      answer: `🤖 **TejStockAI Copilot:** I am monitoring the entire NSE universe. Please specify a valid stock symbol (e.g. *RELIANCE*, *TATAMOTORS*, *SUZLON*, *APOLLO*, *NIFTY50*) or ask about FII/DII activity, Market Depth, Option Chains, or Technical Breakouts!`
+      answer: `🤖 **TejStockAI Copilot:** I am monitoring the entire NSE Cash universe. Please specify a valid stock symbol (e.g. *RELIANCE*, *TATAMOTORS*, *SUZLON*, *APOLLO*, *NIFTY50*) or ask about FII/DII activity, Market Depth, VWAP, Delivery %, or Technical Breakouts!`
     });
   }
 
   const ai = stock.aiMomentum || computeAiMomentumAnalysis(stock);
   const depth = stock.marketDepth || computeBrokerMarketDepth(stock);
-  const deriv = stock.derivatives || computeBrokerDerivatives(stock);
 
   let answer = '';
 
-  if (qLower.includes('option') || qLower.includes('chain') || qLower.includes('pcr') || qLower.includes('max pain') || qLower.includes('derivative') || qLower.includes('f&o')) {
-    answer = `📊 **Dhan & Upstox Option Chain Matrix for ${stock.symbol} (₹${stock.ltp}):**\n\n` +
-      `- **Put-Call Ratio (PCR):** **${deriv.pcr}** (${deriv.pcr > 1.0 ? 'Bullish Sentiment' : 'Bearish / Neutral'})\n` +
-      `- **Max Pain Strike:** **${deriv.maxPain}**\n` +
-      `- **ATM Strike:** **${deriv.atmStrike}**\n` +
-      `- **OI Buildup Direction:** **${deriv.oiBuildup}**\n` +
-      `- **India VIX:** ${deriv.indiaVix}\n\n` +
-      `**Key Strike Open Interest Breakdown:**\n` +
-      deriv.strikes.slice(1, 6).map(s => `  • Strike **₹${s.strike}** ${s.isATM ? '*(ATM)*' : ''}: Call OI ${s.callOI} (₹${s.callPremium}) | Put OI ${s.putOI} (₹${s.putPremium})`).join('\n') + `\n\n` +
-      `*💡 Strategy Setup: ${deriv.pcr > 1.1 ? 'Bull Call Spread (Buy ATM Call + Sell OTM Call)' : 'Wait for Max Pain convergence around ' + deriv.maxPain}*`;
+  if (qLower.includes('option') || qLower.includes('chain') || qLower.includes('pcr') || qLower.includes('max pain') || qLower.includes('derivative') || qLower.includes('f&o') || qLower.includes('futures')) {
+    answer = `ℹ️ **Notice:** Future & Options (F&O / Derivatives) have been removed. TejStockAI is dedicated exclusively to **NSE Cash Equities, Delivery Volumes, VWAP, and Level 2 Market Depth**. You can ask about delivery volume, VWAP, circuit limits, moving averages, or intraday price action for ${stock.symbol}!`;
   } else if (qLower.includes('depth') || qLower.includes('circuit') || qLower.includes('order book') || qLower.includes('vwap') || qLower.includes('turnover') || qLower.includes('delivery')) {
     answer = `📑 **Zerodha Kite & Angel One Level 2 Market Depth for ${stock.symbol} (₹${stock.ltp}):**\n\n` +
       `- **Upper Circuit (+10%):** **₹${depth.upperCircuit}**\n` +
@@ -1563,7 +1553,7 @@ app.post('/api/ai/terminal-chat', async (req, res) => {
       `- **Delivery Volatility:** ${depth.deliveryPct}`;
   } else if (qLower.includes('stop loss') || qLower.includes('sl') || qLower.includes('risk') || qLower.includes('target')) {
     answer = `🛡️ **Stop-Loss & Risk Management for ${stock.symbol}:**\n\n` +
-      `- **Strict Stop-Loss:** **₹${ai.tradeSetup.stopLoss}** (Based on 1.5x ATR volatility buffer)\n` +
+      `- **Wide Volatility Stop-Loss:** **₹${ai.tradeSetup.stopLoss}** (Based on 2.5x ATR buffer / ~5% cushion to absorb false wicks)\n` +
       `- **Current Entry Point:** ₹${stock.ltp}\n` +
       `- **Target 1 (T1):** **₹${ai.tradeSetup.target1}**\n` +
       `- **Target 2 (T2):** **₹${ai.tradeSetup.target2}**\n` +
@@ -1572,9 +1562,9 @@ app.post('/api/ai/terminal-chat', async (req, res) => {
   } else {
     answer = `🤖 **TejStockAI Comprehensive Report for ${stock.symbol} (₹${stock.ltp}):**\n\n` +
       `${ai.summary}\n\n` +
-      `**Broker Health & Derivatives Highlights (Kite / Dhan):**\n` +
+      `**Broker Health & Cash Highlights (Kite / Upstox):**\n` +
       `- **AI Momentum Score:** **${ai.score} / 100** (${ai.state})\n` +
-      `- **Option Chain PCR:** ${deriv.pcr} | **Max Pain:** ${deriv.maxPain}\n` +
+      `- **VWAP (Average Price):** ₹${depth.vwap} | **Turnover:** ${depth.turnoverCr}\n` +
       `- **Upper Circuit:** ₹${depth.upperCircuit} | **Lower Circuit:** ₹${depth.lowerCircuit}\n` +
       `- **Delivery Volume %:** ${depth.deliveryPct}\n` +
       `- **Recommended Action:** **${ai.tradeSetup.recommendedAction}**\n` +

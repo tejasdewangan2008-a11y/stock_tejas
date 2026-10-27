@@ -382,7 +382,10 @@ function computeBrokerMarketDepth(stock) {
   const prevClose = stock.prevClose || ltp;
   const upperCircuit = parseFloat((prevClose * 1.10).toFixed(2));
   const lowerCircuit = parseFloat((prevClose * 0.90).toFixed(2));
-  const vwap = parseFloat(((stock.high + stock.low + stock.close) / 3).toFixed(2));
+  const high = stock.high || (stock.dailyCandles && stock.dailyCandles.length ? stock.dailyCandles[stock.dailyCandles.length - 1].high : ltp * 1.01);
+  const low = stock.low || (stock.dailyCandles && stock.dailyCandles.length ? stock.dailyCandles[stock.dailyCandles.length - 1].low : ltp * 0.99);
+  const close = stock.close || ltp;
+  const vwap = parseFloat(((high + low + close) / 3).toFixed(2));
 
   // Realistic 5-level bid/ask order book matrix
   const bids = [
@@ -470,10 +473,8 @@ function getFiiDiiData() {
     date: new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }),
     fiiNetCashCr: '+₹1,845.60 Cr',
     diiNetCashCr: '+₹2,120.40 Cr',
-    fiiFuturesLongRatio: '58.4%',
-    institutionalStance: '🟢 Net Institutional Accumulation (Bullish Flow)',
-    fiiIndexCallsNet: '+42,500 Contracts',
-    fiiIndexPutsNet: '-18,200 Contracts'
+    diiSupportCr: '+₹2,120.40 Cr',
+    institutionalStance: '🟢 Net Institutional Accumulation (Bullish Flow)'
   };
 }
 
@@ -488,9 +489,11 @@ function computeAiMomentumAnalysis(stock) {
       summary: 'Evaluating real-time indicator alignment and volume flow.',
       confidence: 50,
       pivotPoints: { pivot: stock.ltp, s1: stock.ltp * 0.98, s2: stock.ltp * 0.96, r1: stock.ltp * 1.02, r2: stock.ltp * 1.04 },
-      tradeSetup: { entry: stock.ltp, stopLoss: stock.ltp * 0.97, target1: stock.ltp * 1.03, target2: stock.ltp * 1.06, riskReward: '1 : 2.0' },
+      tradeSetup: { entry: stock.ltp, stopLoss: parseFloat((stock.ltp * 0.95).toFixed(2)), target1: parseFloat((stock.ltp * 1.075).toFixed(2)), target2: parseFloat((stock.ltp * 1.125).toFixed(2)), riskReward: '1 : 2.0' },
       drivers: ['Price oscillating within channel'],
-      risks: ['Market volatility']
+      risks: ['Market volatility'],
+      intraday: computeIntradayAiMomentum(stock),
+      longTerm: computeLongTermAiMomentum(stock)
     };
   }
 
@@ -502,10 +505,11 @@ function computeAiMomentumAnalysis(stock) {
   const drivers = [];
   const risks = [];
 
-  const sma50 = indicators.sma50 || ltp;
-  const sma200 = indicators.sma200 || ltp;
-  const ema9 = indicators.ema9 || ltp;
-  const ema20 = indicators.ema20 || ltp;
+  const ind = indicators || {};
+  const sma50 = ind.sma50 || ltp;
+  const sma200 = ind.sma200 || ltp;
+  const ema9 = ind.ema9 || ltp;
+  const ema20 = ind.ema20 || ltp;
 
   if (ltp > ema9 && ema9 > ema20) {
     score += 15;
@@ -531,7 +535,7 @@ function computeAiMomentumAnalysis(stock) {
     risks.push('Below 200 SMA - Long-term caution advised');
   }
 
-  const rsi = indicators.rsi14 || 50;
+  const rsi = ind.rsi14 || 50;
   if (rsi >= 60 && rsi <= 72) {
     score += 20;
     drivers.push(`Optimal Bullish Momentum: RSI at ${rsi.toFixed(1)} with upside room`);
@@ -549,9 +553,9 @@ function computeAiMomentumAnalysis(stock) {
     risks.push(`RSI below 50 (${rsi.toFixed(1)}) indicating bearish control`);
   }
 
-  const macdLine = indicators.macdLine;
-  const macdSignal = indicators.macdSignal;
-  const macdHist = indicators.macdHist;
+  const macdLine = ind.macdLine !== undefined ? ind.macdLine : null;
+  const macdSignal = ind.macdSignal !== undefined ? ind.macdSignal : null;
+  const macdHist = ind.macdHist !== undefined ? ind.macdHist : null;
 
   if (macdLine !== null && macdSignal !== null) {
     if (macdLine > macdSignal && macdHist > 0) {
@@ -624,15 +628,17 @@ function computeAiMomentumAnalysis(stock) {
   const s3 = parseFloat((low - 2 * (high - pivot)).toFixed(2));
 
   let entry = ltp;
-  let stopLoss = parseFloat((ltp - 1.5 * atr).toFixed(2));
-  let target1 = parseFloat((ltp + 2.0 * atr).toFixed(2));
-  let target2 = parseFloat((ltp + 3.5 * atr).toFixed(2));
+  // Wide 2.5x ATR volatility stop-loss buffer (minimum 4.8% cushion) to absorb false wick stop-outs
+  const widerAtrBuffer = parseFloat(Math.max(2.5 * atr, ltp * 0.048).toFixed(2));
+  let stopLoss = parseFloat((ltp - widerAtrBuffer).toFixed(2));
+  let target1 = parseFloat((ltp + widerAtrBuffer * 1.5).toFixed(2));
+  let target2 = parseFloat((ltp + widerAtrBuffer * 2.5).toFixed(2));
 
   if (score < 45) {
     entry = ltp;
-    stopLoss = parseFloat((ltp + 1.5 * atr).toFixed(2));
-    target1 = parseFloat((ltp - 2.0 * atr).toFixed(2));
-    target2 = parseFloat((ltp - 3.5 * atr).toFixed(2));
+    stopLoss = parseFloat((ltp + widerAtrBuffer).toFixed(2));
+    target1 = parseFloat((ltp - widerAtrBuffer * 1.5).toFixed(2));
+    target2 = parseFloat((ltp - widerAtrBuffer * 2.5).toFixed(2));
   }
 
   const riskAmt = Math.abs(entry - stopLoss);
@@ -836,23 +842,21 @@ function computeIntradayAiMomentum(stock) {
   }
 
   let entry = ltp;
-  let stopLoss = isAboveVwap ? parseFloat((Math.min(vwap * 0.996, ltp - intradayAtr)).toFixed(2)) : parseFloat((ltp - intradayAtr).toFixed(2));
-  let target1 = parseFloat((ltp + intradayAtr * 1.5).toFixed(2));
-  let target2 = parseFloat((ltp + intradayAtr * 2.8).toFixed(2));
+  // Wide intraday volatility buffer: 2.5x Intraday ATR (minimum 2.2% cushion below VWAP)
+  const widerIntraBuffer = parseFloat(Math.max(intradayAtr * 2.5, ltp * 0.022).toFixed(2));
+  let stopLoss = isAboveVwap ? parseFloat((Math.min(vwap * 0.978, ltp - widerIntraBuffer)).toFixed(2)) : parseFloat((ltp - widerIntraBuffer).toFixed(2));
+  let target1 = parseFloat((ltp + widerIntraBuffer * 1.5).toFixed(2));
+  let target2 = parseFloat((ltp + widerIntraBuffer * 2.5).toFixed(2));
 
   if (score < 45) {
-    stopLoss = parseFloat((Math.max(vwap * 1.004, ltp + intradayAtr)).toFixed(2));
-    target1 = parseFloat((ltp - intradayAtr * 1.5).toFixed(2));
-    target2 = parseFloat((ltp - intradayAtr * 2.8).toFixed(2));
+    stopLoss = parseFloat((Math.max(vwap * 1.022, ltp + widerIntraBuffer)).toFixed(2));
+    target1 = parseFloat((ltp - widerIntraBuffer * 1.5).toFixed(2));
+    target2 = parseFloat((ltp - widerIntraBuffer * 2.5).toFixed(2));
   }
 
   const riskAmt = Math.abs(entry - stopLoss);
   const rewardAmt = Math.abs(target1 - entry);
   const rrRatio = riskAmt > 0 ? (rewardAmt / riskAmt).toFixed(1) : '2.0';
-
-  const strikeInterval = ltp > 2000 ? 50 : (ltp > 500 ? 20 : 10);
-  const atmStrike = Math.round(ltp / strikeInterval) * strikeInterval;
-  const suggestedOption = score >= 55 ? `${atmStrike} CE (Call Option)` : `${atmStrike} PE (Put Option)`;
 
   const summary = `**Level 5 Intraday AI Synthesis for ${stock.symbol}:** Currently trading at **₹${ltp}** (${changePct >= 0 ? '+' : ''}${changePct}%), ${stock.symbol} demonstrates **${state}** with an Intraday Score of **${score}/100**. Spot price is ${isAboveVwap ? `**₹${(ltp - vwap).toFixed(2)} above VWAP** (₹${vwap})` : `**₹${(vwap - ltp).toFixed(2)} below VWAP** (₹${vwap})`}. CPR structure is **${isNarrowCpr ? 'Narrow (Trending alert)' : 'Wide (Rangebound)'}** with Central Pivot at **₹${pivot}**. Key breakout level is **₹${h4}** (H4) and critical support at **₹${l3}** (L3). Chartink "Indeces Intraday" Screener signal status is **${chartinkStatus}** (5M RSI: ${currentRsi}).`;
 
@@ -868,7 +872,6 @@ function computeIntradayAiMomentum(stock) {
     cpr: { tc, pivot, bc, widthPct: cprWidthPct, isNarrow: isNarrowCpr },
     camarilla: { h4, h3, l3, l4 },
     pivots: { r1, r2, pivot, s1, s2 },
-    suggestedOption,
     chartinkScan: {
       id: 'indeces-intraday',
       name: 'Indeces Intraday',
@@ -893,6 +896,7 @@ function computeIntradayAiMomentum(stock) {
       riskReward: `1 : ${rrRatio}`,
       recommendedAction: verdict
     },
+    volumeSurge: volumeMultiplier >= 1.5 ? `${volumeMultiplier}x Surge` : 'Active Volume Flow',
     drivers,
     risks
   };
@@ -1011,7 +1015,7 @@ function computeLongTermAiMomentum(stock) {
 
   const target3M = parseFloat((ltp * (score >= 60 ? 1.12 : 0.95)).toFixed(2));
   const target1Y = parseFloat((ltp * (score >= 60 ? 1.35 : 0.88)).toFixed(2));
-  const stopLoss = parseFloat((Math.min(sma200 * 0.97, ltp * 0.88)).toFixed(2));
+  const stopLoss = parseFloat((Math.min(sma200 * 0.95, ltp * 0.85)).toFixed(2));
   const projectedReturn = (((target1Y - ltp) / ltp) * 100).toFixed(1);
 
   const summary = `**Level 5 Long-Term AI Outlook for ${stock.symbol}:** Priced at **₹${ltp}**, ${stock.name} is positioned in **${stage}** with an AI Conviction Score of **${score}/100** (**${state}**). The stock trades ${isAbove200 ? `**${(((ltp - sma200)/sma200)*100).toFixed(1)}% above its 200 SMA**` : `below its 200 SMA`} with a **${deliveryPct}% delivery ratio**. Projected 1-Year valuation target sits at **₹${target1Y}** (${projectedReturn >= 0 ? '+' : ''}${projectedReturn}%), with essential positional stop-loss anchored on a weekly close below **₹${stopLoss}**.`;
@@ -1914,71 +1918,7 @@ class RealMarketService {
     const matched = [];
     const seen = new Set();
 
-    // 1. Check for Options & Futures derivative query patterns
-    const isOptionQuery = q.includes(' CE') || q.includes(' PE') || q.includes('CALL') || q.includes('PUT') || q.includes('FUT') || /\d{4,5}/.test(q);
-    if (isOptionQuery) {
-      const matchStrike = q.match(/(\d{4,5})/);
-      const strike = matchStrike ? parseInt(matchStrike[1], 10) : 24500;
-      let underlying = 'NIFTY';
-      if (q.includes('BANK') || strike >= 45000) underlying = 'BANKNIFTY';
-      else if (q.includes('FIN')) underlying = 'FINNIFTY';
-      else if (q.includes('MID')) underlying = 'MIDCPNIFTY';
-      else {
-        const knownStock = this.directory.find(s => q.includes(s.symbol));
-        if (knownStock) underlying = knownStock.symbol;
-      }
-
-      const isCall = q.includes('CE') || q.includes('CALL') || (!q.includes('PE') && !q.includes('PUT'));
-      const isPut = q.includes('PE') || q.includes('PUT') || (!q.includes('CE') && !q.includes('CALL'));
-      const isFut = q.includes('FUT');
-
-      if (isFut || q.includes('FUT')) {
-        const futSym = `${underlying} FUT`;
-        seen.add(futSym);
-        matched.push({
-          symbol: futSym,
-          name: `${underlying} Current Month Futures`,
-          sector: 'Futures Contract',
-          ltp: underlying === 'BANKNIFTY' ? 56350.00 : (underlying === 'NIFTY' ? 23410.00 : 2850.00),
-          changePct: 0.45,
-          badge: 'FUTURES',
-          isCached: true,
-          score: 110
-        });
-      }
-
-      if (isCall) {
-        const ceSym = `${underlying} ${strike} CE`;
-        seen.add(ceSym);
-        matched.push({
-          symbol: ceSym,
-          name: `${underlying} ${strike} Call Option (Current Expiry)`,
-          sector: 'Options Derivative',
-          ltp: parseFloat((85 + (strike % 120) * 1.5).toFixed(2)),
-          changePct: 12.8,
-          badge: 'CALL CE',
-          isCached: true,
-          score: 105
-        });
-      }
-
-      if (isPut) {
-        const peSym = `${underlying} ${strike} PE`;
-        seen.add(peSym);
-        matched.push({
-          symbol: peSym,
-          name: `${underlying} ${strike} Put Option (Current Expiry)`,
-          sector: 'Options Derivative',
-          ltp: parseFloat((70 + (strike % 95) * 1.3).toFixed(2)),
-          changePct: -6.4,
-          badge: 'PUT PE',
-          isCached: true,
-          score: 104
-        });
-      }
-    }
-
-    // 2. Exact symbol, alias or prefix match (Cash & Indices)
+    // Search across Cash Equities and Indices
     this.directory.forEach(s => {
       const sym = s.symbol.toUpperCase();
       const name = s.name.toUpperCase();

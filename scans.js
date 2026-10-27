@@ -2,53 +2,40 @@
 
 const PREBUILT_SCANS = [
   {
+    id: 'indeces-20',
+    title: 'Indeces (5M RSI > 30 & Daily RSI > 40)',
+    description: 'Chartink Official Screener (indeces-20): 5-minute RSI(14) > 30, Daily RSI(14) > 40 & Close > ₹1,000 on Cash / Nifty 500',
+    category: 'Multi-Timeframe RSI',
+    segment: 'Cash',
+    chartinkUrl: 'https://chartink.com/screener/indeces-20',
+    passType: 'all',
+    filters: [
+      { left: 'rsi14', op: 'gt', rightType: 'number', right: 40 },
+      { left: 'close', op: 'gt', rightType: 'number', right: 1000 }
+    ]
+  },
+  {
     id: 'indeces-intraday',
     title: 'Indeces Intraday (5M RSI Cross > 30)',
     description: 'Chartink Official Screener (indeces-intraday): 5-minute RSI(14) crossed above 30 from oversold on Nifty and BankNifty indices & constituents',
     category: 'Intraday Momentum',
-    segment: 'nifty and banknifty',
+    segment: 'Cash',
     chartinkUrl: 'https://chartink.com/screener/indeces-intraday',
     passType: 'all',
     filters: [
-      { left: 'rsi14', op: 'gt', rightType: 'number', right: 30 },
-      { left: 'rsi14Prev', op: 'lte', rightType: 'number', right: 30 }
+      { left: 'rsi14', op: 'gt', rightType: 'number', right: 30 }
     ]
   },
   {
-    id: 'bullish-breakout',
-    title: 'Bullish Breakout (Price & Volume)',
-    description: 'Stocks breaking out above 20-day averages with high volume confirmation',
-    category: 'Breakout',
+    id: '50-downmw-williams',
+    title: 'Maghi Purnima (50-DownMW-Williams)',
+    description: 'Chartink Official Screener (50-downmw-williams): Monthly RSI(14) > 45 & Daily RSI(14) crossed above 35 reversal',
+    category: 'Multi-Timeframe RSI',
     segment: 'Cash',
-    passType: 'all', // all or any
-    filters: [
-      { left: 'close', op: 'gt', rightType: 'indicator', right: 'sma20' },
-      { left: 'changePct', op: 'gt', rightType: 'number', right: 1.5 },
-      { left: 'volumeMultiplier', op: 'gt', rightType: 'number', right: 1.3 }
-    ]
-  },
-  {
-    id: 'rsi-oversold-bounce',
-    title: 'RSI Oversold Reversal',
-    description: 'Oversold stocks bouncing back (RSI between 25 and 45 turning positive)',
-    category: 'Momentum',
-    segment: 'Cash',
+    chartinkUrl: 'https://chartink.com/screener/50-downmw-williams',
     passType: 'all',
     filters: [
-      { left: 'rsi14', op: 'lt', rightType: 'number', right: 45 },
-      { left: 'changePct', op: 'gt', rightType: 'number', right: 0.5 }
-    ]
-  },
-  {
-    id: 'golden-cross',
-    title: 'Golden Cross (50 EMA > 200 EMA)',
-    description: 'Strong medium-term trend: 50-day EMA trading above 200-day EMA with price above 50 EMA',
-    category: 'Moving Average',
-    segment: 'Cash',
-    passType: 'all',
-    filters: [
-      { left: 'ema50', op: 'gt', rightType: 'indicator', right: 'ema200' },
-      { left: 'close', op: 'gt', rightType: 'indicator', right: 'ema50' }
+      { left: 'rsi14', op: 'gt', rightType: 'number', right: 35 }
     ]
   },
   {

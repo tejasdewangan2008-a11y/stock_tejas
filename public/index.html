@@ -1,50 +1,545 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>TejStockAI - Pro Stock Screener, TradingView Charts & Broker AI Copilot</title>
   
+  <!-- Inter Google Font (Exact Match to User UI Screenshot) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
   <!-- SEO and PWA Metadata -->
   <meta name="description" content="TejStockAI: Real-time NSE Stock Screener, TradingView Charts, Zerodha/AngelOne/Upstox/Dhan Market Depth, Option Chain Matrix, and Broker AI Copilot.">
-  <meta name="theme-color" content="#0f141c">
+  <meta name="theme-color" content="#f0f4f9">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="TejStockAI">
   
-  <!-- Critical Eye-Comfort Styling (Guaranteed Smooth Palette) -->
+  <!-- Global & Light/Dark Theme System -->
   <style>
     :root {
-      color-scheme: dark;
-      --bg-primary: #0f141c;
-      --bg-secondary: #141b26;
-      --bg-card: #18202e;
-      --bg-card-hover: #1e2839;
-      --bg-elevated: #222d40;
-      --border-color: #263347;
-      --border-subtle: #1c2636;
-      --text-main: #e2e8f0;
-      --text-secondary: #94a3b8;
+      color-scheme: light dark;
+      --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --bg-primary: #f0f4f9;
+      --bg-secondary: #ffffff;
+      --bg-card: #ffffff;
+      --bg-card-hover: #f8fafc;
+      --bg-elevated: #e2e8f0;
+      --border-color: #dce5f0;
+      --border-subtle: #e2e8f0;
+      --text-main: #0f172a;
+      --text-secondary: #475569;
       --text-muted: #64748b;
-      --accent: #38bdf8;
+      --accent: #0ea5e9;
       --accent-hover: #0284c7;
-      --green: #22c55e;
-      --green-bg: rgba(34, 197, 94, 0.12);
-      --red: #f43f5e;
-      --red-bg: rgba(244, 63, 94, 0.12);
+      --green: #15803d;
+      --green-bg: #dcfce7;
+      --red: #b91c1c;
+      --red-bg: #fee2e2;
     }
 
     html, body {
       margin: 0;
       padding: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    /* =========================================================
+       EXACT LIGHT MODE REPLICA (MATCHING USER SCREENSHOT 100%)
+       ========================================================= */
+    html[data-theme="light"], body[data-theme="light"] {
+      background-color: #f0f4f9 !important;
+      color: #0f172a !important;
+    }
+
+    /* 1. Navbar in Light Mode */
+    [data-theme="light"] .navbar {
+      background: #ffffff !important;
+      border-bottom: 1px solid #e2e8f0 !important;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+    }
+
+    [data-theme="light"] .nav-brand {
+      color: #0f172a !important;
+    }
+
+    [data-theme="light"] .brand-title {
+      color: #0f172a !important;
+      font-weight: 800 !important;
+    }
+
+    [data-theme="light"] .brand-badge {
+      background: #8b5cf6 !important;
+      color: #ffffff !important;
+      font-weight: 800 !important;
+    }
+
+    [data-theme="light"] .ci-workspace-nav-pill {
+      background: #e0f2fe !important;
+      border: 1px solid #bae6fd !important;
+      color: #0284c7 !important;
+      font-weight: 700 !important;
+      border-radius: 20px !important;
+    }
+
+    [data-theme="light"] .ci-workspace-nav-pill:hover {
+      background: #bae6fd !important;
+      color: #0369a1 !important;
+    }
+
+    [data-theme="light"] .nav-search-bar {
+      background: #f1f5f9 !important;
+      border: 1px solid #e2e8f0 !important;
+      border-radius: 20px !important;
+    }
+
+    [data-theme="light"] .nav-search-bar input {
+      color: #0f172a !important;
+    }
+
+    [data-theme="light"] .nav-search-bar input::placeholder {
+      color: #94a3b8 !important;
+    }
+
+    [data-theme="light"] .search-shortcut-badge {
+      background: #e2e8f0 !important;
+      color: #64748b !important;
+      border: 1px solid #cbd5e1 !important;
+      font-weight: 700 !important;
+    }
+
+    [data-theme="light"] .nav-link {
+      color: #334155 !important;
+      font-weight: 600 !important;
+    }
+
+    [data-theme="light"] .nav-link:hover {
+      color: #0284c7 !important;
+    }
+
+    [data-theme="light"] .nav-link.active {
+      color: #0284c7 !important;
+      font-weight: 700 !important;
+    }
+
+    [data-theme="light"] .nav-link-ai {
+      background: #f1f5f9 !important;
+      border: 1px solid #e2e8f0 !important;
+      border-radius: 8px !important;
+      color: #0f172a !important;
+    }
+
+    [data-theme="light"] .ci-pro-nav-pill {
+      background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%) !important;
+      color: #ffffff !important;
+      font-weight: 700 !important;
+      border-radius: 20px !important;
+      box-shadow: 0 2px 6px rgba(168, 85, 247, 0.25) !important;
+    }
+
+    [data-theme="light"] .ci-admin-pill-btn {
+      background: #fef3c7 !important;
+      border: 1px solid #fde68a !important;
+      color: #92400e !important;
+      font-weight: 700 !important;
+      border-radius: 20px !important;
+    }
+
+    [data-theme="light"] .ci-admin-pill-btn:hover {
+      background: #fde68a !important;
+      color: #78350f !important;
+    }
+
+    [data-theme="light"] .ci-user-avatar {
+      background: #3b82f6 !important;
+      color: #ffffff !important;
+      font-weight: 800 !important;
+      box-shadow: 0 2px 5px rgba(59, 130, 246, 0.3) !important;
+    }
+
+    [data-theme="light"] .ci-system-toggle-btn {
+      background: #ffffff !important;
+      border: 1px solid #e2e8f0 !important;
+      color: #1e293b !important;
+      border-radius: 20px !important;
+      font-weight: 600 !important;
+    }
+
+    [data-theme="light"] .ci-system-toggle-btn:hover {
+      background: #f1f5f9 !important;
+      border-color: #cbd5e1 !important;
+    }
+
+    [data-theme="light"] .btn-connect {
+      background: #f1f5f9 !important;
+      border: 1px solid #e2e8f0 !important;
+      color: #334155 !important;
+      border-radius: 20px !important;
+      font-weight: 600 !important;
+    }
+
+    /* 2. Market Ticker Bar in Light Mode */
+    [data-theme="light"] .market-ticker-bar {
+      background: #f8fafc !important;
+      border-bottom: 1px solid #e2e8f0 !important;
+      color: #334155 !important;
+    }
+
+    [data-theme="light"] #marketStatusText {
+      color: #dc2626 !important;
+      font-weight: 700 !important;
+    }
+
+    [data-theme="light"] #btnRefreshMarketData {
+      background: #ffffff !important;
+      border: 1px solid #e2e8f0 !important;
+      color: #334155 !important;
+      border-radius: 8px !important;
+      font-weight: 600 !important;
+    }
+
+    [data-theme="light"] #btnRefreshMarketData:hover {
+      background: #f1f5f9 !important;
+      color: #0f172a !important;
+    }
+
+    [data-theme="light"] .ticker-item {
+      background: #e2e8f0 !important;
+      border-radius: 8px !important;
+      color: #0f172a !important;
+      font-weight: 600 !important;
+      padding: 3px 8px !important;
+    }
+
+    [data-theme="light"] .ticker-item .text-green {
+      color: #16a34a !important;
+      font-weight: 700 !important;
+    }
+
+    [data-theme="light"] .ticker-item .text-red {
+      color: #dc2626 !important;
+      font-weight: 700 !important;
+    }
+
+    /* 3. Scan Dashboard Header & Controls in Light Mode */
+    [data-theme="light"] .view-title-group h2 {
+      color: #0f172a !important;
+      font-weight: 800 !important;
+      font-size: 1.55rem !important;
+      letter-spacing: -0.02em !important;
+    }
+
+    [data-theme="light"] .view-subtitle {
+      color: #475569 !important;
+      font-size: 0.88rem !important;
+      font-weight: 500 !important;
+    }
+
+    [data-theme="light"] .select-control,
+    [data-theme="light"] #dashboardSelect {
+      background: #ffffff !important;
+      border: 1px solid #cbd5e1 !important;
+      color: #0f172a !important;
+      border-radius: 10px !important;
+      font-weight: 600 !important;
+    }
+
+    [data-theme="light"] .refresh-control-box {
+      background: #ffffff !important;
+      border: 1px solid #cbd5e1 !important;
+      color: #0f172a !important;
+      border-radius: 10px !important;
+      font-weight: 600 !important;
+    }
+
+    [data-theme="light"] #btnManualRefresh {
+      background: #ffffff !important;
+      border: 1px solid #cbd5e1 !important;
+      color: #334155 !important;
+      border-radius: 8px !important;
+    }
+
+    [data-theme="light"] #btnManualRefresh:hover {
+      background: #f1f5f9 !important;
+      color: #0f172a !important;
+    }
+
+    [data-theme="light"] #btnAddScanToDash {
+      background: #0ea5e9 !important;
+      border: none !important;
+      color: #ffffff !important;
+      font-weight: 700 !important;
+      border-radius: 10px !important;
+      box-shadow: 0 2px 6px rgba(14, 165, 233, 0.3) !important;
+    }
+
+    [data-theme="light"] #btnAddScanToDash:hover {
+      background: #0284c7 !important;
+    }
+
+    /* 4. Segment Filter Pills in Light Mode */
+    [data-theme="light"] .segment-pills .pill-item {
+      background: #e2e8f0 !important;
+      border: none !important;
+      color: #475569 !important;
+      border-radius: 20px !important;
+      font-weight: 600 !important;
+      padding: 0.35rem 0.95rem !important;
+      transition: all 0.2s ease !important;
+    }
+
+    [data-theme="light"] .segment-pills .pill-item:hover {
+      background: #cbd5e1 !important;
+      color: #0f172a !important;
+    }
+
+    [data-theme="light"] .segment-pills .pill-item.active {
+      background: #38bdf8 !important;
+      color: #ffffff !important;
+      font-weight: 700 !important;
+      box-shadow: 0 2px 8px rgba(56, 189, 248, 0.35) !important;
+    }
+
+    /* 5. Scan Cards in Light Mode */
+    [data-theme="light"] .scan-card {
+      background: #ffffff !important;
+      border: 1.5px solid #dce5f0 !important;
+      border-radius: 16px !important;
+      box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.03) !important;
+      color: #0f172a !important;
+      overflow: hidden !important;
+    }
+
+    [data-theme="light"] .scan-card-header {
+      background: #ffffff !important;
+      border-bottom: 1px solid #f1f5f9 !important;
+      padding: 1rem 1.25rem 0.6rem 1.25rem !important;
+    }
+
+    [data-theme="light"] .scan-card-title {
+      color: #0f172a !important;
+      font-weight: 800 !important;
+      font-size: 1.05rem !important;
+      letter-spacing: -0.01em !important;
+    }
+
+    [data-theme="light"] .scan-count-badge {
+      background: #dbeafe !important;
+      color: #0284c7 !important;
+      font-weight: 700 !important;
+      font-size: 0.75rem !important;
+      border-radius: 12px !important;
+      padding: 2px 8px !important;
+    }
+
+    [data-theme="light"] .scan-action-btn {
+      color: #64748b !important;
+    }
+
+    [data-theme="light"] .scan-action-btn:hover {
+      color: #0284c7 !important;
+      background: #f1f5f9 !important;
+    }
+
+    /* 6. Formula / Description Box in Light Mode */
+    [data-theme="light"] .scan-card-description {
+      background: #f0f7ff !important;
+      border: 1px solid #e0f2fe !important;
+      border-radius: 10px !important;
+      color: #334155 !important;
+      font-size: 0.82rem !important;
+      line-height: 1.45 !important;
+      margin: 0.5rem 1.25rem 0.75rem 1.25rem !important;
+      padding: 0.65rem 0.85rem !important;
+    }
+
+    [data-theme="light"] .scan-card-description span:last-child {
+      background: #e0f2fe !important;
+      color: #0284c7 !important;
+      border-radius: 6px !important;
+      padding: 2px 6px !important;
+      font-weight: 700 !important;
+      font-size: 0.72rem !important;
+    }
+
+    /* 7. Stock Results Table in Light Mode */
+    [data-theme="light"] .scan-table-wrapper {
+      background: #ffffff !important;
+    }
+
+    [data-theme="light"] .stock-table th {
+      background: #ffffff !important;
+      color: #64748b !important;
+      font-size: 0.72rem !important;
+      font-weight: 700 !important;
+      letter-spacing: 0.05em !important;
+      text-transform: uppercase !important;
+      border-bottom: 1px solid #f1f5f9 !important;
+      padding: 8px 14px !important;
+    }
+
+    [data-theme="light"] .stock-table td {
+      background: #ffffff !important;
+      color: #0f172a !important;
+      border-bottom: 1px solid #f1f5f9 !important;
+      padding: 10px 14px !important;
+      font-size: 0.88rem !important;
+    }
+
+    [data-theme="light"] .stock-table tr:hover td {
+      background: #f8fafc !important;
+    }
+
+    [data-theme="light"] .stock-symbol {
+      color: #0f172a !important;
+      font-weight: 800 !important;
+      font-size: 0.9rem !important;
+      letter-spacing: -0.01em !important;
+    }
+
+    [data-theme="light"] .stock-name {
+      color: #64748b !important;
+      font-weight: 600 !important;
+      font-size: 0.72rem !important;
+      text-transform: uppercase !important;
+      margin-top: 2px !important;
+    }
+
+    [data-theme="light"] .stock-price,
+    [data-theme="light"] .cell-price {
+      color: #0f172a !important;
+      font-weight: 700 !important;
+      font-size: 0.9rem !important;
+      font-family: 'Inter', system-ui, sans-serif !important;
+    }
+
+    /* Change % Pills */
+    [data-theme="light"] .stock-change.change-positive {
+      background: #dcfce7 !important;
+      color: #15803d !important;
+      font-weight: 700 !important;
+      font-size: 0.78rem !important;
+      border-radius: 6px !important;
+      padding: 2px 8px !important;
+      display: inline-block !important;
+      border: 1px solid rgba(34, 197, 94, 0.25) !important;
+    }
+
+    [data-theme="light"] .stock-change.change-negative {
+      background: #fee2e2 !important;
+      color: #b91c1c !important;
+      font-weight: 700 !important;
+      font-size: 0.78rem !important;
+      border-radius: 6px !important;
+      padding: 2px 8px !important;
+      display: inline-block !important;
+      border: 1px solid rgba(239, 68, 68, 0.25) !important;
+    }
+
+    /* Volume */
+    [data-theme="light"] .stock-table td:nth-child(4) {
+      color: #0f172a !important;
+      font-weight: 700 !important;
+      font-size: 0.88rem !important;
+      font-family: 'Inter', system-ui, sans-serif !important;
+    }
+
+    /* 8. Scan Card Footer in Light Mode */
+    [data-theme="light"] .scan-card-footer {
+      background: #ffffff !important;
+      border-top: 1px solid #f1f5f9 !important;
+      color: #64748b !important;
+      padding: 0.75rem 1.25rem !important;
+    }
+
+    [data-theme="light"] .footer-action-link {
+      color: #64748b !important;
+    }
+
+    [data-theme="light"] .footer-action-link:hover {
+      color: #0284c7 !important;
+    }
+
+    /* 9. Floating AI Action Button in Light Mode */
+    [data-theme="light"] .floating-ai-btn {
+      background: #ffffff !important;
+      color: #0f172a !important;
+      border: 1px solid #e2e8f0 !important;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08) !important;
+      font-weight: 700 !important;
+    }
+
+    [data-theme="light"] .floating-ai-btn:hover {
+      background: #f8fafc !important;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12) !important;
+    }
+
+    /* 10. Kite Watchlist & Sector Accordion in Light Mode */
+    [data-theme="light"] .kite-watchlist-card,
+    [data-theme="light"] .kite-sector-accordion,
+    [data-theme="light"] .kite-sector-row {
+      background: #ffffff !important;
+      border-color: #e2e8f0 !important;
+      color: #0f172a !important;
+    }
+
+    /* 11. Portal Active Mode Sticky Banner in Light Mode */
+    [data-theme="light"] .portal-active-mode-banner {
+      background: #ffffff !important;
+      border-bottom: 1px solid #e2e8f0 !important;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04) !important;
+    }
+
+    [data-theme="light"] body.workspace-mode-cash .portal-active-mode-banner.banner-cash {
+      background: #f0fdf4 !important;
+      border-bottom: 1px solid #bbf7d0 !important;
+    }
+
+    [data-theme="light"] body.workspace-mode-fno .portal-active-mode-banner.banner-fno {
+      background: #fffbeb !important;
+      border-bottom: 1px solid #fef3c7 !important;
+    }
+
+    [data-theme="light"] #portalModeText {
+      color: #475569 !important;
+    }
+
+    [data-theme="light"] .portal-mode-btn {
+      background: #ffffff !important;
+      border: 1px solid #cbd5e1 !important;
+      color: #1e293b !important;
+    }
+
+    [data-theme="light"] .portal-mode-btn:hover {
+      background: #f1f5f9 !important;
+      color: #0f172a !important;
+    }
+
+    [data-theme="light"] .banner-cash .portal-mode-pill {
+      background: #dcfce7 !important;
+      color: #15803d !important;
+      border: 1px solid #86efac !important;
+    }
+
+    [data-theme="light"] .banner-fno .portal-mode-pill {
+      background: #fef3c7 !important;
+      color: #b45309 !important;
+      border: 1px solid #fde68a !important;
+    }
+
+    /* =========================================================
+       DARK MODE STYLES (SCOPED STRICTLY UNDER [data-theme="dark"])
+       ========================================================= */
+    html[data-theme="dark"], body[data-theme="dark"] {
       background-color: #0f141c !important;
       color: #e2e8f0 !important;
     }
 
-    /* Guaranteed Smooth Eye-Comfort Colors for Scan Cards & Tables */
-    .scan-card {
+    [data-theme="dark"] .scan-card {
       background: #18202e !important;
       border: 1px solid #263347 !important;
       border-radius: 12px !important;
@@ -52,66 +547,520 @@
       color: #e2e8f0 !important;
     }
 
-    .scan-card-header {
+    [data-theme="dark"] .scan-card-header {
       background: #141b26 !important;
       border-bottom: 1px solid #263347 !important;
     }
 
-    .scan-card-title {
+    [data-theme="dark"] .scan-card-title {
       color: #f1f5f9 !important;
     }
 
-    .scan-card-description {
+    [data-theme="dark"] .scan-card-description {
       background: #111722 !important;
       color: #8fa0b5 !important;
     }
 
-    .stock-table th {
+    [data-theme="dark"] .stock-table th {
       background: #141b26 !important;
       color: #8fa0b5 !important;
       border-bottom: 1px solid #263347 !important;
     }
 
-    .stock-table td {
+    [data-theme="dark"] .stock-table td {
       color: #e2e8f0 !important;
       border-bottom: 1px solid #1c2636 !important;
       background: transparent !important;
     }
 
-    .stock-symbol {
+    [data-theme="dark"] .stock-symbol {
       color: #f8fafc !important;
     }
 
-    .stock-name {
+    [data-theme="dark"] .stock-name {
       color: #7d8ea3 !important;
     }
 
-    .stock-table tr:hover td {
+    [data-theme="dark"] .stock-table tr:hover td {
       background: #1e2839 !important;
     }
 
-    .scan-card-footer {
+    [data-theme="dark"] .scan-card-footer {
       background: #141b26 !important;
       border-top: 1px solid #263347 !important;
       color: #8fa0b5 !important;
     }
 
-    .kite-watchlist-card,
-    .kite-sector-accordion,
-    .kite-sector-row {
+    [data-theme="dark"] .kite-watchlist-card,
+    [data-theme="dark"] .kite-sector-accordion,
+    [data-theme="dark"] .kite-sector-row {
       background: #18202e !important;
       border-color: #263347 !important;
       color: #e2e8f0 !important;
     }
 
-    .navbar {
+    [data-theme="dark"] .navbar {
       background: rgba(15, 20, 28, 0.98) !important;
       border-bottom: 1px solid #263347 !important;
     }
 
-    .market-ticker-bar {
+    [data-theme="dark"] .market-ticker-bar {
       background: #111722 !important;
       border-bottom: 1px solid #263347 !important;
+    }
+
+    /* =========================================================
+       CRITICAL ADMIN DUAL MARKET INFOGRAPHIC & STRICT ISOLATION
+       ========================================================= */
+    .admin-modal-container {
+      overflow-y: auto !important;
+      max-height: 92vh !important;
+      scroll-behavior: smooth !important;
+    }
+
+    .admin-market-infographic-card {
+      margin: 1rem 0 1.25rem 0 !important;
+      border-radius: 16px !important;
+      background: linear-gradient(135deg, #0e1626 0%, #172236 100%) !important;
+      border: 1px solid rgba(99, 102, 241, 0.45) !important;
+      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.6) !important;
+      overflow: hidden !important;
+      display: block !important;
+    }
+
+    .infographic-banner-header {
+      padding: 0.85rem 1.25rem !important;
+      background: #090e1a !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      flex-wrap: wrap !important;
+      gap: 0.5rem !important;
+    }
+
+    .infographic-badge-tag {
+      font-size: 0.72rem !important;
+      font-weight: 800 !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.06em !important;
+      color: #c084fc !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: 0.4rem !important;
+    }
+
+    .infographic-image-banner-wrapper {
+      padding: 1rem 1.25rem !important;
+      background: #060a12 !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+
+    .infographic-image-container {
+      position: relative !important;
+      border-radius: 12px !important;
+      overflow: hidden !important;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+      background: #000 !important;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.5) !important;
+    }
+
+    .infographic-img-tag {
+      width: 100% !important;
+      max-height: 290px !important;
+      object-fit: contain !important;
+      display: block !important;
+      margin: 0 auto !important;
+    }
+
+    .infographic-click-zone {
+      position: absolute !important;
+      top: 0 !important;
+      bottom: 0 !important;
+      width: 50% !important;
+      display: flex !important;
+      align-items: flex-end !important;
+      justify-content: center !important;
+      padding-bottom: 12px !important;
+      cursor: pointer !important;
+      transition: all 0.25s ease !important;
+      z-index: 5 !important;
+    }
+
+    .click-zone-cash {
+      left: 0 !important;
+      background: linear-gradient(180deg, transparent 40%, rgba(34, 197, 94, 0.25) 100%) !important;
+    }
+
+    .click-zone-cash:hover {
+      background: linear-gradient(180deg, rgba(34, 197, 94, 0.1) 0%, rgba(34, 197, 94, 0.45) 100%) !important;
+    }
+
+    .click-zone-fno {
+      right: 0 !important;
+      background: linear-gradient(180deg, transparent 40%, rgba(245, 158, 11, 0.25) 100%) !important;
+    }
+
+    .click-zone-fno:hover {
+      background: linear-gradient(180deg, rgba(245, 158, 11, 0.1) 0%, rgba(245, 158, 11, 0.45) 100%) !important;
+    }
+
+    .click-zone-hint {
+      padding: 0.35rem 0.85rem !important;
+      border-radius: 20px !important;
+      font-size: 0.78rem !important;
+      font-weight: 800 !important;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6) !important;
+      backdrop-filter: blur(6px) !important;
+    }
+
+    .click-zone-cash .click-zone-hint {
+      background: rgba(34, 197, 94, 0.9) !important;
+      color: #052e16 !important;
+      border: 1px solid #4ade80 !important;
+    }
+
+    .click-zone-fno .click-zone-hint {
+      background: rgba(245, 158, 11, 0.9) !important;
+      color: #451a03 !important;
+      border: 1px solid #fde047 !important;
+    }
+
+    .infographic-columns-grid {
+      display: grid !important;
+      grid-template-columns: 1fr auto 1fr !important;
+      position: relative !important;
+      background: #0d1422 !important;
+    }
+
+    @media (max-width: 860px) {
+      .infographic-columns-grid {
+        grid-template-columns: 1fr !important;
+      }
+      .infographic-vs-divider {
+        display: none !important;
+      }
+    }
+
+    .infographic-col {
+      padding: 1.25rem 1.4rem !important;
+      cursor: pointer !important;
+      transition: all 0.25s ease !important;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: space-between !important;
+      text-decoration: none !important;
+    }
+
+    .infographic-col-cash {
+      background: rgba(34, 197, 94, 0.04) !important;
+      border-right: 1px solid rgba(255, 255, 255, 0.06) !important;
+    }
+
+    .infographic-col-cash:hover {
+      background: rgba(34, 197, 94, 0.12) !important;
+      box-shadow: inset 0 0 30px rgba(34, 197, 94, 0.2) !important;
+    }
+
+    .infographic-col-fno {
+      background: rgba(245, 158, 11, 0.04) !important;
+    }
+
+    .infographic-col-fno:hover {
+      background: rgba(245, 158, 11, 0.12) !important;
+      box-shadow: inset 0 0 30px rgba(245, 158, 11, 0.2) !important;
+    }
+
+    .infographic-col-title {
+      font-size: 1.15rem !important;
+      font-weight: 800 !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: 0.5rem !important;
+    }
+
+    .infographic-col-cash .infographic-col-title {
+      color: #4ade80 !important;
+    }
+
+    .infographic-col-fno .infographic-col-title {
+      color: #fbbf24 !important;
+    }
+
+    .infographic-col-sub {
+      font-size: 0.78rem !important;
+      color: #94a3b8 !important;
+      margin-top: 0.2rem !important;
+      font-weight: 600 !important;
+    }
+
+    .infographic-feature-chips {
+      display: flex !important;
+      flex-wrap: wrap !important;
+      gap: 0.4rem !important;
+      margin: 0.75rem 0 !important;
+    }
+
+    .infographic-chip {
+      font-size: 0.72rem !important;
+      font-weight: 700 !important;
+      padding: 0.25rem 0.6rem !important;
+      border-radius: 6px !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 0.35rem !important;
+    }
+
+    .infographic-col-cash .infographic-chip {
+      background: rgba(34, 197, 94, 0.12) !important;
+      color: #86efac !important;
+      border: 1px solid rgba(34, 197, 94, 0.3) !important;
+    }
+
+    .infographic-col-fno .infographic-chip {
+      background: rgba(245, 158, 11, 0.12) !important;
+      color: #fde047 !important;
+      border: 1px solid rgba(245, 158, 11, 0.3) !important;
+    }
+
+    .infographic-points-list {
+      list-style: none !important;
+      padding: 0 !important;
+      margin: 0.75rem 0 1rem 0 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 0.45rem !important;
+    }
+
+    .infographic-points-list li {
+      font-size: 0.78rem !important;
+      color: #cbd5e1 !important;
+      display: flex !important;
+      align-items: flex-start !important;
+      gap: 0.5rem !important;
+      line-height: 1.4 !important;
+    }
+
+    .infographic-points-list li strong {
+      color: #f8fafc !important;
+    }
+
+    .infographic-col-action {
+      padding: 0.6rem 0.85rem !important;
+      border-radius: 8px !important;
+      font-size: 0.8rem !important;
+      font-weight: 800 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+    }
+
+    .infographic-col-cash .infographic-col-action {
+      background: rgba(34, 197, 94, 0.18) !important;
+      color: #4ade80 !important;
+      border: 1px solid rgba(34, 197, 94, 0.4) !important;
+    }
+
+    .infographic-col-fno .infographic-col-action {
+      background: rgba(245, 158, 11, 0.18) !important;
+      color: #fbbf24 !important;
+      border: 1px solid rgba(245, 158, 11, 0.4) !important;
+    }
+
+    .infographic-vs-divider {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      padding: 0 0.5rem !important;
+      background: rgba(0, 0, 0, 0.2) !important;
+    }
+
+    .infographic-vs-badge {
+      width: 36px !important;
+      height: 36px !important;
+      border-radius: 50% !important;
+      background: #070c18 !important;
+      border: 2px solid #6366f1 !important;
+      color: #a5b4fc !important;
+      font-weight: 900 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      font-size: 0.82rem !important;
+      box-shadow: 0 0 15px rgba(99, 102, 241, 0.5) !important;
+    }
+
+    /* Image 3: Dual Market Launch Cards */
+    .admin-portal-gateway-bar {
+      margin: 1rem 0 !important;
+      padding: 1.25rem !important;
+      background: #090e1a !important;
+      border: 1px solid rgba(99, 102, 241, 0.35) !important;
+      border-radius: 16px !important;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45) !important;
+    }
+
+    .admin-gateway-eyebrow {
+      font-size: 0.7rem !important;
+      font-weight: 800 !important;
+      color: #c084fc !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.06em !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: 0.4rem !important;
+      margin-bottom: 0.35rem !important;
+    }
+
+    .admin-gateway-heading {
+      font-size: 1.25rem !important;
+      font-weight: 900 !important;
+      color: #f8fafc !important;
+      margin: 0 0 0.35rem 0 !important;
+      letter-spacing: -0.01em !important;
+    }
+
+    .admin-gateway-sub {
+      font-size: 0.8rem !important;
+      color: #94a3b8 !important;
+      margin: 0 !important;
+    }
+
+    .admin-portal-gateway-cards {
+      display: grid !important;
+      grid-template-columns: 1fr 1fr !important;
+      gap: 1rem !important;
+      margin-top: 1rem !important;
+    }
+
+    @media (max-width: 768px) {
+      .admin-portal-gateway-cards {
+        grid-template-columns: 1fr !important;
+      }
+    }
+
+    .admin-gateway-card-btn {
+      padding: 1.25rem !important;
+      border-radius: 14px !important;
+      text-align: left !important;
+      cursor: pointer !important;
+      transition: all 0.25s ease !important;
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 0.65rem !important;
+    }
+
+    .cash-card-btn {
+      background: rgba(34, 197, 94, 0.05) !important;
+      border: 1.5px solid rgba(34, 197, 94, 0.4) !important;
+    }
+
+    .cash-card-btn:hover {
+      background: rgba(34, 197, 94, 0.15) !important;
+      border-color: #22c55e !important;
+      box-shadow: 0 8px 30px rgba(34, 197, 94, 0.3) !important;
+      transform: translateY(-2px) !important;
+    }
+
+    .fno-card-btn {
+      background: rgba(245, 158, 11, 0.05) !important;
+      border: 1.5px solid rgba(245, 158, 11, 0.4) !important;
+    }
+
+    .fno-card-btn:hover {
+      background: rgba(245, 158, 11, 0.15) !important;
+      border-color: #f59e0b !important;
+      box-shadow: 0 8px 30px rgba(245, 158, 11, 0.3) !important;
+      transform: translateY(-2px) !important;
+    }
+
+    .card-btn-header {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+    }
+
+    .card-btn-tag {
+      font-size: 0.68rem !important;
+      font-weight: 800 !important;
+      padding: 0.2rem 0.55rem !important;
+      border-radius: 4px !important;
+      letter-spacing: 0.05em !important;
+    }
+
+    .tag-cash {
+      background: rgba(34, 197, 94, 0.2) !important;
+      color: #4ade80 !important;
+      border: 1px solid rgba(34, 197, 94, 0.4) !important;
+    }
+
+    .tag-fno {
+      background: rgba(245, 158, 11, 0.2) !important;
+      color: #fbbf24 !important;
+      border: 1px solid rgba(245, 158, 11, 0.4) !important;
+    }
+
+    .card-btn-icon {
+      font-size: 1.35rem !important;
+    }
+
+    .card-btn-title {
+      font-size: 1.15rem !important;
+      font-weight: 800 !important;
+      color: #f8fafc !important;
+    }
+
+    .card-btn-desc {
+      font-size: 0.77rem !important;
+      color: #94a3b8 !important;
+      line-height: 1.45 !important;
+    }
+
+    .card-btn-footer {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      padding-top: 0.5rem !important;
+      border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+      margin-top: 0.25rem !important;
+    }
+
+    .card-btn-cta {
+      font-size: 0.82rem !important;
+      font-weight: 800 !important;
+    }
+
+    .cash-card-btn .card-btn-cta {
+      color: #4ade80 !important;
+    }
+
+    .fno-card-btn .card-btn-cta {
+      color: #fbbf24 !important;
+    }
+
+    .card-btn-arrow {
+      font-size: 1rem !important;
+      color: #fff !important;
+    }
+
+    /* STRICT DUAL WORKSPACE ISOLATION ("other should not be seen that part") */
+    body.workspace-mode-cash .nav-link-fno,
+    body.workspace-mode-cash #navLinkFno,
+    body.workspace-mode-cash #view_fno_derivatives,
+    body.workspace-mode-cash .fno-exclusive-only {
+      display: none !important;
+    }
+
+    body.workspace-mode-fno #navLinkAtlas,
+    body.workspace-mode-fno #navLinkScreens,
+    body.workspace-mode-fno #navLinkDashboard,
+    body.workspace-mode-fno #navLinkWatchlist,
+    body.workspace-mode-fno #view_dashboard,
+    body.workspace-mode-fno #view_builder,
+    body.workspace-mode-fno #view_scans,
+    body.workspace-mode-fno #view_watchlist,
+    body.workspace-mode-fno .cash-exclusive-only {
+      display: none !important;
     }
   </style>
 
@@ -121,8 +1070,8 @@
   <link rel="apple-touch-icon" href="./icons/icon-192.png">
 
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="./css/style.css?v=6.0">
-  <link rel="stylesheet" href="./css/mobile.css?v=6.0">
+  <link rel="stylesheet" href="./css/style.css?v=7.5">
+  <link rel="stylesheet" href="./css/mobile.css?v=7.5">
 </head>
 <body>
 
@@ -491,14 +1440,169 @@
           </div>
         </div>
         <div class="admin-header-actions">
+          <button type="button" class="admin-btn-portal-action admin-btn-portal-cash" onclick="window.app?.launchFromAdmin('cash')" title="Launch 100% Cash Equities Portal">
+            <span>📈 Cash Stocks</span>
+          </button>
+          <button type="button" class="admin-btn-portal-action admin-btn-portal-fno" onclick="window.app?.launchFromAdmin('fno')" title="Launch Futures & Options Cockpit">
+            <span>⚡ F&O Stocks</span>
+          </button>
           <button type="button" class="admin-btn-action" id="btnRefreshAdminStats" onclick="window.app?.loadAdminStats()" title="Refresh live analytics">
             <span>🔄 Refresh</span>
           </button>
           <button type="button" class="admin-btn-action admin-btn-danger" id="btnClearAdminLogs" onclick="window.app?.clearAdminLogs()" title="Clear logs">
             <span>🗑️ Clear Logs</span>
           </button>
-          <button type="button" class="admin-btn-close" id="btnCloseAdminModal" onclick="window.app?.closeAdminModal()" title="Close Admin Terminal">
+          <button type="button" class="admin-btn-close" id="btnCloseAdminModal" onclick="window.app?.closeAdminModal(true)" title="Close Admin Terminal & Choose Market Portal">
             ✕
+          </button>
+        </div>
+      </div>
+
+      <!-- =========================================================
+           IMAGE 2: DUAL MARKET INFOGRAPHIC COMPARISON
+           (CASH STOCK MARKET vs FUTURE & OPTION MARKET)
+           ========================================================= -->
+      <div class="admin-market-infographic-card">
+        <div class="infographic-banner-header">
+          <div class="infographic-badge-tag">
+            <span class="pulse-dot"></span>
+            <span>DUAL MARKET ARCHITECTURE • CORE FUNDAMENTALS COMPARISON (IMAGE 2)</span>
+          </div>
+          <div style="font-size: 0.75rem; color: #94a3b8; display: flex; align-items: center; gap: 0.75rem;">
+            <span>👆 Click either Cash or F&amp;O half to direct to that portal</span>
+            <button type="button" class="btn btn-secondary btn-sm" style="font-size: 0.68rem; padding: 0.2rem 0.5rem;" onclick="window.app?.openInfographicModal()">
+              🖼️ View Fullscreen
+            </button>
+          </div>
+        </div>
+
+        <!-- Authentic Image 2 Visual Graphic with Interactive Click Zones -->
+        <div class="infographic-image-banner-wrapper">
+          <div class="infographic-image-container">
+            <img src="./images/cash_vs_fno.jpg" alt="Cash Stock Market vs Future &amp; Option Market" class="infographic-img-tag">
+            <!-- Left Click Overlay for Cash Market -->
+            <div class="infographic-click-zone click-zone-cash" onclick="window.app?.launchFromAdmin('cash')" title="Click Left Half: Direct to Cash Stocks Portal">
+              <span class="click-zone-hint">📈 Direct to Cash Stocks Portal ➔</span>
+            </div>
+            <!-- Right Click Overlay for F&O Market -->
+            <div class="infographic-click-zone click-zone-fno" onclick="window.app?.launchFromAdmin('fno')" title="Click Right Half: Direct to F&amp;O Derivatives Cockpit">
+              <span class="click-zone-hint">⚡ Direct to F&amp;O Derivatives Cockpit ➔</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="infographic-columns-grid">
+          <!-- Left: Cash Stock Market -->
+          <div class="infographic-col infographic-col-cash" onclick="window.app?.launchFromAdmin('cash')" title="Launch Pure Cash Equities Portal (Hides F&O)">
+            <div>
+              <div class="infographic-col-header">
+                <div class="infographic-col-title">
+                  <span>📈 CASH STOCK MARKET</span>
+                </div>
+                <div class="infographic-col-sub">Owning a piece of the company</div>
+              </div>
+
+              <div class="infographic-feature-chips">
+                <span class="infographic-chip">💻 Real-time stock trading</span>
+                <span class="infographic-chip">🤝 Buying share directly</span>
+                <span class="infographic-chip">📜 Share ownership</span>
+                <span class="infographic-chip">💼 Investor portfolio</span>
+              </div>
+
+              <ul class="infographic-points-list">
+                <li><span class="point-icon">✓</span> <span><strong>Direct Ownership of Shares:</strong> You become a legal shareholder in the company.</span></li>
+                <li><span class="point-icon">✓</span> <span><strong>Invest now, hold indefinitely:</strong> Hold for hours, years, or decades with zero time decay.</span></li>
+                <li><span class="point-icon">✓</span> <span><strong>Requires Full Upfront Capital:</strong> 100% cash settlement for delivery trades.</span></li>
+                <li><span class="point-icon">✓</span> <span><strong>Potential for Dividends & Voting:</strong> Receive direct company cash payouts.</span></li>
+                <li><span class="point-icon">✓</span> <span><strong>Risk limited to invested amount:</strong> T+1 / T+0 Settlement with zero margin calls.</span></li>
+              </ul>
+            </div>
+
+            <div class="infographic-col-action">
+              <span>Launch 100% Cash Equities Portal</span>
+              <span>➔</span>
+            </div>
+          </div>
+
+          <!-- Center VS Divider -->
+          <div class="infographic-vs-divider">
+            <div class="infographic-vs-badge">VS</div>
+          </div>
+
+          <!-- Right: Future & Option Market -->
+          <div class="infographic-col infographic-col-fno" onclick="window.app?.launchFromAdmin('fno')" title="Launch Pure Futures & Options Cockpit (Hides Cash)">
+            <div>
+              <div class="infographic-col-header">
+                <div class="infographic-col-title">
+                  <span>⚡ FUTURE & OPTION MARKET</span>
+                </div>
+                <div class="infographic-col-sub">Trading contracts and leverage</div>
+              </div>
+
+              <div class="infographic-feature-chips">
+                <span class="infographic-chip">📑 Derivative Contracts</span>
+                <span class="infographic-chip">⏳ Expiry Schedule</span>
+                <span class="infographic-chip">⚖️ Leverage-Based Trading</span>
+                <span class="infographic-chip">⚡ Buy / Sell Contracts</span>
+              </div>
+
+              <ul class="infographic-points-list">
+                <li><span class="point-icon">⚡</span> <span><strong>Trading Contracts, Not Ownership:</strong> Pure derivative agreement based on underlying.</span></li>
+                <li><span class="point-icon">⚡</span> <span><strong>Mandatory Expiry:</strong> Fixed weekly or monthly expiration requiring squaring off.</span></li>
+                <li><span class="point-icon">⚡</span> <span><strong>Leverage-Based Trade with Margin:</strong> Control big lot sizes with small upfront margin.</span></li>
+                <li><span class="point-icon">⚡</span> <span><strong>No Dividends or Voting Rights:</strong> You do not own underlying company equity.</span></li>
+                <li><span class="point-icon">⚡</span> <span><strong>High Risk / High Return:</strong> Rapid percentage volatility and quick theta/delta decay.</span></li>
+              </ul>
+            </div>
+
+            <div class="infographic-col-action">
+              <span>Launch 100% F&O Cockpit</span>
+              <span>➔</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- =========================================================
+           IMAGE 3: DUAL MARKET ARCHITECTURE LAUNCH CARDS
+           ========================================================= -->
+      <div class="admin-portal-gateway-bar">
+        <div class="admin-portal-gateway-left">
+          <div class="admin-gateway-eyebrow">
+            <span class="pulse-dot"></span>
+            <span>NEXT TRADING STEP • DUAL MARKET ARCHITECTURE</span>
+          </div>
+          <h3 class="admin-gateway-heading">Launch Trading Portal from Admin Terminal</h3>
+          <p class="admin-gateway-sub">Select your target market segment to exit Security Terminal and launch live trading screens:</p>
+        </div>
+
+        <div class="admin-portal-gateway-cards">
+          <!-- Cash Stocks Card -->
+          <button type="button" class="admin-gateway-card-btn cash-card-btn" onclick="window.app?.launchFromAdmin('cash')" title="Launch 100% Cash Equities Portal">
+            <div class="card-btn-header">
+              <span class="card-btn-tag tag-cash">100% CASH EQUITIES</span>
+              <span class="card-btn-icon">📈</span>
+            </div>
+            <div class="card-btn-title">Cash Stocks Portal</div>
+            <div class="card-btn-desc">Scan Dashboard, 18-Sector Collapsible Watchlist, Real-Time Delivery Volume %, Equity Breakouts (Zero F&O Clutter).</div>
+            <div class="card-btn-footer">
+              <span class="card-btn-cta">Launch Cash Portal</span>
+              <span class="card-btn-arrow">➔</span>
+            </div>
+          </button>
+
+          <!-- Futures & Options Card -->
+          <button type="button" class="admin-gateway-card-btn fno-card-btn" onclick="window.app?.launchFromAdmin('fno')" title="Launch 100% Futures & Options Derivatives Cockpit">
+            <div class="card-btn-header">
+              <span class="card-btn-tag tag-fno">FUTURES & OPTIONS (F&O)</span>
+              <span class="card-btn-icon">⚡</span>
+            </div>
+            <div class="card-btn-title">Future & Options Portal</div>
+            <div class="card-btn-desc">Dhan & Sensibull Option Chain, ATM Strike Ladder, Call/Put Open Interest (OI), PCR Sentiment, Max Pain & India VIX.</div>
+            <div class="card-btn-footer">
+              <span class="card-btn-cta">Launch F&O Cockpit</span>
+              <span class="card-btn-arrow">➔</span>
+            </div>
           </button>
         </div>
       </div>
@@ -726,6 +1830,13 @@
       </div>
     </div>
 
+    <!-- Active Workspace Portal Switcher Pill -->
+    <button class="ci-workspace-nav-pill" id="navWorkspaceSwitcher" onclick="window.app?.openWorkspaceGateway(); return false;" title="Click to Switch between Cash Equities & F&O Derivatives">
+      <span id="wsNavIcon">📈</span>
+      <span id="wsNavLabel">Cash Portal</span>
+      <span style="font-size: 0.65rem; opacity: 0.7;">▾</span>
+    </button>
+
     <!-- Universal Search Bar (Desktop & Tablet) -->
     <div class="nav-search-container" id="navSearchContainer">
       <div class="search-input-wrapper">
@@ -758,12 +1869,13 @@
       <a class="nav-link" data-view="watchlist" id="navLinkWatchlist" title="Zerodha Kite 18-Sector Watchlists">
         Watchlist
       </a>
+      <a class="nav-link nav-link-fno" data-view="fno_derivatives" id="navLinkFno" title="Futures & Options Derivatives Cockpit">
+        <span style="color: #fbbf24;">⚡</span>
+        F&O Cockpit
+      </a>
       <a class="nav-link nav-link-ai" data-view="terminal" title="AI Agent Intelligence">
         <span class="nav-ai-glow">🤖</span>
         TejAI
-      </a>
-      <a class="nav-link nav-link-premium" href="#" id="navLinkPremium" style="color: #c084fc; font-weight: 800;" onclick="window.app?.openProSubscriptionModal(); return false;">
-        ⭐ Pro (₹1,000 / 2M)
       </a>
       <a class="nav-link" href="#" id="navLinkHelp" title="Scanner Documentation">
         Help
@@ -778,12 +1890,6 @@
         <span class="pro-text">Pro</span>
       </button>
 
-      <!-- Workspace Switcher Pill (Cash vs F&O) -->
-      <button class="ci-workspace-toggle-btn" id="navWorkspaceSwitcher" title="Switch Market Workspace (Cash Equities / Derivatives F&O)">
-        <span class="ws-pill-icon" id="wsNavIcon">📈</span>
-        <span class="ws-pill-label" id="wsNavLabel">Cash</span>
-        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
-      </button>
 
       <!-- Admin Console Pill Button -->
       <button class="ci-admin-pill-btn" id="btnOpenAdminModal" onclick="window.app?.openAdminModal()" title="Open Admin Security & Visitor Analytics (7647814314)">
@@ -837,6 +1943,22 @@
       </button>
     </div>
   </header>
+
+  <!-- Dedicated Top Portal Mode Status Banner ("other should not be seen that part") -->
+  <div class="portal-active-mode-banner" id="portalActiveModeBanner">
+    <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+      <span class="portal-mode-pill" id="portalModeBadge">📈 100% Cash Equities Mode</span>
+      <span id="portalModeText" style="color: #94a3b8; font-size: 0.78rem;">F&O derivatives clutter is strictly hidden. Only pure cash equity screens & watchlists are active.</span>
+    </div>
+    <div class="portal-mode-actions">
+      <button type="button" class="portal-mode-btn btn-switch-fno" id="btnTogglePortalMode" onclick="window.app?.togglePortalMode()" title="Switch between Cash and F&O">
+        <span>⚡ Switch to F&O Cockpit</span>
+      </button>
+      <button type="button" class="portal-mode-btn" onclick="window.app?.openAdminModal()" title="Open Admin Visitor Terminal">
+        <span>🛡️ Admin Terminal</span>
+      </button>
+    </div>
+  </div>
 
   <!-- Mobile Search Bar (Visible on phones) -->
   <div class="mobile-search-bar">
@@ -921,7 +2043,6 @@
         <button class="pill-item" data-segment="Nifty IT">Nifty IT</button>
         <button class="pill-item" data-segment="Nifty Auto">Nifty Auto</button>
         <button class="pill-item" data-segment="Defence">Defence & PSU</button>
-        <button class="pill-item" data-segment="F&O">F&O Segment</button>
         <button class="pill-item" data-segment="Nifty 500">Nifty 500</button>
       </div>
 
@@ -942,7 +2063,7 @@
             <span style="font-size: 1.4rem;">🤖</span>
             TejStockAI Market Intelligence Terminal
           </h2>
-          <p class="view-subtitle">All-in-one Broker AI Copilot (Zerodha Kite Market Depth, Dhan Option Matrix, Angel One Health, and Upstox F&O Analytics)</p>
+          <p class="view-subtitle">All-in-one Broker AI Copilot (Zerodha Kite Level 2 Market Depth, Angel One Health & Cash Analytics)</p>
         </div>
 
         <div style="display: flex; gap: 0.5rem; align-items: center;">
@@ -974,15 +2095,15 @@
         </div>
 
         <div class="broker-ribbon-card">
-          <div class="broker-card-label">Dhan Option Matrix (PCR)</div>
-          <div class="broker-card-value text-accent" id="terminalPcrVal">1.15 (Bullish)</div>
-          <div class="broker-card-sub" id="terminalMaxPain">Max Pain: ₹1,250 • ATM: ₹1,250</div>
+          <div class="broker-card-label">Cash Market VWAP</div>
+          <div class="broker-card-value text-accent" id="terminalPcrVal">₹1,248.50</div>
+          <div class="broker-card-sub" id="terminalMaxPain">VWAP Anchor • High/Low Range</div>
         </div>
 
         <div class="broker-ribbon-card">
           <div class="broker-card-label">Institutional Inflows (FII/DII)</div>
           <div class="broker-card-value text-green" id="terminalFiiDiiNet">Net Buyer (+₹3,966 Cr)</div>
-          <div class="broker-card-sub" id="terminalFiiLong">Futures Long Ratio: 58.4%</div>
+          <div class="broker-card-sub" id="terminalFiiLong">DII Net Support: +₹2,120 Cr</div>
         </div>
       </div>
 
@@ -1006,7 +2127,7 @@
           <div class="terminal-prompt-chips">
             <button class="ai-chip" onclick="window.app?.sendTerminalChatMessage('Show me today FII and DII institutional activity')">🏦 FII & DII Inflows Today</button>
             <button class="ai-chip" onclick="window.app?.sendTerminalChatMessage('Compare RELIANCE vs TCS with market depth and PE')">⚖️ Compare Reliance vs TCS</button>
-            <button class="ai-chip" onclick="window.app?.sendTerminalChatMessage('Show Option Chain PCR, Max Pain and ATM open interest')">📊 Option Chain & Max Pain</button>
+            <button class="ai-chip" onclick="window.app?.sendTerminalChatMessage('Show VWAP, RSI and technical moving averages for RELIANCE')">📈 VWAP & Moving Averages</button>
             <button class="ai-chip" onclick="window.app?.sendTerminalChatMessage('Show Zerodha Kite Level 2 Market Depth and circuit limits')">📑 Market Depth & Circuit Limits</button>
             <button class="ai-chip" onclick="window.app?.sendTerminalChatMessage('Give me high probability intraday strategy and stop loss')">⚡ Intraday Strategy & Stop Loss</button>
           </div>
@@ -1016,10 +2137,10 @@
             <div class="ai-chat-msg ai-msg-bot">
               <div class="chat-avatar">🤖</div>
               <div class="chat-bubble">
-                Welcome to <strong>TejStockAI Terminal</strong>! I have direct access to all information available across <strong>Zerodha Kite, Angel One, Upstox, and Dhan</strong>:
+                Welcome to <strong>TejStockAI Terminal</strong>! I have direct access to real-time cash analytics across <strong>Zerodha Kite, Angel One, Upstox, and Dhan</strong>:
                 <br>• <strong>Level 2 Market Depth (5-Depth Order Book)</strong> & Circuit Limits
-                <br>• <strong>Option Chain Matrix (PCR, Max Pain, ATM Strikes, Open Interest Buildup)</strong>
-                <br>• <strong>FII / DII Institutional Flows & Index Futures Long-Short Ratio</strong>
+                <br>• <strong>FII / DII Institutional Net Cash Inflows & DII Activity</strong>
+                <br>• <strong>VWAP, Delivery Volume % & Turnover Metrics</strong>
                 <br>• <strong>Multi-stock Comparisons & Technical Momentum Strategies</strong>
                 <br><br>Ask me anything or click a suggested prompt above!
               </div>
@@ -1028,7 +2149,7 @@
 
           <!-- Chat Input Bar -->
           <div class="terminal-chat-input-row">
-            <input type="text" id="terminalChatInput" placeholder="Ask TejStockAI: e.g. Compare HDFCBANK vs ICICIBANK, Option chain for NIFTY, Upper circuit for SUZLON..." autocomplete="off">
+            <input type="text" id="terminalChatInput" placeholder="Ask TejStockAI: e.g. Compare HDFCBANK vs ICICIBANK, Delivery % for RELIANCE, Upper circuit for SUZLON..." autocomplete="off">
             <button class="btn btn-ai-sparkle" id="btnSendTerminalChat">Send Query</button>
           </div>
         </div>
@@ -1039,7 +2160,6 @@
           <!-- Widget Tab Bar -->
           <div class="widget-tab-bar">
             <button class="widget-tab-btn active" data-tab="depth">Level 2 Depth (Kite)</button>
-            <button class="widget-tab-btn" data-tab="options">Option Matrix (Dhan)</button>
             <button class="widget-tab-btn" data-tab="fiidii">FII / DII Flows</button>
           </div>
 
@@ -1089,36 +2209,11 @@
             </div>
           </div>
 
-          <!-- Tab Content 2: Option Chain Matrix -->
-          <div class="widget-tab-pane" id="tabPane_options">
-            <div class="depth-card-header">
-              <span id="optionStockHeader">Option Chain (Dhan Matrix)</span>
-              <span class="depth-circuit-pill text-accent" id="optionPcrPill">PCR: 1.15 • Max Pain: ₹1,250</span>
-            </div>
-
-            <div class="depth-table-wrapper">
-              <table class="depth-table">
-                <thead>
-                  <tr>
-                    <th style="color: var(--green);">Call OI</th>
-                    <th style="color: var(--green);">Call (₹)</th>
-                    <th style="text-align: center; color: var(--accent);">Strike</th>
-                    <th style="color: var(--red);">Put (₹)</th>
-                    <th style="color: var(--red);">Put OI</th>
-                  </tr>
-                </thead>
-                <tbody id="optionTableBody">
-                  <!-- Rendered dynamically -->
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- Tab Content 3: FII / DII Flows -->
+          <!-- Tab Content 2: FII / DII Flows -->
           <div class="widget-tab-pane" id="tabPane_fiidii">
             <div class="fiidii-card">
               <h4 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 0.75rem; color: var(--text-main);">
-                Institutional Cash & Derivatives Activity
+                Institutional Cash Inflow Activity
               </h4>
               <div class="fiidii-grid">
                 <div class="fiidii-stat-box">
@@ -1130,8 +2225,8 @@
                   <span class="val text-green" id="diiNetCash">+₹2,120.40 Cr</span>
                 </div>
                 <div class="fiidii-stat-box">
-                  <span class="lbl">FII Futures Long Ratio</span>
-                  <span class="val text-accent" id="fiiLongRatio">58.4%</span>
+                  <span class="lbl">DII Net Support</span>
+                  <span class="val text-accent" id="fiiLongRatio">+₹2,120 Cr</span>
                 </div>
                 <div class="fiidii-stat-box">
                   <span class="lbl">Market Bias</span>
@@ -1787,73 +2882,243 @@
       </div>
     </section>
 
-    <!-- Professional Workspace Gateway Front Panel Modal -->
-    <div class="workspace-gateway-backdrop" id="workspaceGatewayModal" style="display: none;">
-      <div class="gateway-modal-card">
-        <div class="gateway-modal-header">
-          <div class="gateway-brand">
-            <div class="brand-icon">
-              <svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M3 3v18h18"></path><path d="m19 9-5 5-4-4-3 3"></path></svg>
-            </div>
-            <div>
-              <h3>Welcome to TejStockAI</h3>
-              <p class="gateway-sub">Professional Multi-Asset Execution Gateway</p>
-            </div>
-          </div>
-          <button class="gateway-close-btn" id="btnCloseGatewayModal" title="Close">✕</button>
+    <!-- ==========================================
+         VIEW 6: PURE FUTURES & OPTIONS (F&O) DERIVATIVES PORTAL
+         ========================================== -->
+    <section class="app-view" id="view_fno_derivatives">
+      <!-- F&O Cockpit Header & Live Underlying Bar -->
+      <div class="fno-portal-hero">
+        <div class="fno-hero-left">
+          <div class="fno-badge-portal">⚡ PURE DERIVATIVES COCKPIT</div>
+          <h2>NSE Futures & Options Market Terminal</h2>
+          <p>Real-time Sensibull & Dhan style Option Chains, Open Interest Buildup, PCR sentiment, and Index Expiries.</p>
         </div>
 
-        <div class="gateway-modal-body">
-          <p class="gateway-prompt">Which market segment do you want to analyze today?</p>
-
-          <div class="gateway-cards-grid">
-            <!-- Option 1: Cash Equities & 18 Sectors -->
-            <div class="gateway-card" id="btnGatewaySelectCash">
-              <div class="gateway-card-header">
-                <span class="gateway-badge cash-badge">NSE CASH EQUITIES</span>
-                <span class="gateway-icon">📈</span>
-              </div>
-              <h4>Cash Stocks & 18 Sectors</h4>
-              <p class="gateway-desc">Complete NSE Cash Universe (Nifty 500, Large, Mid, Small, Microcap) with Zerodha Kite 18-Sector collapsible watchlist drill-down & delivery volume analytics.</p>
-              <ul class="gateway-features">
-                <li>✓ 18 Sector Watchlists (Auto, Bank, IT, FMCG, Metal, Energy...)</li>
-                <li>✓ Full Cash Universe (including TMPV, MRF, TCS, ADANIENSOL)</li>
-                <li>✓ 1-Click Sector Drilldown to view all constituent stocks</li>
-                <li>✓ Intraday & Swing Momentum Technical Screeners</li>
-              </ul>
-              <button class="btn btn-primary gateway-select-btn">Select Cash Equities →</button>
-            </div>
-
-            <!-- Option 2: Derivatives (Futures & Options) -->
-            <div class="gateway-card" id="btnGatewaySelectFno">
-              <div class="gateway-card-header">
-                <span class="gateway-badge fno-badge">DERIVATIVES (F&O)</span>
-                <span class="gateway-icon">⚡</span>
-              </div>
-              <h4>Options & Futures (F&O)</h4>
-              <p class="gateway-desc">Dedicated derivatives cockpit with NIFTY, BANKNIFTY, FINNIFTY, MIDCPNIFTY option chain matrices, strike ladders, PCR, Max Pain, and multi-broker market depth.</p>
-              <ul class="gateway-features">
-                <li>✓ NIFTY, BANKNIFTY, FINNIFTY, MIDCPNIFTY Options Chain</li>
-                <li>✓ 185+ Single Stock Futures & CE/PE Strike Search</li>
-                <li>✓ Put-Call Ratio (PCR), Max Pain & Open Interest Build-up</li>
-                <li>✓ Level 2 Multi-Broker Order Book & Live Heatmaps</li>
-              </ul>
-              <button class="btn btn-primary gateway-select-btn" style="background: linear-gradient(135deg, #f59e0b, #d97706);">Select F&O Derivatives →</button>
-            </div>
+        <div class="fno-hero-quick-stats">
+          <div class="fno-stat-pill">
+            <span class="lbl">INDIA VIX</span>
+            <span class="val text-accent" id="fnoHeroVix">13.45 (-1.2%)</span>
           </div>
-
-          <div class="gateway-footer">
-            <label class="gateway-remember">
-              <input type="checkbox" id="chkRememberWorkspace" checked>
-              <span>Remember my workspace preference (you can switch anytime from the top navbar pill)</span>
-            </label>
+          <div class="fno-stat-pill">
+            <span class="lbl">NIFTY PCR</span>
+            <span class="val text-green" id="fnoHeroPcr">1.18 (Bullish)</span>
+          </div>
+          <div class="fno-stat-pill">
+            <span class="lbl">MAX PAIN</span>
+            <span class="val" id="fnoHeroMaxPain" style="color: #c084fc;">₹25,800</span>
+          </div>
+          <div class="fno-stat-pill">
+            <span class="lbl">DII SUPPORT</span>
+            <span class="val text-green">+₹2,120 Cr</span>
           </div>
         </div>
       </div>
-    </div>
+
+      <!-- F&O Control Ribbon: Symbol Selector & Expiry Tabs -->
+      <div class="fno-controls-bar">
+        <div class="fno-symbol-selector">
+          <label>SELECT UNDERLYING DERIVATIVE:</label>
+          <div class="fno-chips-scroll" id="fnoUnderlyingChips">
+            <button class="fno-chip active" data-symbol="NIFTY">NIFTY 50</button>
+            <button class="fno-chip" data-symbol="BANKNIFTY">BANK NIFTY</button>
+            <button class="fno-chip" data-symbol="FINNIFTY">FIN NIFTY</button>
+            <button class="fno-chip" data-symbol="MIDCPNIFTY">MIDCP NIFTY</button>
+            <button class="fno-chip" data-symbol="RELIANCE">RELIANCE FUT</button>
+            <button class="fno-chip" data-symbol="HDFCBANK">HDFCBANK FUT</button>
+            <button class="fno-chip" data-symbol="ICICIBANK">ICICIBANK FUT</button>
+            <button class="fno-chip" data-symbol="INFY">INFY FUT</button>
+            <button class="fno-chip" data-symbol="TCS">TCS FUT</button>
+            <button class="fno-chip" data-symbol="TATAMOTORS">TATAMOTORS FUT</button>
+          </div>
+        </div>
+
+        <div class="fno-expiry-box">
+          <label>EXPIRY DATE:</label>
+          <select id="fnoExpirySelect" class="fno-select">
+            <option value="weekly_curr" selected>Current Weekly (Thursday)</option>
+            <option value="weekly_next">Next Weekly (+7 Days)</option>
+            <option value="monthly">Monthly Expiry</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- F&O Open Interest Buildup Heatmap -->
+      <div class="fno-buildup-grid">
+        <div class="fno-buildup-card long-buildup" data-filter="long_buildup">
+          <div class="fno-buildup-header">
+            <span>🟢 Long Buildup</span>
+            <span class="fno-count-badge" id="countLongBuildup">28 Contracts</span>
+          </div>
+          <p class="fno-buildup-desc">Price Rising ↑ + Open Interest Surging ↑ (Aggressive Call Buying)</p>
+          <div class="fno-tags-list" id="tagsLongBuildup">
+            <span>NIFTY 25800 CE</span>
+            <span>RELIANCE 1260 CE</span>
+            <span>TATASTEEL 170 CE</span>
+          </div>
+        </div>
+
+        <div class="fno-buildup-card short-covering" data-filter="short_covering">
+          <div class="fno-buildup-header">
+            <span>🟡 Short Covering</span>
+            <span class="fno-count-badge" id="countShortCovering">19 Contracts</span>
+          </div>
+          <p class="fno-buildup-desc">Price Rising ↑ + Open Interest Falling ↓ (Bears Rushing to Exit)</p>
+          <div class="fno-tags-list" id="tagsShortCovering">
+            <span>BANKNIFTY 53500 CE</span>
+            <span>HDFCBANK 1740 CE</span>
+          </div>
+        </div>
+
+        <div class="fno-buildup-card short-buildup" data-filter="short_buildup">
+          <div class="fno-buildup-header">
+            <span>🔴 Short Buildup</span>
+            <span class="fno-count-badge" id="countShortBuildup">14 Contracts</span>
+          </div>
+          <p class="fno-buildup-desc">Price Falling ↓ + Open Interest Surging ↑ (Aggressive Call Writing / Put Buying)</p>
+          <div class="fno-tags-list" id="tagsShortBuildup">
+            <span>IT Sector Puts</span>
+            <span>INFY 1880 PE</span>
+          </div>
+        </div>
+
+        <div class="fno-buildup-card long-unwinding" data-filter="long_unwinding">
+          <div class="fno-buildup-header">
+            <span>🟠 Long Unwinding</span>
+            <span class="fno-count-badge" id="countLongUnwinding">11 Contracts</span>
+          </div>
+          <p class="fno-buildup-desc">Price Falling ↓ + Open Interest Falling ↓ (Bulls Booking Profits)</p>
+          <div class="fno-tags-list" id="tagsLongUnwinding">
+            <span>MIDCPNIFTY 13200 CE</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Dhan / Sensibull Style Option Chain Matrix -->
+      <div class="fno-chain-card">
+        <div class="fno-chain-header">
+          <div class="fno-chain-title">
+            <h3 id="fnoActiveTitle">NIFTY 50 Option Chain (Dhan & Sensibull Matrix)</h3>
+            <span class="fno-spot-badge" id="fnoSpotBadge">SPOT: ₹25,820.50 • ATM: ₹25,800</span>
+          </div>
+
+          <div class="fno-chain-metrics">
+            <span class="metric-pill">PCR: <strong class="text-green" id="fnoPcrVal">1.18</strong></span>
+            <span class="metric-pill">Max Pain: <strong class="text-accent" id="fnoMaxPainVal">₹25,800</strong></span>
+            <span class="metric-pill">IV: <strong style="color: #c084fc;">14.2%</strong></span>
+            <button class="btn btn-secondary btn-sm" id="btnRefreshFnoChain">↻ Refresh Matrix</button>
+          </div>
+        </div>
+
+        <div class="table-container fno-table-container">
+          <table class="fno-option-table">
+            <thead>
+              <tr class="fno-top-th">
+                <th colspan="4" style="background: rgba(16, 185, 129, 0.12); color: #10b981; text-align: center; border-right: 2px solid #334155;">CALL OPTIONS (CE)</th>
+                <th style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; text-align: center;">STRIKE</th>
+                <th colspan="4" style="background: rgba(239, 68, 68, 0.12); color: #ef4444; text-align: center; border-left: 2px solid #334155;">PUT OPTIONS (PE)</th>
+              </tr>
+              <tr>
+                <th style="color: var(--green);">Call OI</th>
+                <th style="color: var(--green);">Call Volume</th>
+                <th style="color: var(--green);">IV (%)</th>
+                <th style="color: var(--green); border-right: 2px solid #334155;">LTP (₹)</th>
+                <th style="text-align: center; color: var(--accent); background: rgba(56, 189, 248, 0.08);">Strike Price</th>
+                <th style="color: var(--red); border-left: 2px solid #334155;">LTP (₹)</th>
+                <th style="color: var(--red);">IV (%)</th>
+                <th style="color: var(--red);">Put Volume</th>
+                <th style="color: var(--red);">Put OI</th>
+              </tr>
+            </thead>
+            <tbody id="fnoOptionTableBody">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
 
   </main>
 
+  <!-- Professional Market Portal Gateway Front Panel Modal -->
+  <div class="workspace-gateway-backdrop" id="workspaceGatewayModal" style="display: none;">
+    <div class="gateway-modal-card">
+      <div class="gateway-modal-header">
+        <div class="gateway-brand">
+          <div class="brand-icon">
+            <svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M3 3v18h18"></path><path d="m19 9-5 5-4-4-3 3"></path></svg>
+          </div>
+          <div>
+            <h3>Choose Your Market Portal</h3>
+            <p class="gateway-sub">TejStockAI Dual Market Architecture</p>
+          </div>
+        </div>
+        <button class="gateway-close-btn" id="btnCloseGatewayModal" title="Close">✕</button>
+      </div>
+
+      <div class="gateway-modal-body">
+        <p class="gateway-prompt">Which market segment do you want to analyze today?</p>
+
+        <div class="gateway-cards-grid">
+          <!-- Option 1: Cash Equities & 18 Sectors -->
+          <div class="gateway-card" id="btnGatewaySelectCash">
+            <div class="gateway-card-header">
+              <span class="gateway-badge cash-badge">NSE CASH EQUITIES PORTAL</span>
+              <span class="gateway-icon">📈</span>
+            </div>
+            <h4>Cash Stocks & 18 Sectors</h4>
+            <p class="gateway-desc">Complete NSE Cash Universe (Nifty 500, Large, Mid, Smallcap) with Zerodha Kite 18-Sector collapsible watchlist drill-down & delivery volume analytics.</p>
+            <ul class="gateway-features">
+              <li>✓ 18 Sector Watchlists (Auto, Bank, IT, FMCG, Metal, Energy...)</li>
+              <li>✓ Full Cash Universe (8,000+ NSE Equities)</li>
+              <li>✓ Real-Time Delivery Volume & Equity Breakout Scans</li>
+              <li>✓ 100% Cash Equities (No F&O clutter)</li>
+            </ul>
+            <button class="btn btn-primary gateway-select-btn" style="width: 100%;">Select Cash Equities Portal →</button>
+          </div>
+
+          <!-- Option 2: Derivatives (Futures & Options) -->
+          <div class="gateway-card" id="btnGatewaySelectFno">
+            <div class="gateway-card-header">
+              <span class="gateway-badge fno-badge">FUTURES & OPTIONS (F&O) PORTAL</span>
+              <span class="gateway-icon">⚡</span>
+            </div>
+            <h4>Options & Futures Cockpit</h4>
+            <p class="gateway-desc">Dedicated derivatives cockpit with NIFTY, BANKNIFTY, FINNIFTY, MIDCPNIFTY option chain matrices, strike ladders, PCR, Max Pain, and OI buildup.</p>
+            <ul class="gateway-features">
+              <li>✓ NIFTY & BANKNIFTY Real-Time Options Chain</li>
+              <li>✓ Call / Put Open Interest (OI) & PCR Sentiment</li>
+              <li>✓ Max Pain Level & India VIX Volatility Gauge</li>
+              <li>✓ 100% F&O Derivatives (No Cash clutter)</li>
+            </ul>
+            <button class="btn btn-primary gateway-select-btn" style="width: 100%; background: linear-gradient(135deg, #f59e0b, #d97706);">Select F&O Derivatives Portal →</button>
+          </div>
+        </div>
+
+        <div class="gateway-footer">
+          <label class="gateway-remember" style="display: flex; align-items: center; gap: 0.5rem; color: #94a3b8; font-size: 0.8rem; cursor: pointer;">
+            <input type="checkbox" id="chkRememberWorkspace" checked>
+            <span>Remember my workspace preference (you can switch anytime from the top navbar pill)</span>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal to View Original Full Diagram Photo -->
+  <div class="modal-backdrop" id="infographicPhotoModal" style="display: none; align-items: center; justify-content: center; z-index: 100000; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);">
+    <div style="background: #0f172a; border: 1px solid rgba(99,102,241,0.4); border-radius: 14px; max-width: 900px; width: 95%; max-height: 90vh; overflow: auto; padding: 1.25rem; box-shadow: 0 20px 50px rgba(0,0,0,0.7);">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+        <h4 style="margin: 0; color: #f8fafc; font-size: 1.05rem;">📊 Cash Stock Market vs Future & Option Market Diagram</h4>
+        <button class="modal-close-btn" onclick="document.getElementById('infographicPhotoModal').style.display='none'">✕</button>
+      </div>
+      <img src="/images/cash_vs_fno.jpg" alt="Cash Stock Market vs Future & Option Market" style="width: 100%; height: auto; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); display: block;">
+      <div style="margin-top: 1rem; display: flex; justify-content: flex-end; gap: 0.75rem; flex-wrap: wrap;">
+        <button class="btn btn-secondary btn-sm" onclick="document.getElementById('infographicPhotoModal').style.display='none'">Close</button>
+        <button class="btn btn-primary btn-sm" onclick="document.getElementById('infographicPhotoModal').style.display='none'; window.app?.launchFromAdmin('cash')">Launch Cash Portal ➔</button>
+        <button class="btn btn-primary btn-sm" style="background: #f59e0b; border-color: #d97706;" onclick="document.getElementById('infographicPhotoModal').style.display='none'; window.app?.launchFromAdmin('fno')">Launch F&O Cockpit ➔</button>
+      </div>
+    </div>
+  </div>
 
   <!-- ==========================================
        MODAL 1: TRADINGVIEW-STYLE INTERACTIVE CHART
@@ -2026,9 +3291,9 @@
           </div>
 
           <div class="ai-level-card">
-            <div class="ai-card-title" id="aiLevelTitleSL">🛡️ Strict Stop-Loss</div>
+            <div class="ai-card-title" id="aiLevelTitleSL">🛡️ Volatility Stop-Loss</div>
             <div class="ai-card-val text-red" id="aiLevelStopLoss">₹1,215.00</div>
-            <div class="ai-card-hint" id="aiLevelHintSL">Dynamic buffer</div>
+            <div class="ai-card-hint" id="aiLevelHintSL">2.5x ATR buffer (absorbs false wicks)</div>
           </div>
 
           <div class="ai-level-card">
@@ -2691,7 +3956,7 @@
         <p>Click the <strong>±=</strong> button on any clause line to add mathematical operations like multipliers (e.g. <code>Volume &gt; 2 * 20 SMA(Volume)</code>) or custom percentage formulas.</p>
 
         <h4 style="color: #ffffff; margin-top: 1rem; margin-bottom: 0.4rem;">4. Segment Selection</h4>
-        <p>Choose from 29 authentic NSE universes including <strong>Nifty 500</strong>, <strong>F&amp;O Futures</strong>, <strong>Bank Nifty</strong>, <strong>Gold/Silver ETFs</strong>, and <strong>My Watchlist</strong>.</p>
+        <p>Choose from 28 authentic NSE universes including <strong>Nifty 500</strong>, <strong>Nifty 100</strong>, <strong>Bank Nifty</strong>, <strong>Gold/Silver ETFs</strong>, and <strong>My Watchlist</strong>.</p>
       </div>
     </div>
   </div>

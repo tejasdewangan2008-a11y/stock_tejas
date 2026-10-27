@@ -7,7 +7,6 @@ const CHARTINK_SEGMENTS = [
   { id: 'Banknifty', label: 'Banknifty', desc: 'Nifty Bank banking constituents' },
   { id: 'broad indices', label: 'broad indices', desc: 'Broad market benchmark indices' },
   { id: 'ETFs', label: 'ETFs', desc: 'Exchange Traded Funds on NSE' },
-  { id: 'futures', label: 'futures', desc: 'F&O contracts & derivative eligible stocks' },
   { id: 'Gold ETFs', label: 'Gold ETFs', desc: 'Gold exchange traded funds' },
   { id: 'g-sec bonds', label: 'g-sec bonds', desc: 'Government securities and sovereign bonds' },
   { id: 'Midcap 50', label: 'Midcap 50', desc: 'Top 50 high momentum midcap companies' },

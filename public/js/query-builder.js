@@ -165,9 +165,9 @@ class QueryBuilder {
           id: 'scan-rsi-60',
           title: 'RSI 60',
           description: 'TEJAS',
-          segment: 'F&O',
+          segment: 'Cash',
           category: 'Momentum',
-          tags: ['F&O', 'High Momentum'],
+          tags: ['Cash', 'High Momentum'],
           createdOn: '2/14/2026',
           passType: 'all',
           filters: [
@@ -432,7 +432,7 @@ class QueryBuilder {
 
     // Add Tag Button (+ Add tag - Image 1)
     document.getElementById('btnAddScanTag')?.addEventListener('click', () => {
-      const newTag = prompt('Enter a new tag for this scanner (e.g. Breakout, Swing, Nifty 50, F&O):');
+      const newTag = prompt('Enter a new tag for this scanner (e.g. Breakout, Swing, Nifty 50):');
       if (newTag && newTag.trim()) {
         const cleanTag = newTag.trim();
         if (!this.currentScan.tags) this.currentScan.tags = [];
@@ -649,7 +649,7 @@ class QueryBuilder {
       },
       {
         title: 'Golden Cross (50 EMA > 200 EMA)',
-        desc: 'Premier long-term institutional trend breakout pattern on NSE Cash/F&O stocks',
+        desc: 'Premier long-term institutional trend breakout pattern on NSE Cash stocks',
         filters: [
           { timeframe: 'Daily', left: 'ema50', op: 'gt', rightType: 'indicator', right: 'ema200' },
           { timeframe: 'Daily', left: 'close', op: 'gt', rightType: 'indicator', right: 'ema50' },
@@ -3485,7 +3485,6 @@ class QueryBuilder {
           { id: 'Banknifty', label: 'Banknifty' },
           { id: 'broad indices', label: 'broad indices' },
           { id: 'ETFs', label: 'ETFs' },
-          { id: 'futures', label: 'futures' },
           { id: 'Gold ETFs', label: 'Gold ETFs' },
           { id: 'g-sec bonds', label: 'g-sec bonds' },
           { id: 'Midcap 50', label: 'Midcap 50' },
