@@ -4198,6 +4198,7 @@ class App {
       let savedTheme = localStorage.getItem('chartink_theme') || 'light';
       document.documentElement.setAttribute('data-theme', savedTheme);
       updateThemeBtnUI(savedTheme);
+      this.initCursorGlow();
     }
 
     // Chartink Top Nav Links
@@ -5029,6 +5030,41 @@ class App {
         btn.innerHTML = origText;
       }
     }
+  }
+
+  /**
+   * Initializes the Cursor Glow / Spotlight Effect for Dark Mode
+   */
+  initCursorGlow() {
+    const glow = document.getElementById('cursorGlow') || document.querySelector('.cursor-glow');
+    if (!glow) return;
+
+    let mouseX = -999;
+    let mouseY = -999;
+    let rafId = null;
+
+    const renderGlow = () => {
+      glow.style.setProperty('--mouse-x', `${mouseX}px`);
+      glow.style.setProperty('--mouse-y', `${mouseY}px`);
+      rafId = null;
+    };
+
+    window.addEventListener('pointermove', (event) => {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark' || document.body?.getAttribute('data-theme') === 'dark';
+      if (!isDark) return;
+
+      mouseX = event.clientX;
+      mouseY = event.clientY;
+
+      if (!rafId) {
+        rafId = window.requestAnimationFrame(renderGlow);
+      }
+    }, { passive: true });
+
+    document.addEventListener('mouseleave', () => {
+      glow.style.setProperty('--mouse-x', '-999px');
+      glow.style.setProperty('--mouse-y', '-999px');
+    });
   }
 }
 

@@ -70,6 +70,48 @@
   --shadow-lg: 0 10px 20px -3px rgba(0, 0, 0, 0.08);
 }
 
+/* =========================================================
+   CURSOR GLOW / SPOTLIGHT EFFECT (DARK MODE EXCLUSIVE)
+   ========================================================= */
+.cursor-glow {
+  position: fixed;
+  inset: 0;
+  pointer-events: none !important;
+  z-index: 95;
+  display: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  background: radial-gradient(
+    360px circle at var(--mouse-x, -999px) var(--mouse-y, -999px),
+    rgba(90, 100, 255, 0.22),
+    rgba(56, 189, 248, 0.12) 40%,
+    transparent 75%
+  );
+}
+
+/* Enabled strictly in Dark Mode */
+[data-theme="dark"] .cursor-glow,
+html[data-theme="dark"] .cursor-glow,
+body[data-theme="dark"] .cursor-glow {
+  display: block !important;
+  opacity: 1 !important;
+}
+
+/* Hidden in Light Mode */
+[data-theme="light"] .cursor-glow,
+html[data-theme="light"] .cursor-glow,
+body[data-theme="light"] .cursor-glow {
+  display: none !important;
+  opacity: 0 !important;
+}
+
+/* Disabled on touch/mobile devices where there is no cursor hover */
+@media (hover: none) {
+  .cursor-glow {
+    display: none !important;
+  }
+}
+
 * {
   box-sizing: border-box;
   margin: 0;

@@ -532,6 +532,48 @@
     }
 
     /* =========================================================
+       CURSOR GLOW / SPOTLIGHT EFFECT (DARK MODE EXCLUSIVE)
+       ========================================================= */
+    .cursor-glow {
+      position: fixed;
+      inset: 0;
+      pointer-events: none !important;
+      z-index: 95;
+      display: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      background: radial-gradient(
+        360px circle at var(--mouse-x, -999px) var(--mouse-y, -999px),
+        rgba(90, 100, 255, 0.22),
+        rgba(56, 189, 248, 0.12) 40%,
+        transparent 75%
+      );
+    }
+
+    /* Active strictly in Dark Mode */
+    [data-theme="dark"] .cursor-glow,
+    html[data-theme="dark"] .cursor-glow,
+    body[data-theme="dark"] .cursor-glow {
+      display: block !important;
+      opacity: 1 !important;
+    }
+
+    /* Hidden in Light Mode */
+    [data-theme="light"] .cursor-glow,
+    html[data-theme="light"] .cursor-glow,
+    body[data-theme="light"] .cursor-glow {
+      display: none !important;
+      opacity: 0 !important;
+    }
+
+    /* Disabled on touch / mobile devices without mouse cursor */
+    @media (hover: none) {
+      .cursor-glow {
+        display: none !important;
+      }
+    }
+
+    /* =========================================================
        DARK MODE STYLES (SCOPED STRICTLY UNDER [data-theme="dark"])
        ========================================================= */
     html[data-theme="dark"], body[data-theme="dark"] {
@@ -1074,6 +1116,9 @@
   <link rel="stylesheet" href="./css/mobile.css?v=7.5">
 </head>
 <body>
+
+  <!-- Cursor Glow Effect / Spotlight Cursor (Dark Mode Exclusive) -->
+  <div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
 
   <!-- ==========================================
        LOGIN & AUTHENTICATION PORTAL (ENTRY SCREEN)
@@ -4171,6 +4216,33 @@
   <script src="./js/query-builder.js?v=5.2"></script>
   <script src="./js/dashboard.js?v=5.2"></script>
   <script src="./js/app.js?v=5.2"></script>
+
+  <!-- Immediate Cursor Glow Initializer for Dark Mode -->
+  <script>
+    (function() {
+      const glow = document.getElementById('cursorGlow') || document.querySelector('.cursor-glow');
+      if (!glow) return;
+      let rafId = null;
+      let x = -999, y = -999;
+      window.addEventListener('pointermove', function(e) {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark' || (document.body && document.body.getAttribute('data-theme') === 'dark');
+        if (!isDark) return;
+        x = e.clientX;
+        y = e.clientY;
+        if (!rafId) {
+          rafId = requestAnimationFrame(function() {
+            glow.style.setProperty('--mouse-x', x + 'px');
+            glow.style.setProperty('--mouse-y', y + 'px');
+            rafId = null;
+          });
+        }
+      }, { passive: true });
+      document.addEventListener('mouseleave', function() {
+        glow.style.setProperty('--mouse-x', '-999px');
+        glow.style.setProperty('--mouse-y', '-999px');
+      });
+    })();
+  </script>
 
 </body>
 </html>
