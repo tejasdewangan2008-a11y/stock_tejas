@@ -654,10 +654,30 @@
     /* =========================================================
        CRITICAL ADMIN DUAL MARKET INFOGRAPHIC & STRICT ISOLATION
        ========================================================= */
+    .admin-modal-overlay {
+      overflow-y: auto !important;
+      display: flex !important;
+      align-items: flex-start !important;
+      justify-content: center !important;
+      padding: 1.5rem 1rem !important;
+      -webkit-overflow-scrolling: touch;
+    }
+
     .admin-modal-container {
       overflow-y: auto !important;
+      overflow-x: hidden !important;
       max-height: 92vh !important;
       scroll-behavior: smooth !important;
+      position: relative !important;
+      margin: auto 0 !important;
+    }
+
+    .admin-header {
+      position: sticky !important;
+      top: 0 !important;
+      z-index: 25 !important;
+      background: #141b26 !important;
+      flex-shrink: 0 !important;
     }
 
     .admin-market-infographic-card {
