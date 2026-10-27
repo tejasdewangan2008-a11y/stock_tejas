@@ -18,6 +18,7 @@ const {
 const { PREBUILT_SCANS, runScan } = require('./scans');
 
 const app = express();
+app.set('trust proxy', true);
 const isDirectRun = require.main === module;
 let server = null;
 let wss = null;
@@ -319,12 +320,25 @@ function parseUserAgent(ua = '') {
 }
 
 function getClientIp(req) {
-  const forwarded = req.headers['x-forwarded-for'];
-  if (forwarded) {
-    const ip = forwarded.split(',')[0].trim();
-    if (ip) return ip;
-  }
-  let ip = req.socket?.remoteAddress || req.ip || '127.0.0.1';
+  try {
+    const forwarded = req.headers && (req.headers['x-forwarded-for'] || req.headers['x-real-ip']);
+    if (forwarded) {
+      const ip = forwarded.split(',')[0].trim();
+      if (ip) return (ip === '::1' || ip === '::ffff:127.0.0.1') ? '127.0.0.1' : ip;
+    }
+  } catch (e) {}
+
+  let ip = '127.0.0.1';
+  try {
+    if (req.socket && req.socket.remoteAddress) {
+      ip = req.socket.remoteAddress;
+    } else if (req.connection && req.connection.remoteAddress) {
+      ip = req.connection.remoteAddress;
+    } else if (req.ip) {
+      ip = req.ip;
+    }
+  } catch (e) {}
+
   if (ip === '::1' || ip === '::ffff:127.0.0.1') ip = '127.0.0.1';
   return ip;
 }
@@ -459,8 +473,8 @@ app.get('/api/info', async (req, res) => {
   try {
     const isNetlify = Boolean(process.env.NETLIFY || req.headers['x-nf-request-id']);
     const isVercel = Boolean(process.env.VERCEL || req.headers['x-vercel-id']);
-    const host = req.get('host') || 'localhost:3000';
-    const proto = req.headers['x-forwarded-proto'] || req.protocol || (host.includes('localhost') ? 'http' : 'https');
+    const host = (req.get && req.get('host')) || req.headers?.host || 'localhost:3000';
+    const proto = (req.headers && req.headers['x-forwarded-proto']) || (req.socket && req.socket.encrypted ? 'https' : (host.includes('localhost') ? 'http' : 'https'));
     const currentDeployUrl = `${proto}://${host}`;
     const isCloud = isNetlify || isVercel || (!host.includes('localhost') && !host.includes('127.0.0.1') && !host.startsWith('192.168.'));
 

@@ -9,6 +9,17 @@ try {
 
 module.exports = (req, res) => {
   try {
+    // Provide safe socket / connection fallbacks for serverless environments
+    if (!req.socket) {
+      req.socket = {
+        remoteAddress: (req.headers && (req.headers['x-forwarded-for'] || req.headers['x-real-ip']))?.split(',')[0]?.trim() || '127.0.0.1',
+        encrypted: true
+      };
+    }
+    if (!req.connection) {
+      req.connection = req.socket;
+    }
+
     if (!app) {
       const server = require('../server');
       app = server.app;
