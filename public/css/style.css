@@ -8466,7 +8466,7 @@ select option:focus,
 .admin-modal-container {
   width: 100%;
   max-width: 1100px;
-  max-height: 90vh;
+  max-height: calc(100vh - 3rem);
   background: #111722;
   border: 1px solid rgba(251, 191, 36, 0.35);
   border-radius: 20px;
@@ -8475,20 +8475,24 @@ select option:focus,
   flex-direction: column;
   overflow-y: auto !important;
   overflow-x: hidden !important;
+  overscroll-behavior: contain;
   scroll-behavior: smooth !important;
   position: relative;
-  margin: auto 0;
+  margin: 0 auto;
+  padding-bottom: 2.5rem;
+  scrollbar-width: thin;
+  scrollbar-color: #334155 #0f141c;
 }
 
 .admin-modal-container::-webkit-scrollbar {
-  width: 8px;
+  width: 10px;
 }
 .admin-modal-container::-webkit-scrollbar-track {
   background: #0f141c;
   border-radius: 10px;
 }
 .admin-modal-container::-webkit-scrollbar-thumb {
-  background: #27344a;
+  background: #334155;
   border-radius: 10px;
   border: 2px solid #0f141c;
 }

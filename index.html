@@ -656,6 +656,9 @@
        CRITICAL ADMIN DUAL MARKET INFOGRAPHIC & STRICT ISOLATION
        ========================================================= */
     .admin-modal-overlay {
+      position: fixed !important;
+      inset: 0 !important;
+      z-index: 100000 !important;
       overflow-y: auto !important;
       display: flex !important;
       align-items: flex-start !important;
@@ -667,10 +670,14 @@
     .admin-modal-container {
       overflow-y: auto !important;
       overflow-x: hidden !important;
-      max-height: 92vh !important;
+      overscroll-behavior: contain !important;
+      max-height: calc(100vh - 3rem) !important;
       scroll-behavior: smooth !important;
       position: relative !important;
-      margin: auto 0 !important;
+      margin: 0 auto !important;
+      padding-bottom: 2.5rem !important;
+      scrollbar-width: thin !important;
+      scrollbar-color: #334155 #0f141c !important;
     }
 
     .admin-header {
