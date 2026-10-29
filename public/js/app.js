@@ -431,7 +431,18 @@ class App {
   // ==========================================
   // SUPER ADMIN SECURITY & TRACKING CONTROLLER
   // ==========================================
-  switchLoginTab(tab) {
+    fillAdminCredentials(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    const nameInput = document.getElementById('adminNameInput');
+    const mobileInput = document.getElementById('adminMobileInput');
+    const pwInput = document.getElementById('adminPasswordInput');
+    if (nameInput) nameInput.value = 'Tejas Dewangan';
+    if (mobileInput) mobileInput.value = '7647814314';
+    if (pwInput) pwInput.value = 'Tejas@7647814314';
+    this.showToast('Super Admin default credentials pre-filled', 'info', 2000);
+  }
+
+switchLoginTab(tab) {
     const tabTrader = document.getElementById('tabTraderLogin');
     const tabQuick = document.getElementById('tabQuickAccess');
     const tabPhone = document.getElementById('tabPhoneLogin');
@@ -448,11 +459,10 @@ class App {
       if (traderForm) traderForm.style.display = 'none';
       if (adminForm) adminForm.style.display = 'block';
       if (phoneSection) phoneSection.style.display = 'none';
-      if (googleSec) googleSec.style.display = 'none'; // STRICT REQUIREMENT: Excluded from Admin Portal
-      const mobileInput = document.getElementById('adminMobileInput');
-      if (mobileInput) {
-        mobileInput.focus();
-      }
+      if (googleSec) googleSec.style.display = 'none';
+      this.fillAdminCredentials();
+      const pwInput = document.getElementById('adminPasswordInput');
+      if (pwInput) pwInput.focus();
     } else if (tab === 'phone') {
       tabPhone?.classList.add('active');
       if (traderForm) traderForm.style.display = 'none';
@@ -619,9 +629,11 @@ class App {
         this.showToast(`👑 Welcome Super Admin ${data.admin?.name || adminName}! Terminal unlocked.`, 'success', 3500);
 
         // Hide login portal
-        document.getElementById('loginPortalView')?.classList.add('hidden');
-
-        // Open Admin Security Console
+        const portal = document.getElementById('loginPortalView');
+        if (portal) {
+          portal.classList.add('hidden');
+          portal.style.display = 'none';
+        }
         this.openAdminModal();
       } else {
         this.showToast(data.error || 'Invalid Admin credentials', 'error', 4500);
@@ -695,6 +707,7 @@ class App {
     const modal = document.getElementById('adminDashboardModal');
     if (modal) {
       modal.style.display = 'flex';
+      modal.classList.add('active');
       const container = modal.querySelector('.admin-modal-container');
       if (container) container.scrollTop = 0;
       this.loadAdminStats();
@@ -704,7 +717,10 @@ class App {
 
   closeAdminModal(openGateway = false) {
     const modal = document.getElementById('adminDashboardModal');
-    if (modal) modal.style.display = 'none';
+    if (modal) {
+      modal.style.display = 'none';
+      modal.classList.remove('active');
+    }
     if (this.adminRefreshInterval) {
       clearInterval(this.adminRefreshInterval);
       this.adminRefreshInterval = null;
@@ -927,13 +943,19 @@ class App {
     this.activeVisitorModalId = visitorId;
     this.renderVisitorHistoryModalContent(visitorId);
     const modal = document.getElementById('visitorHistoryModal');
-    if (modal) modal.style.display = 'flex';
+    if (modal) {
+      modal.style.display = 'flex';
+      modal.classList.add('active');
+    }
   }
 
   closeVisitorHistoryModal() {
     this.activeVisitorModalId = null;
     const modal = document.getElementById('visitorHistoryModal');
-    if (modal) modal.style.display = 'none';
+    if (modal) {
+      modal.style.display = 'none';
+      modal.classList.remove('active');
+    }
   }
 
   renderVisitorHistoryModalContent(visitorId) {

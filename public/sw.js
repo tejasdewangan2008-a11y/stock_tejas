@@ -1,5 +1,5 @@
 // Service Worker for TejStockAI Screener PWA
-const CACHE_NAME = 'tejstockai-screener-v26';
+const CACHE_NAME = 'tejstockai-screener-v30';
 
 self.addEventListener('install', event => {
   self.skipWaiting();

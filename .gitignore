@@ -4,3 +4,7 @@ node_modules
 .cache
 .env
 scratch/
+/css
+/js
+/images
+/icons

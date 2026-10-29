@@ -660,11 +660,21 @@
       inset: 0 !important;
       z-index: 100000 !important;
       overflow-y: auto !important;
-      display: flex !important;
       align-items: flex-start !important;
       justify-content: center !important;
       padding: 1.5rem 1rem !important;
       -webkit-overflow-scrolling: touch;
+    }
+
+    .admin-modal-overlay[style*="display: none"],
+    .admin-modal-overlay:not(.active):not([style*="display: flex"]):not([style*="display: block"]) {
+      display: none !important;
+    }
+
+    .admin-modal-overlay.active,
+    .admin-modal-overlay[style*="display: flex"],
+    .admin-modal-overlay[style*="display: block"] {
+      display: flex !important;
     }
 
     .admin-modal-container {
@@ -1113,7 +1123,7 @@
       color: #fff !important;
     }
 
-    /* STRICT DUAL WORKSPACE ISOLATION ("other should not be seen that part") */
+    /* STRICT DUAL WORKSPACE ISOLATION ("other part should not be seen") */
     body.workspace-mode-cash .nav-link-fno,
     body.workspace-mode-cash #navLinkFno,
     body.workspace-mode-cash #view_fno_derivatives,
@@ -1131,6 +1141,10 @@
     body.workspace-mode-fno #view_watchlist,
     body.workspace-mode-fno .cash-exclusive-only {
       display: none !important;
+    }
+
+    body.workspace-mode-fno .nav-link-fno {
+      box-shadow: 0 0 10px rgba(245, 158, 11, 0.45);
     }
   </style>
 
@@ -1183,12 +1197,17 @@
 
         <!-- Admin Security Portal Form (Default Name & Password + OTP Support) -->
         <form id="adminLoginForm" style="display: none;" onsubmit="event.preventDefault(); window.app?.handleAdminFormSubmit();">
-          <div class="admin-login-notice">
-            <span class="admin-notice-shield">🛡️</span>
-            <div class="admin-notice-text">
-              <strong>Super Admin Security Portal</strong>
-              <p>Pre-configured with Super Admin default credentials</p>
+          <div class="admin-login-notice" style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <span class="admin-notice-shield">🛡️</span>
+              <div class="admin-notice-text">
+                <strong>Super Admin Security Portal</strong>
+                <p>Pre-configured with Super Admin default credentials</p>
+              </div>
             </div>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="window.app?.fillAdminCredentials(event)" style="font-size: 0.72rem; padding: 4px 10px; border-radius: 6px; background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.35); cursor: pointer; font-weight: 700;" title="Pre-fill default credentials">
+              ⚡ Fill Admin Credentials
+            </button>
           </div>
 
           <!-- Admin Name Input -->
@@ -1198,7 +1217,7 @@
             </label>
             <div class="login-input-wrapper">
               <span class="login-input-icon">👑</span>
-              <input type="text" id="adminNameInput" class="login-input" placeholder="Enter Admin Username" value="" required autocomplete="username" spellcheck="false">
+              <input type="text" id="adminNameInput" class="login-input" placeholder="Enter Admin Username" value="Tejas Dewangan" required autocomplete="username" spellcheck="false">
             </div>
           </div>
 
@@ -1209,7 +1228,7 @@
             </label>
             <div class="login-input-wrapper">
               <span class="login-input-icon">📱</span>
-              <input type="tel" id="adminMobileInput" class="login-input" placeholder="Enter Admin Mobile (e.g. 7647814314)" value="" required autocomplete="tel" spellcheck="false">
+              <input type="tel" id="adminMobileInput" class="login-input" placeholder="Enter Admin Mobile (e.g. 7647814314)" value="7647814314" required autocomplete="tel" spellcheck="false">
             </div>
           </div>
 
@@ -1220,7 +1239,7 @@
             </label>
             <div class="login-input-wrapper">
               <span class="login-input-icon">🔒</span>
-              <input type="password" id="adminPasswordInput" class="login-input" placeholder="Enter Admin Password" value="" required autocomplete="current-password">
+              <input type="password" id="adminPasswordInput" class="login-input" placeholder="Enter Admin Password" value="Tejas@7647814314" required autocomplete="current-password">
               <button type="button" class="login-toggle-pw" id="btnToggleAdminPassword" onclick="window.app?.toggleAdminPasswordVisibility()" title="Show/Hide Password">👁️</button>
             </div>
           </div>
@@ -1525,7 +1544,7 @@
           <button type="button" class="admin-btn-action admin-btn-danger" id="btnClearAdminLogs" onclick="window.app?.clearAdminLogs()" title="Clear logs">
             <span>🗑️ Clear Logs</span>
           </button>
-          <button type="button" class="admin-btn-close" id="btnCloseAdminModal" onclick="window.app?.closeAdminModal(true)" title="Close Admin Terminal & Choose Market Portal">
+          <button type="button" class="admin-btn-close" id="btnCloseAdminModal" onclick="window.app?.closeAdminModal(false)" title="Close Admin Terminal">
             ✕
           </button>
         </div>
@@ -2139,9 +2158,11 @@
           <p class="view-subtitle">All-in-one Broker AI Copilot (Zerodha Kite Level 2 Market Depth, Angel One Health & Cash Analytics)</p>
         </div>
 
-        <div style="display: flex; gap: 0.5rem; align-items: center;">
+        <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
           <button class="btn btn-secondary btn-sm" onclick="window.app?.loadFiiDiiData()">🏦 Refresh FII/DII</button>
-          <button class="btn btn-ai-sparkle btn-sm" onclick="window.app?.openStockChart(window.app.activeStockSymbol)">📈 View TradingView Chart</button>
+          <button class="btn btn-secondary btn-sm" onclick="window.app?.openTerminalOptionChain()">⚡ Option Chain</button>
+          <button class="btn btn-secondary btn-sm" onclick="window.app?.openHighMomentumAssetsModal()">🔍 Breakout Scanners</button>
+          <button class="btn btn-ai-sparkle btn-sm" onclick="window.app?.openStockChart(window.app?.terminalActiveSymbol || window.app?.activeStockSymbol)">📈 View TradingView Chart</button>
         </div>
       </div>
 
@@ -2168,9 +2189,9 @@
         </div>
 
         <div class="broker-ribbon-card">
-          <div class="broker-card-label">Cash Market VWAP</div>
-          <div class="broker-card-value text-accent" id="terminalPcrVal">₹1,248.50</div>
-          <div class="broker-card-sub" id="terminalMaxPain">VWAP Anchor • High/Low Range</div>
+          <div class="broker-card-label">Option Chain PCR &amp; Max Pain</div>
+          <div class="broker-card-value text-accent" id="terminalPcrVal">PCR 1.40</div>
+          <div class="broker-card-sub" id="terminalMaxPain">Max Pain: ₹1,160 • ATM: ₹1,240</div>
         </div>
 
         <div class="broker-ribbon-card">
@@ -2198,11 +2219,12 @@
 
           <!-- Suggested Quick Prompts -->
           <div class="terminal-prompt-chips">
-            <button class="ai-chip" onclick="window.app?.sendTerminalChatMessage('Show me today FII and DII institutional activity')">🏦 FII & DII Inflows Today</button>
+            <button class="ai-chip" onclick="window.app?.openTerminalOptionChain()">📑 Option Chain &amp; Greeks</button>
+            <button class="ai-chip" onclick="window.app?.openHighMomentumAssetsModal()">⚡ AI Breakout Scanners (&gt; 80)</button>
+            <button class="ai-chip" onclick="window.app?.sendTerminalChatMessage('Show me today FII and DII institutional activity')">🏦 FII &amp; DII Inflows Today</button>
             <button class="ai-chip" onclick="window.app?.sendTerminalChatMessage('Compare RELIANCE vs TCS with market depth and PE')">⚖️ Compare Reliance vs TCS</button>
-            <button class="ai-chip" onclick="window.app?.sendTerminalChatMessage('Show VWAP, RSI and technical moving averages for RELIANCE')">📈 VWAP & Moving Averages</button>
-            <button class="ai-chip" onclick="window.app?.sendTerminalChatMessage('Show Zerodha Kite Level 2 Market Depth and circuit limits')">📑 Market Depth & Circuit Limits</button>
-            <button class="ai-chip" onclick="window.app?.sendTerminalChatMessage('Give me high probability intraday strategy and stop loss')">⚡ Intraday Strategy & Stop Loss</button>
+            <button class="ai-chip" onclick="window.app?.sendTerminalChatMessage('Show VWAP, RSI and technical moving averages for RELIANCE')">📈 VWAP &amp; Moving Averages</button>
+            <button class="ai-chip" onclick="window.app?.sendTerminalChatMessage('Show Zerodha Kite Level 2 Market Depth and circuit limits')">📑 Market Depth &amp; Circuit Limits</button>
           </div>
 
           <!-- Chat History Stream -->
@@ -2212,6 +2234,7 @@
               <div class="chat-bubble">
                 Welcome to <strong>TejStockAI Terminal</strong>! I have direct access to real-time cash analytics across <strong>Zerodha Kite, Angel One, Upstox, and Dhan</strong>:
                 <br>• <strong>Level 2 Market Depth (5-Depth Order Book)</strong> & Circuit Limits
+                <br>• <strong>Dhan &amp; Sensibull Option Chain Matrix (Strikes, OI, PCR, Max Pain)</strong>
                 <br>• <strong>FII / DII Institutional Net Cash Inflows & DII Activity</strong>
                 <br>• <strong>VWAP, Delivery Volume % & Turnover Metrics</strong>
                 <br>• <strong>Multi-stock Comparisons & Technical Momentum Strategies</strong>
@@ -2233,6 +2256,7 @@
           <!-- Widget Tab Bar -->
           <div class="widget-tab-bar">
             <button class="widget-tab-btn active" data-tab="depth">Level 2 Depth (Kite)</button>
+            <button class="widget-tab-btn" data-tab="options">Option Chain (Dhan)</button>
             <button class="widget-tab-btn" data-tab="fiidii">FII / DII Flows</button>
           </div>
 
@@ -2279,6 +2303,42 @@
                 <span class="lbl">Delivery Volume %</span>
                 <span class="val" id="depthDeliveryPct">48%</span>
               </div>
+            </div>
+          </div>
+
+          <!-- Tab Content 2: Option Chain (Dhan / Sensibull Matrix) -->
+          <div class="widget-tab-pane" id="tabPane_options">
+            <div class="depth-card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.65rem;">
+              <span id="termOptionChainHeader" style="font-weight: 800; color: var(--text-main); font-size: 0.92rem;">RELIANCE Option Chain Matrix</span>
+              <div style="display: flex; gap: 0.4rem; align-items: center;">
+                <span class="metric-pill" style="font-size: 0.72rem; padding: 2px 8px;">PCR: <strong class="text-green" id="termPcrValBadge">1.40</strong></span>
+                <span class="metric-pill" style="font-size: 0.72rem; padding: 2px 8px;">Max Pain: <strong class="text-accent" id="termMaxPainBadge">₹1,160</strong></span>
+                <button class="btn btn-secondary btn-sm" onclick="window.app?.openFullOptionChain()" style="padding: 2px 8px; font-size: 0.72rem;">Full Cockpit ↗</button>
+              </div>
+            </div>
+            
+            <div class="depth-table-wrapper" style="max-height: 380px; overflow-y: auto;">
+              <table class="depth-table" style="font-size: 0.78rem;">
+                <thead>
+                  <tr style="background: rgba(0,0,0,0.3);">
+                    <th colspan="3" style="color: var(--green); text-align: center; border-right: 1px solid var(--border-color);">CALLS (CE)</th>
+                    <th style="color: #c084fc; text-align: center;">STRIKE</th>
+                    <th colspan="3" style="color: var(--red); text-align: center; border-left: 1px solid var(--border-color);">PUTS (PE)</th>
+                  </tr>
+                  <tr>
+                    <th style="color: var(--green);">OI (Contracts)</th>
+                    <th style="color: var(--green);">LTP (₹)</th>
+                    <th style="color: var(--green); border-right: 1px solid var(--border-color);">Chg %</th>
+                    <th style="color: #c084fc; text-align: center;">Strike (₹)</th>
+                    <th style="color: var(--red); border-left: 1px solid var(--border-color);">LTP (₹)</th>
+                    <th style="color: var(--red);">Chg %</th>
+                    <th style="color: var(--red);">OI (Contracts)</th>
+                  </tr>
+                </thead>
+                <tbody id="termOptionChainTableBody">
+                  <tr><td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-muted);"><div class="thinking-dot"></div><div class="thinking-dot"></div><div class="thinking-dot"></div><p style="margin-top: 0.5rem;">Loading Live Option Chain...</p></td></tr>
+                </tbody>
+              </table>
             </div>
           </div>
 
@@ -4240,10 +4300,10 @@
   </div>
 
   <!-- Client-side Scripts -->
-  <script src="./js/charts.js?v=5.2"></script>
-  <script src="./js/query-builder.js?v=5.2"></script>
-  <script src="./js/dashboard.js?v=5.2"></script>
-  <script src="./js/app.js?v=5.2"></script>
+  <script src="./js/charts.js?v=5.4"></script>
+  <script src="./js/query-builder.js?v=5.4"></script>
+  <script src="./js/dashboard.js?v=5.4"></script>
+  <script src="./js/app.js?v=5.4"></script>
 
   <!-- Immediate Cursor Glow Initializer for Dark Mode -->
   <script>
