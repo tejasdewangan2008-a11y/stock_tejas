@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "cleanUrls": true,
   "rewrites": [
     {
       "source": "/api",
@@ -8,6 +9,10 @@
     {
       "source": "/api/(.*)",
       "destination": "/api/index.js"
+    },
+    {
+      "source": "/",
+      "destination": "/index.html"
     }
   ],
   "functions": {
@@ -16,7 +21,9 @@
         "tradingview-stocks.json",
         "nse-master.json",
         "EQUITY_L.csv",
-        "admin_logs.json"
+        "admin_logs.json",
+        "index.html",
+        "public/index.html"
       ]
     }
   },

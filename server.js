@@ -475,7 +475,13 @@ app.get('/', (req, res) => {
   ];
   for (const c of candidates) {
     if (fs.existsSync(c)) {
-      return res.sendFile(c);
+      try {
+        const html = fs.readFileSync(c, 'utf8');
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        return res.send(html);
+      } catch (e) {
+        return res.sendFile(c);
+      }
     }
   }
   res.send('TejStockAI Terminal Ready');

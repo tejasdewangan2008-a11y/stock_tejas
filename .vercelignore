@@ -4,5 +4,3 @@ start-screener.bat
 *.log
 scratch/
 scratch_*
-%LOCALAPPDATA%/
-.git

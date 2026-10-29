@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "build": "node -e \"const fs = require('fs'); try { fs.copyFileSync('public/index.html', 'index.html'); fs.copyFileSync('public/manifest.json', 'manifest.json'); fs.copyFileSync('public/sw.js', 'sw.js'); console.log('[Build] Root index.html and PWA assets prepared for Vercel CDN'); } catch (e) { console.warn(e.message); }\""
+    "build": "node scripts/build.js"
   },
   "keywords": [
     "tejstockai",
