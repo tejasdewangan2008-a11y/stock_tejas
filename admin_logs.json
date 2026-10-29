@@ -154,12 +154,40 @@
       "browser": "Chrome / Browser",
       "path": "/",
       "timestamp": "2026-09-30T10:43:46.477Z",
-      "lastSeen": "2026-10-29T09:53:28.147Z",
-      "visitCount": 168,
+      "lastSeen": "2026-10-29T10:25:24.385Z",
+      "visitCount": 170,
       "identifiedUser": "Tejas Dewangan (TEJAS)",
       "role": "PRO_TRADER",
       "broker": "Zerodha Kite",
       "viewsHistory": [
+        {
+          "id": "ev_1793269524385_a41pv",
+          "visitorId": "vis_1790765026477_loqhs",
+          "visitNumber": 170,
+          "timestamp": "2026-10-29T10:25:24.385Z",
+          "ip": "127.0.0.1",
+          "device": "Windows PC",
+          "browser": "Google Chrome",
+          "path": "/",
+          "viewerName": "Tejas Dewangan (TEJAS)",
+          "role": "PRO_TRADER",
+          "broker": "Zerodha Kite",
+          "status": "Authenticated Trader"
+        },
+        {
+          "id": "ev_1793269522237_4qcje",
+          "visitorId": "vis_1790765026477_loqhs",
+          "visitNumber": 169,
+          "timestamp": "2026-10-29T10:25:22.237Z",
+          "ip": "127.0.0.1",
+          "device": "Windows PC",
+          "browser": "Google Chrome",
+          "path": "/",
+          "viewerName": "Tejas Dewangan (TEJAS)",
+          "role": "PRO_TRADER",
+          "broker": "Zerodha Kite",
+          "status": "Authenticated Trader"
+        },
         {
           "id": "ev_1793267608147_0h71i",
           "visitorId": "vis_1790765026477_loqhs",
@@ -1531,34 +1559,6 @@
           "role": "PRO_TRADER",
           "broker": "Zerodha Kite",
           "status": "Authenticated Trader"
-        },
-        {
-          "id": "ev_1793021785534_43cog",
-          "visitorId": "vis_1790765026477_loqhs",
-          "visitNumber": 70,
-          "timestamp": "2026-10-26T13:36:25.534Z",
-          "ip": "127.0.0.1",
-          "device": "Windows PC",
-          "browser": "Google Chrome",
-          "path": "/",
-          "viewerName": "Tejas Dewangan (TEJAS)",
-          "role": "PRO_TRADER",
-          "broker": "Zerodha Kite",
-          "status": "Authenticated Trader"
-        },
-        {
-          "id": "ev_1793021785369_rvmgc",
-          "visitorId": "vis_1790765026477_loqhs",
-          "visitNumber": 69,
-          "timestamp": "2026-10-26T13:36:25.368Z",
-          "ip": "127.0.0.1",
-          "device": "Windows PC",
-          "browser": "Google Chrome",
-          "path": "/",
-          "viewerName": "Tejas Dewangan (TEJAS)",
-          "role": "PRO_TRADER",
-          "broker": "Zerodha Kite",
-          "status": "Authenticated Trader"
         }
       ]
     },
@@ -2286,6 +2286,34 @@
     }
   ],
   "visitEvents": [
+    {
+      "id": "ev_1793269524385_a41pv",
+      "visitorId": "vis_1790765026477_loqhs",
+      "visitNumber": 170,
+      "timestamp": "2026-10-29T10:25:24.385Z",
+      "ip": "127.0.0.1",
+      "device": "Windows PC",
+      "browser": "Google Chrome",
+      "path": "/",
+      "viewerName": "Tejas Dewangan (TEJAS)",
+      "role": "PRO_TRADER",
+      "broker": "Zerodha Kite",
+      "status": "Authenticated Trader"
+    },
+    {
+      "id": "ev_1793269522237_4qcje",
+      "visitorId": "vis_1790765026477_loqhs",
+      "visitNumber": 169,
+      "timestamp": "2026-10-29T10:25:22.237Z",
+      "ip": "127.0.0.1",
+      "device": "Windows PC",
+      "browser": "Google Chrome",
+      "path": "/",
+      "viewerName": "Tejas Dewangan (TEJAS)",
+      "role": "PRO_TRADER",
+      "broker": "Zerodha Kite",
+      "status": "Authenticated Trader"
+    },
     {
       "id": "ev_1793267608147_0h71i",
       "visitorId": "vis_1790765026477_loqhs",
